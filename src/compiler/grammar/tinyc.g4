@@ -94,6 +94,7 @@ id_
 
 integer
    : INT
+   | '-' INT
    ;
 
 

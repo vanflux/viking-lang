@@ -17,7 +17,6 @@ export class Compiler {
     
     const parseTre = parser.program();
     const ast = new Ast(parseTre);
-    console.log('ast', ast.statements);
 
     const codeGen = new CodeGen(ast);
     return codeGen.code.join('\n') + '\n';

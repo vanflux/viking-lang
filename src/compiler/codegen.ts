@@ -35,7 +35,12 @@ export class CodeGen {
   }
 
   genLitToRegMov(literal: number, reg: string) {
-    this.code.push(`ldi ${reg}, ${literal}`);
+    if (literal >= 128 && literal <= 255) {
+      this.code.push(`ldc ${reg}, 0`);
+      this.code.push(`ldc ${reg}, ${literal}`);
+    } else {
+      this.code.push(`ldi ${reg}, ${literal}`);
+    }
   }
 
   genRegToRegMov(src: string, dest: string) {
@@ -115,6 +120,9 @@ export class CodeGen {
 
       private freeRegister() {
         if (this.availableRegisters.length > 0) return this.availableRegisters.shift()!;
+        // TODO: deallocate the less used...
+        // needs some modifications on set value, when setting -> we need
+        // blacklist the two registers involved on set from deallocation
         const oldAllocable = this.allocables.find(x => x.register);
         if (!oldAllocable) throw new Error('Compiler tried to allocate too many registers');
         const register = oldAllocable.register!;
@@ -371,7 +379,7 @@ export class CodeGen {
           }
           this.genSymbol(`if_end_${ifNum}`);
         } else if (statement instanceof WhileStatement) {
-          const whileNum = nextWhileNum++;
+          /*const whileNum = nextWhileNum++;
           if (!statement.executeFirst) this.genJmp(`while_cond_${whileNum}`);
           this.genSymbol(`while_start_${whileNum}`);
           genStatements(statement.statements);
@@ -381,7 +389,8 @@ export class CodeGen {
           const tmpReg = valueAllocator.ensureOnRegister(tmpId);
           valueAllocator.deallocateId(tmpId);
           this.genJmpIfRegIsNotZero(tmpReg, `while_start_${whileNum}`);
-          this.genSymbol(`while_end_${whileNum}`);
+          this.genSymbol(`while_end_${whileNum}`);*/
+          throw new Error('While statement has bugs...');
         } else if (statement instanceof PrintStatement) {
           const tmpId = valueAllocator.getTmpId(nextTmpNum++);
           genExpression(statement.expression, tmpId);
@@ -393,7 +402,7 @@ export class CodeGen {
 
     genStatements(ast.statements);
 
-    console.log(valueAllocator);
+    //console.log(valueAllocator);
 
     this.genEnd();
   }
