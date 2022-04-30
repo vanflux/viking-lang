@@ -1,4 +1,4 @@
-import utils from '../../../utils';
+import utils from '../../../common/utils';
 import { Simulation } from '../../simulation';
 import { Port } from '../port';
 import { Device } from './device';

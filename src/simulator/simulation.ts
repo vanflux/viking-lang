@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events';
-import utils from '../utils';
-import { Architecture, ArchitectureMemoryRegions } from '../architecture';
+import utils from '../common/utils';
+import { Architecture, ArchitectureMemoryRegions } from '../common/architecture';
 import Memory from './memory';
 import { RegisterBank } from './registerBank';
 import { IOManager } from './io/ioManager';
 import { Port } from './io/port';
-import { Instruction } from '../instruction';
+import { Instruction } from '../common/instruction';
 
 const endSimulationCode = 0x0003;
 

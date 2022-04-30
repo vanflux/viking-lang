@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { Architecture, ArchitectureRegister } from '../architecture';
-import utils from '../utils';
+import { Architecture, ArchitectureRegister } from '../common/architecture';
+import utils from '../common/utils';
 
 export interface Register {
     baseName: string;

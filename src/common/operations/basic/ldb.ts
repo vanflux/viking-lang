@@ -1,5 +1,5 @@
 
-import { Simulation } from "../../simulator/simulation";
+import { Simulation } from "../../../simulator/simulation";
 import { BasicOperation } from "../operation";
 
 export class B_Ldb extends BasicOperation {

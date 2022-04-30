@@ -1,17 +1,21 @@
 
-import { Simulation } from "../../simulator/simulation";
+import { Simulation } from "../../../simulator/simulation";
 import { BasicOperation } from "../operation";
 
-export class B_Ldw extends BasicOperation {
-    getName() { return 'ldw' }
-    getOpcode() { return 0x4002 }
+export class B_Lsr extends BasicOperation {
+    getName() { return 'lsr' }
+    getOpcode() { return 0xA000 }
     supportR() { return true }
     supportI() { return false }
     executeR(simulation: Simulation, rst: string, rsa: string, rsb: string) {
         let registerBank = simulation.getRegisterBank();
-        let memory = simulation.getMemory();
 
-        registerBank.setValue(rst, memory.readWord(registerBank.getUValue(rsb)));
+        let value = registerBank.getValue(rsa);
+        simulation.setCarry(value & 1);
+        registerBank.setValue(
+            rst, 
+            value >>> 1,
+        );
     }
     executeI(simulation: Simulation, rst: string, immediate: number): void {
         throw new Error("Method not implemented.");

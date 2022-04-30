@@ -3,7 +3,7 @@ import { Architecture } from './architecture';
 import { BasicOperation, Operation, PseudoOperation } from './operations/operation';
 import { Operand } from './operand';
 import { OperationsManager } from './operations/operationsManager';
-import { Simulation } from './simulator/simulation';
+import { Simulation } from '../simulator/simulation';
 
 export class Instruction {
     static TYPE_R = 'R';

@@ -1,10 +1,10 @@
 
-import { Simulation } from "../../simulator/simulation";
+import { Simulation } from "../../../simulator/simulation";
 import { BasicOperation } from "../operation";
 
-export class B_Ldr extends BasicOperation {
-    getName() { return 'ldr' }
-    getOpcode() { return 0x8000 }
+export class B_Ldc extends BasicOperation {
+    getName() { return 'ldc' }
+    getOpcode() { return 0x9000 }
     supportR() { return false }
     supportI() { return true }
     executeR(simulation: Simulation, rst: string, rsa: string, rsb: string): void {
@@ -15,7 +15,7 @@ export class B_Ldr extends BasicOperation {
 
         registerBank.setValue(
             rst, 
-            immediate,
+            (registerBank.getUValue(rst) << 8) | (immediate & 0xFF),
         );
     }
 }

@@ -1,6 +1,6 @@
 import { unraw } from 'unraw';
-import { Architecture } from '../architecture';
-import utils from '../utils';
+import { Architecture } from '../common/architecture';
+import utils from '../common/utils';
 
 export class DataParser {
     private architecture: Architecture;

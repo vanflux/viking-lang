@@ -1,7 +1,7 @@
-import { Architecture } from "../../architecture";
-import { Instruction } from "../../instruction";
-import { Operand } from "../../operand";
-import { OperationsManager } from "../../operations/operationsManager";
+import { Architecture } from "../../common/architecture";
+import { Instruction } from "../../common/instruction";
+import { Operand } from "../../common/operand";
+import { OperationsManager } from "../../common/operations/operationsManager";
 import { Pseudo } from "../pseudoConverter";
 
 export class PC_Stw implements Pseudo {

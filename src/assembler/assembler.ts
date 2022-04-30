@@ -1,12 +1,12 @@
-import utils from '../utils';
-import { Architecture } from '../architecture';
+import { Architecture } from '../common/architecture';
 import { PseudoConverter } from './pseudoConverter';
-import { Instruction } from '../instruction';
 import { InstructionParser } from './instructionParser';
 import { DataParser } from './dataParser';
 import { CommentParser } from './commentParser';
 import { LineParser, LineParseResult } from './lineParser';
-import { Operand } from '../operand';
+import { Instruction } from '../common/instruction';
+import { Operand } from '../common/operand';
+import utils from '../common/utils';
 
 export interface AdditionalAssembleInfo {
     lineNumber: number;

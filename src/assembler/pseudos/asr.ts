@@ -1,8 +1,8 @@
-import { Architecture } from '../../architecture';
-import { Instruction } from '../../instruction';
-import { Operand } from '../../operand';
+import { Architecture } from '../../common/architecture';
+import { Instruction } from '../../common/instruction';
+import { Operand } from '../../common/operand';
+import { OperationsManager } from '../../common/operations/operationsManager';
 import { Pseudo } from '../pseudoConverter';
-import { OperationsManager } from '../../operations/operationsManager';
 
 export class PC_Asr implements Pseudo {
     convert(instruction: Instruction, architecture: Architecture) {

@@ -1,5 +1,5 @@
-import { Architecture } from '../architecture';
-import { Instruction } from '../instruction';
+import { Architecture } from '../common/architecture';
+import { Instruction } from '../common/instruction';
 
 class Disassembler {
     private architecture: Architecture;

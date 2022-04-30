@@ -1,19 +1,20 @@
 
-import { Simulation } from "../../simulator/simulation";
+import { Simulation } from "../../../simulator/simulation";
 import { BasicOperation } from "../operation";
 
-export class B_Sbc extends BasicOperation {
-    getName() { return 'sbc' }
-    getOpcode() { return 0x6001 }
+export class B_Asr extends BasicOperation {
+    getName() { return 'asr' }
+    getOpcode() { return 0xA001 }
     supportR() { return true }
     supportI() { return false }
     executeR(simulation: Simulation, rst: string, rsa: string, rsb: string) {
         let registerBank = simulation.getRegisterBank();
-        let carry = simulation.getCarry();
 
+        let value = registerBank.getValue(rsa);
+        simulation.setCarry(value & 1);
         registerBank.setValue(
             rst, 
-            registerBank.getValue(rsa) - registerBank.getValue(rsb) - carry,
+            value >> 1,
         );
     }
     executeI(simulation: Simulation, rst: string, immediate: number): void {

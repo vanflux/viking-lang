@@ -1,10 +1,10 @@
 
-import { Simulation } from "../../simulator/simulation";
+import { Simulation } from "../../../simulator/simulation";
 import { BasicOperation } from "../operation";
 
-export class B_Or extends BasicOperation {
-    getName() { return 'or' }
-    getOpcode() { return 0x1000 }
+export class B_Xor extends BasicOperation {
+    getName() { return 'xor' }
+    getOpcode() { return 0x2000 }
     supportR() { return true }
     supportI() { return true }
     executeR(simulation: Simulation, rst: string, rsa: string, rsb: string) {
@@ -12,7 +12,7 @@ export class B_Or extends BasicOperation {
 
         registerBank.setValue(
             rst, 
-            registerBank.getValue(rsa) | registerBank.getValue(rsb),
+            registerBank.getUValue(rsa) ^ registerBank.getUValue(rsb),
         );
     }
     executeI(simulation: Simulation, rst: string, immediate: number): void {
@@ -20,7 +20,7 @@ export class B_Or extends BasicOperation {
 
         registerBank.setValue(
             rst, 
-            registerBank.getValue(rst) | immediate,
+            registerBank.getUValue(rst) ^ immediate,
         );
     }
 }

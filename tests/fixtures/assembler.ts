@@ -1,4 +1,4 @@
-import { ArchitectureManager } from "../../src/architectureManager";
+import { ArchitectureManager } from "../../src/common/architectureManager";
 import Assembler from "../../src/assembler/assembler";
 import { PseudoConverter } from "../../src/assembler/pseudoConverter";
 import { PC_Asr } from "../../src/assembler/pseudos/asr";

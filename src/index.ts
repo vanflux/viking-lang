@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { ArchitectureManager } from "./architectureManager";
+import { ArchitectureManager } from "./common/architectureManager";
 import Assembler from "./assembler/assembler";
 import Disassembler from "./disassembler/disassembler";
 import { PseudoConverter } from "./assembler/pseudoConverter";

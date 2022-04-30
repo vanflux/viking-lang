@@ -1,4 +1,5 @@
-import { Simulation } from "../simulator/simulation";
+import { Simulation } from "../../simulator/simulation";
+
 
 export type Operation = BasicOperation | PseudoOperation;
 

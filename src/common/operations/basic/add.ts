@@ -1,10 +1,10 @@
 
-import { Simulation } from "../../simulator/simulation";
+import { Simulation } from "../../../simulator/simulation";
 import { BasicOperation } from "../operation";
 
-export class B_Sltu extends BasicOperation {
-    getName() { return 'sltu' }
-    getOpcode() { return 0x4000 }
+export class B_Add extends BasicOperation {
+    getName() { return 'add' }
+    getOpcode() { return 0x5000 }
     supportR() { return true }
     supportI() { return true }
     executeR(simulation: Simulation, rst: string, rsa: string, rsb: string) {
@@ -12,7 +12,7 @@ export class B_Sltu extends BasicOperation {
 
         registerBank.setValue(
             rst, 
-            registerBank.getUValue(rsa) < registerBank.getUValue(rsb) ? 1 : 0,
+            registerBank.getValue(rsa) + registerBank.getValue(rsb),
         );
     }
     executeI(simulation: Simulation, rst: string, immediate: number): void {
@@ -20,7 +20,7 @@ export class B_Sltu extends BasicOperation {
 
         registerBank.setValue(
             rst, 
-            registerBank.getUValue(rst) < (immediate >>> 0) ? 1 : 0,
+            registerBank.getValue(rst) + immediate,
         );
     }
 }
