@@ -1,14 +1,14 @@
 import { Architecture } from '../../architecture';
 import { Instruction } from '../../instruction';
 import { Operand } from '../../operand';
-import { Pseudo } from '../pseudo';
+import { Pseudo } from '../pseudoConverter';
 import { OperationsManager } from '../../operations/operationsManager';
 
-export class PC_Ldb implements Pseudo {
+export class PC_Ldw implements Pseudo {
     convert(instruction: Instruction, architecture: Architecture) {
-        const operationLdb = OperationsManager.getOperationByName('ldb');
+        const operationLdw = OperationsManager.getOperationByName('ldw');
         const operationLdi = OperationsManager.getOperationByName('ldi');
-        if (instruction.getOperation().getName() !== operationLdb.getName()) return [];
+        if (instruction.getOperation().getName() !== operationLdw.getName()) return [];
 
         let operands = instruction.getOperands();
         if (operands.length !== 2) return [];
@@ -16,16 +16,16 @@ export class PC_Ldb implements Pseudo {
         if (operands[0].getType() === 'register') {
             switch (operands[1].getType()) {
                 case 'register':
-                    // ldb r1, r2 -> [ ldb r1, r0, r2 ]
+                    // ldw r1, r2 -> [ ldw r1, r0, r2 ]
                     return [
-                        new Instruction(operationLdb, [ operands[0], new Operand('r0', Operand.REGISTER), operands[1] ]),
+                        new Instruction(operationLdw, [ operands[0], new Operand('r0', Operand.REGISTER), operands[1] ]),
                     ];
                 case 'symbol':
                 case 'literal':
-                    // ldb r1, 0 -> [ ldi at, 0   ldb r1, r0, at ]
+                    // ldw r1, lit -> [ ldi at, lit   ldb r1, r0, at ]
                     return [
                         new Instruction(operationLdi, [ new Operand('at', Operand.REGISTER), operands[1] ]),
-                        new Instruction(operationLdb, [ operands[0], new Operand('r0', Operand.REGISTER), new Operand('at', Operand.REGISTER) ]),
+                        new Instruction(operationLdw, [ operands[0], new Operand('r0', Operand.REGISTER), new Operand('at', Operand.REGISTER) ]),
                     ];
                 default:
             }

@@ -1,6 +1,6 @@
 import { Architecture } from '../../architecture';
 import { Instruction } from '../../instruction';
-import { Pseudo } from '../pseudo';
+import { Pseudo } from '../pseudoConverter';
 import { OperationsManager } from '../../operations/operationsManager';
 
 export class PC_Lsl implements Pseudo {

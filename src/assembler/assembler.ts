@@ -1,6 +1,6 @@
 import utils from '../utils';
 import { Architecture } from '../architecture';
-import { PseudoConverter } from '../pseudoInstructionConversions/pseudoConverter';
+import { PseudoConverter } from './pseudoConverter';
 import { Instruction } from '../instruction';
 import { InstructionParser } from './instructionParser';
 import { DataParser } from './dataParser';

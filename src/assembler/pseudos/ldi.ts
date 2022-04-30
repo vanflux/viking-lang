@@ -1,6 +1,6 @@
 import utils from '../../utils';
 import { Architecture } from '../../architecture';
-import { Pseudo } from '../pseudo';
+import { Pseudo } from '../pseudoConverter';
 import { Instruction } from '../../instruction';
 import { Operand } from '../../operand';
 import { OperationsManager } from '../../operations/operationsManager';

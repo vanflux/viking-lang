@@ -1,6 +1,9 @@
 import { Architecture } from "../architecture";
 import { Instruction } from "../instruction";
-import { Pseudo } from "./pseudo";
+
+export interface Pseudo {
+    convert(instruction: Instruction, architecture: Architecture): Instruction[];
+}
 
 export class PseudoConverter {
     private pseudos: Pseudo[];

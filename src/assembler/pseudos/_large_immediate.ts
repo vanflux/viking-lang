@@ -2,7 +2,7 @@ import { Architecture } from '../../architecture';
 import { Instruction } from '../../instruction';
 import { Operand } from '../../operand';
 import { OperationsManager } from '../../operations/operationsManager';
-import { Pseudo } from '../pseudo';
+import { Pseudo } from '../pseudoConverter';
 
 let supportedOpNames = new Set([ 'and', 'or', 'xor', 'slt', 'add', 'sub', 'bez', 'bnz' ]);
 
