@@ -1,6 +1,6 @@
 export function simpleVariableAssignment() {
   return `
-a = 5;
-print(a);
+  a = 5;
+  printn(a);
   `;
 }

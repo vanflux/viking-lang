@@ -5,6 +5,7 @@ import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { ProgramContext } from "./tinycParser";
 import { StatementContext } from "./tinycParser";
+import { Function_callContext } from "./tinycParser";
 import { Paren_exprContext } from "./tinycParser";
 import { ExprContext } from "./tinycParser";
 import { TestContext } from "./tinycParser";
@@ -35,6 +36,13 @@ export interface tinycVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitStatement?: (ctx: StatementContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `tinycParser.function_call`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFunction_call?: (ctx: Function_callContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `tinycParser.paren_expr`.

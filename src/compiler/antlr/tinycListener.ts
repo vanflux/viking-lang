@@ -5,6 +5,7 @@ import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 
 import { ProgramContext } from "./tinycParser";
 import { StatementContext } from "./tinycParser";
+import { Function_callContext } from "./tinycParser";
 import { Paren_exprContext } from "./tinycParser";
 import { ExprContext } from "./tinycParser";
 import { TestContext } from "./tinycParser";
@@ -40,6 +41,17 @@ export interface tinycListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitStatement?: (ctx: StatementContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `tinycParser.function_call`.
+	 * @param ctx the parse tree
+	 */
+	enterFunction_call?: (ctx: Function_callContext) => void;
+	/**
+	 * Exit a parse tree produced by `tinycParser.function_call`.
+	 * @param ctx the parse tree
+	 */
+	exitFunction_call?: (ctx: Function_callContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `tinycParser.paren_expr`.

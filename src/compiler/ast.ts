@@ -1,4 +1,4 @@
-import { ExprContext, Id_Context, IntegerContext, Paren_exprContext, ProgramContext, StatementContext, Sum_Context, TermContext, TestContext } from "./antlr/tinycParser";
+import { ExprContext, Function_callContext, Id_Context, IntegerContext, Paren_exprContext, ProgramContext, StatementContext, Sum_Context, TermContext, TestContext } from "./antlr/tinycParser";
 
 type ProcessFunc<T=void> = (node: Node, ctx?: T)=>T;
 
@@ -75,8 +75,9 @@ export class SubExpression implements Expression {
 
 // Statements
 
-export class PrintStatement implements Statement {
+export class FuncCallStatement implements Statement {
   constructor(
+    public funcName: string,
     public expression: Expression,
   ) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
@@ -149,11 +150,12 @@ export class Ast {
         statements.push(new WhileStatement(true, conditionExpression, bodyStatements));
       } else if (child1.text === '{') {
         statements.push(...ctx.statement().flatMap(statementToAst));
-      } else if (child1.text === 'print') {
-        const expression = expressionToAst(ctx.paren_expr()!);
-        statements.push(new PrintStatement(expression));
       } else if (child1 instanceof ExprContext) {
         statements.push(expressionToAst(child1));
+      } else if (child1 instanceof Function_callContext) {
+        statements.push(new FuncCallStatement(child1.STRING().text, expressionToAst(child1.expr())));
+      } else {
+        throw new Error('Unhandled statement on ast generation');
       }
       return statements;
     }

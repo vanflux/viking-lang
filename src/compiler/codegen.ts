@@ -1,4 +1,4 @@
-import { AssignExpression, Ast, Expression, LiteralExpression, SubExpression, MathExpression, VarReference, IfStatement, TestExpression, Statement, PrintStatement, WhileStatement } from "./ast";
+import { AssignExpression, Ast, Expression, LiteralExpression, MathExpression, VarReference, IfStatement, TestExpression, Statement, WhileStatement, FuncCallStatement } from "./ast";
 
 export class CodeGen {
   code: string[] = [];
@@ -69,6 +69,10 @@ export class CodeGen {
 
   genSymbol(symbolName: string) {
     this.code.push(`${symbolName}`);
+  }
+
+  genPrintChar(reg: string) {
+    this.code.push(`stw ${reg}, 0xf000`);
   }
 
   genPrintNumber(reg: string) {
@@ -391,11 +395,20 @@ export class CodeGen {
           this.genJmpIfRegIsNotZero(tmpReg, `while_start_${whileNum}`);
           this.genSymbol(`while_end_${whileNum}`);*/
           throw new Error('While statement has bugs...');
-        } else if (statement instanceof PrintStatement) {
+        } else if (statement instanceof FuncCallStatement) {
           const tmpId = valueAllocator.getTmpId(nextTmpNum++);
           genExpression(statement.expression, tmpId);
           const tmpReg = valueAllocator.ensureOnRegister(tmpId);
-          this.genPrintNumber(tmpReg);
+          switch (statement.funcName) {
+            case 'printc':
+              this.genPrintChar(tmpReg);
+              break;
+            case 'printn':
+              this.genPrintNumber(tmpReg);
+              break;
+            default:
+              throw new Error('Function not found: ' + statement.funcName);
+          }
         }
       }
     };

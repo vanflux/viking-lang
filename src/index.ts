@@ -88,7 +88,7 @@ export async function main() {
   // solution 1: after each if else block restore the
   // variables to the same registers or stack position
 
-  const code = `
+  /*const code = `
   a = 8;
   b = 4;
   if (b < a) {
@@ -99,7 +99,7 @@ export async function main() {
     g = 1;
   }
   print(a)
-  `;
+  `;*/
 
   /*const code = `
   i = 0;
@@ -109,6 +109,19 @@ export async function main() {
     i = i + 1;
   }
   `;*/
+
+  /*const code = `
+  printc(84);
+  printc(69);
+  printc(83);
+  printc(84);
+  printn(1);
+  printn(-1);
+  `;*/
+
+  const code = `
+  printn(100);
+  `;
   
   const compiler = new Compiler();
   const compiled = compiler.compile(code);
