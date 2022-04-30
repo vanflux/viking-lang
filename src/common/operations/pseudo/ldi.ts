@@ -1,6 +1,7 @@
-
-import { PseudoOperation } from "../operation";
+import { PseudoOperation } from '../operation';
 
 export class P_Ldi extends PseudoOperation {
-    getName() { return 'ldi' }
+  getName() {
+    return 'ldi';
+  }
 }

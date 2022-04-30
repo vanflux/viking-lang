@@ -14,13 +14,13 @@ export class Port extends EventEmitter {
   private readHandler: PortReadHandler;
   private writeHandler: PortWriteHandler;
 
-  constructor(name: string, readHandler: PortReadHandler|undefined, writeHandler: PortWriteHandler|undefined, device: Device) {
+  constructor(name: string, readHandler: PortReadHandler | undefined, writeHandler: PortWriteHandler | undefined, device: Device) {
     super();
     this.name = name;
     this.waitingRead = false;
     this.waitingWrite = false;
-    this.readHandler = readHandler ? readHandler : ()=>0;
-    this.writeHandler = writeHandler ? writeHandler : ()=>false;
+    this.readHandler = readHandler ? readHandler : () => 0;
+    this.writeHandler = writeHandler ? writeHandler : () => false;
     this.device = device;
   }
 
@@ -32,7 +32,7 @@ export class Port extends EventEmitter {
   read(simulation: Simulation) {
     return this.readHandler(simulation);
   }
-  
+
   write(simulation: Simulation, value: number) {
     return this.writeHandler(simulation, value);
   }
@@ -41,7 +41,7 @@ export class Port extends EventEmitter {
     this.waitingRead = false;
     this.emit('read wait end');
   }
-  
+
   endWriteWaiting() {
     this.waitingWrite = false;
     this.emit('write wait end');

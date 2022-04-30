@@ -12,278 +12,275 @@ const endSimulationCode = 0x0003;
 export type BreakpointHandler = (simulation: Simulation, pc: number) => boolean;
 
 export class Simulation extends EventEmitter {
-	public waitingIO = false;
-	
-	private architecture: Architecture;
-	private memory: Memory;
-	private registerBank: RegisterBank;
-	
-	private codeExecutionMaxPC = 0;
-	private running = false;
-	private ended = false;
-	private stopping = false;
-	private stepInterval = 50;
-	private cycles = 0;
-	private pc = 0;
-	private ioManager = new IOManager(this);
-	private carry = 0;
-	private memoryRegions: ArchitectureMemoryRegions;
-	private rawObjCode?: string;
+  public waitingIO = false;
 
-	private breakpointHandler: BreakpointHandler = () => false;
+  private architecture: Architecture;
+  private memory: Memory;
+  private registerBank: RegisterBank;
 
-	constructor(architecture: Architecture, memory: Memory, registerBank: RegisterBank) {
-		super();
-		this.architecture = architecture;
-		this.memory = memory;
-		this.registerBank = registerBank;
-		this.memoryRegions = this.architecture.getMemoryRegions();
-		this.setupMemoryHandlers();
-	}
+  private codeExecutionMaxPC = 0;
+  private running = false;
+  private ended = false;
+  private stopping = false;
+  private stepInterval = 50;
+  private cycles = 0;
+  private pc = 0;
+  private ioManager = new IOManager(this);
+  private carry = 0;
+  private memoryRegions: ArchitectureMemoryRegions;
+  private rawObjCode?: string;
 
-	private writeObjCodeMemory() {
-		if (!this.rawObjCode) return;
-		const wordArray = this.rawObjCode
-			.match(/.{1,4}/g)
-			?.map(x => parseInt(x, 16)) || [];
-		for (let i = 0; i < wordArray.length; i++) {
-			const word = wordArray[i];
-			this.memory.writeWord(i * 2, word);
-		}
+  private breakpointHandler: BreakpointHandler = () => false;
 
-		this.codeExecutionMaxPC = wordArray.length * 2;
-	}
+  constructor(architecture: Architecture, memory: Memory, registerBank: RegisterBank) {
+    super();
+    this.architecture = architecture;
+    this.memory = memory;
+    this.registerBank = registerBank;
+    this.memoryRegions = this.architecture.getMemoryRegions();
+    this.setupMemoryHandlers();
+  }
 
-	reset() {
-		if (this.running && !this.stopping) this.stop();
-		this.ended = false;
-		this.waitingIO = false;
-		this.carry = 0;
-		this.setPC(0);
-		this.setCycles(0);
-		this.registerBank.reset();
-		this.registerBank.setValue('sp', this.memoryRegions.stack);
-		this.memory.reset();
-		this.ioManager.reset();
-		this.writeObjCodeMemory();
-		this.emit('reset');
-	}
+  private writeObjCodeMemory() {
+    if (!this.rawObjCode) return;
+    const wordArray = this.rawObjCode.match(/.{1,4}/g)?.map(x => parseInt(x, 16)) || [];
+    for (let i = 0; i < wordArray.length; i++) {
+      const word = wordArray[i];
+      this.memory.writeWord(i * 2, word);
+    }
 
-	setupMemoryHandlers() {
-		let ioAddress = this.memoryRegions.io;
+    this.codeExecutionMaxPC = wordArray.length * 2;
+  }
 
-		this.memory.onReadWord = (address) => {
-			if (address < ioAddress) return;
-			let portIndex = (address - ioAddress) / this.architecture.getByteWidth();
-			return this.ioManager.read(portIndex);
-		};
+  reset() {
+    if (this.running && !this.stopping) this.stop();
+    this.ended = false;
+    this.waitingIO = false;
+    this.carry = 0;
+    this.setPC(0);
+    this.setCycles(0);
+    this.registerBank.reset();
+    this.registerBank.setValue('sp', this.memoryRegions.stack);
+    this.memory.reset();
+    this.ioManager.reset();
+    this.writeObjCodeMemory();
+    this.emit('reset');
+  }
 
-		this.memory.onWriteWord = (address, value) => {
-			if (address < ioAddress) return true;
-			let portIndex = (address - ioAddress) / this.architecture.getByteWidth();
-			return this.ioManager.write(portIndex, value);
-		};
-	}
+  setupMemoryHandlers() {
+    let ioAddress = this.memoryRegions.io;
 
-	registerPorts(ports: Port[]) {
-		ports.forEach(port => this.ioManager.addPort(port));
-	}
-	
-	unregisterPorts(ports: Port[]) {
-		ports.forEach(port => this.ioManager.removePort(port));
-	}
+    this.memory.onReadWord = address => {
+      if (address < ioAddress) return;
+      let portIndex = (address - ioAddress) / this.architecture.getByteWidth();
+      return this.ioManager.read(portIndex);
+    };
 
-	getPortsSymbolTable() {
-		let symbolTable: {[port: string]: number} = {};
-		let ports = this.ioManager.getPorts();
-		let value = this.memoryRegions.io;
-		for (let port of ports) {
-			if (port.device === null) continue;
-			symbolTable[port.device.name + '_' + port.name] = value;
-			value += this.architecture.getByteWidth();
-		}
-		return symbolTable;
-	}
+    this.memory.onWriteWord = (address, value) => {
+      if (address < ioAddress) return true;
+      let portIndex = (address - ioAddress) / this.architecture.getByteWidth();
+      return this.ioManager.write(portIndex, value);
+    };
+  }
 
-	getPortsSymbolsList() {
-		let symbolList = [];
-		let ports = this.ioManager.getPorts();
-		for (let port of ports) {
-			if (port.device === null) continue;
-			symbolList.push(port.device.name + '_' + port.name);
-		}
-		return symbolList;
-	}
+  registerPorts(ports: Port[]) {
+    ports.forEach(port => this.ioManager.addPort(port));
+  }
 
-	setRawObjCode(rawObjCode: string) {
-		if (rawObjCode.length > this.memoryRegions.io * 2) throw new Error('Object code too big for the memory');
-		this.rawObjCode = rawObjCode;
-		this.reset();
-	}
+  unregisterPorts(ports: Port[]) {
+    ports.forEach(port => this.ioManager.removePort(port));
+  }
 
-	step() {
-		if (this.pc >= this.codeExecutionMaxPC) throw new Error('PC run out of program bounds');
+  getPortsSymbolTable() {
+    let symbolTable: { [port: string]: number } = {};
+    let ports = this.ioManager.getPorts();
+    let value = this.memoryRegions.io;
+    for (let port of ports) {
+      if (port.device === null) continue;
+      symbolTable[port.device.name + '_' + port.name] = value;
+      value += this.architecture.getByteWidth();
+    }
+    return symbolTable;
+  }
 
-		let code;
+  getPortsSymbolsList() {
+    let symbolList = [];
+    let ports = this.ioManager.getPorts();
+    for (let port of ports) {
+      if (port.device === null) continue;
+      symbolList.push(port.device.name + '_' + port.name);
+    }
+    return symbolList;
+  }
 
-		try {
-			code = this.memory.readWord(this.pc);
-		} catch (exc) {
-			console.error(exc);
-			this.emit('run error', exc);
-			return this.stop();
-		}
+  setRawObjCode(rawObjCode: string) {
+    if (rawObjCode.length > this.memoryRegions.io * 2) throw new Error('Object code too big for the memory');
+    this.rawObjCode = rawObjCode;
+    this.reset();
+  }
 
-		if (code === endSimulationCode) {
-			this.ended = true;
-			this.emit('run ended');
-			return this.stop();
-		}
+  step() {
+    if (this.pc >= this.codeExecutionMaxPC) throw new Error('PC run out of program bounds');
 
-		try {
-			let instruction = Instruction.disassemble(code, this.architecture);
-			instruction.execute(this);
-		} catch (exc) {
-			console.error(exc);
-			this.emit('run error', exc);
-			return this.stop();
-		}
+    let code;
 
-		if (this.waitingIO) {
-			return this.stop();
-		}
+    try {
+      code = this.memory.readWord(this.pc);
+    } catch (exc) {
+      console.error(exc);
+      this.emit('run error', exc);
+      return this.stop();
+    }
 
-		this.incrementPC(2);
-		this.incrementCycles(1);
+    if (code === endSimulationCode) {
+      this.ended = true;
+      this.emit('run ended');
+      return this.stop();
+    }
 
-		if (this.breakpointHandler(this, this.pc)) {
-			this.emit('breakpoint', this.pc);
-			this.stop();
-		}
-	}
+    try {
+      let instruction = Instruction.disassemble(code, this.architecture);
+      instruction.execute(this);
+    } catch (exc) {
+      console.error(exc);
+      this.emit('run error', exc);
+      return this.stop();
+    }
 
-	async runner() {
-		this.emit('run started');
-		try {
-			let timePerBlock = 50;
-			let toExecFloat = 0;
-			runLoop:
-			while (!this.stopping) {
-				if (this.stepInterval > 0) {
-					toExecFloat += timePerBlock / this.stepInterval;
-					if (toExecFloat >= 1) {
-						let toExec = Math.floor(toExecFloat);
-						toExecFloat -= toExec;
-						let start = Date.now();
-						for (let i = 0; i < toExec; i++) {
-							if (this.stopping) break runLoop;
-							this.step();
-						}
-						let sleepTime = timePerBlock - (Date.now() - start);
-						if (sleepTime > 0) await sleep(sleepTime);
-					} else {
-						await sleep(timePerBlock);
-					}
-				} else {
-					this.step();
-				}
-			}
-		} catch (error) {
-			console.error(error);
-			this.emit('run error', error);
-		}
-		this.running = false;
-		this.stopping = false;
-	}
+    if (this.waitingIO) {
+      return this.stop();
+    }
 
-	stop() {
-		if (!this.running) throw new Error('Simulation already stopped');
-		if (this.stopping) throw new Error('Simulation already stopping');
-		this.stopping = true;
-	}
+    this.incrementPC(2);
+    this.incrementCycles(1);
 
-	run() {
-		if (this.running) throw new Error('Simulation already running');
-		if (this.stopping) throw new Error('Simulation stopping');
-		this.running = true;
-		this.stopping = false;
-		setTimeout(this.runner.bind(this));
-	}
+    if (this.breakpointHandler(this, this.pc)) {
+      this.emit('breakpoint', this.pc);
+      this.stop();
+    }
+  }
 
-	isWaitingIO() {
-		return this.waitingIO;
-	}
+  async runner() {
+    this.emit('run started');
+    try {
+      let timePerBlock = 50;
+      let toExecFloat = 0;
+      runLoop: while (!this.stopping) {
+        if (this.stepInterval > 0) {
+          toExecFloat += timePerBlock / this.stepInterval;
+          if (toExecFloat >= 1) {
+            let toExec = Math.floor(toExecFloat);
+            toExecFloat -= toExec;
+            let start = Date.now();
+            for (let i = 0; i < toExec; i++) {
+              if (this.stopping) break runLoop;
+              this.step();
+            }
+            let sleepTime = timePerBlock - (Date.now() - start);
+            if (sleepTime > 0) await sleep(sleepTime);
+          } else {
+            await sleep(timePerBlock);
+          }
+        } else {
+          this.step();
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      this.emit('run error', error);
+    }
+    this.running = false;
+    this.stopping = false;
+  }
 
-	isRunning() {
-		return this.running;
-	}
+  stop() {
+    if (!this.running) throw new Error('Simulation already stopped');
+    if (this.stopping) throw new Error('Simulation already stopping');
+    this.stopping = true;
+  }
 
-	isStopping() {
-		return this.stopping;
-	}
+  run() {
+    if (this.running) throw new Error('Simulation already running');
+    if (this.stopping) throw new Error('Simulation stopping');
+    this.running = true;
+    this.stopping = false;
+    setTimeout(this.runner.bind(this));
+  }
 
-	hasEnded() {
-		return this.ended;
-	}
+  isWaitingIO() {
+    return this.waitingIO;
+  }
 
-	getRegisterBank() {
-		return this.registerBank;
-	}
+  isRunning() {
+    return this.running;
+  }
 
-	getMemory() {
-		return this.memory;
-	}
+  isStopping() {
+    return this.stopping;
+  }
 
-	getCarry() {
-		return this.carry;
-	}
+  hasEnded() {
+    return this.ended;
+  }
 
-	setCarry(carry: number) {
-		this.carry = carry;
-	}
+  getRegisterBank() {
+    return this.registerBank;
+  }
 
-	setPC(pc: number) {
-		this.pc = (pc >>> 0) & this.architecture.getMask();
-		this.emit('pc update', this.pc);
-	}
+  getMemory() {
+    return this.memory;
+  }
 
-	incrementPC(value: number) {
-		this.setPC(this.getPC() + value);
-	}
+  getCarry() {
+    return this.carry;
+  }
 
-	getPC() {
-		return this.pc;
-	}
+  setCarry(carry: number) {
+    this.carry = carry;
+  }
 
-	setCycles(cycles: number) {
-		this.cycles = cycles;
-		this.emit('cycles update', this.cycles);
-	}
+  setPC(pc: number) {
+    this.pc = (pc >>> 0) & this.architecture.getMask();
+    this.emit('pc update', this.pc);
+  }
 
-	incrementCycles(value: number) {
-		this.cycles += value;
-		this.emit('cycles update', this.cycles);
-	}
+  incrementPC(value: number) {
+    this.setPC(this.getPC() + value);
+  }
 
-	getCycles() {
-		return this.cycles;
-	}
+  getPC() {
+    return this.pc;
+  }
 
-	getArchitecture() {
-		return this.architecture;
-	}
+  setCycles(cycles: number) {
+    this.cycles = cycles;
+    this.emit('cycles update', this.cycles);
+  }
 
-	setBreakpointHandler(handler: BreakpointHandler) {
-		if (!handler) return this.breakpointHandler = () => false;
-		if (typeof handler != 'function') throw new Error('handler isnt function');
-		this.breakpointHandler = handler;
-	}
+  incrementCycles(value: number) {
+    this.cycles += value;
+    this.emit('cycles update', this.cycles);
+  }
 
-	setStepInterval(ms: number) {
-		this.stepInterval = ms;
-	}
+  getCycles() {
+    return this.cycles;
+  }
 
-	getStepInterval() {
-		return this.stepInterval;
-	}
+  getArchitecture() {
+    return this.architecture;
+  }
+
+  setBreakpointHandler(handler: BreakpointHandler) {
+    if (!handler) return (this.breakpointHandler = () => false);
+    if (typeof handler != 'function') throw new Error('handler isnt function');
+    this.breakpointHandler = handler;
+  }
+
+  setStepInterval(ms: number) {
+    this.stepInterval = ms;
+  }
+
+  getStepInterval() {
+    return this.stepInterval;
+  }
 }

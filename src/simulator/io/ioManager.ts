@@ -1,5 +1,5 @@
-import { Simulation } from "../simulation";
-import { Port } from "./port";
+import { Simulation } from '../simulation';
+import { Port } from './port';
 
 export interface PortHandler {
   answerHandler: () => void;
@@ -38,7 +38,7 @@ export class IOManager {
     port.on('read wait end', answerHandler);
     port.on('write wait end', answerHandler);
 
-    this.portHandlers.push({answerHandler});
+    this.portHandlers.push({ answerHandler });
   }
 
   removePort(port: Port) {

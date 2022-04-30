@@ -1,6 +1,7 @@
-
-import { PseudoOperation } from "../operation";
+import { PseudoOperation } from '../operation';
 
 export class P_Pop extends PseudoOperation {
-    getName() { return 'pop' }
+  getName() {
+    return 'pop';
+  }
 }

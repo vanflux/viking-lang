@@ -1,4 +1,3 @@
-
 export function functionCall() {
   return `
 main

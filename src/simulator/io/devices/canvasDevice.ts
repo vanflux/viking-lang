@@ -1,6 +1,6 @@
-import { Simulation } from "../../simulation";
-import { Port } from "../port";
-import { Device } from "./device";
+import { Simulation } from '../../simulation';
+import { Port } from '../port';
+import { Device } from './device';
 
 export class CanvasDevice extends Device {
   private x = 0;
@@ -52,7 +52,7 @@ export class CanvasDevice extends Device {
     this.x = value;
     return false;
   }
-  
+
   setY(simulation: Simulation, value: number) {
     this.y = value;
     return false;
@@ -62,7 +62,7 @@ export class CanvasDevice extends Device {
     this.emit('draw pixel', this.x, this.y);
     return false;
   }
-  
+
   clearPixel(simulation: Simulation, value: number) {
     this.emit('clear pixel', this.x, this.y);
     return false;
@@ -73,7 +73,7 @@ export class CanvasDevice extends Device {
     this.p1Y = this.y;
     return false;
   }
-  
+
   setP2(simulation: Simulation, value: number) {
     this.p2X = this.x;
     this.p2Y = this.y;
@@ -84,7 +84,7 @@ export class CanvasDevice extends Device {
     this.emit('draw line', this.p1X, this.p1Y, this.p2X, this.p2Y);
     return false;
   }
-  
+
   clearLine(simulation: Simulation, value: number) {
     this.emit('clear line', this.p1X, this.p1Y, this.p2X, this.p2Y);
     return false;
@@ -94,7 +94,7 @@ export class CanvasDevice extends Device {
     this.emit('clear');
     return false;
   }
-  
+
   reset() {
     this.emit('reset');
   }

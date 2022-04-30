@@ -1,4 +1,3 @@
-
 export function fibonacci() {
   return `
 main

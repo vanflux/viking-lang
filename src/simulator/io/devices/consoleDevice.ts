@@ -13,7 +13,7 @@ export class ConsoleDevice extends Device {
 
   constructor() {
     super('console');
-    
+
     this.inputBytes = [];
 
     this.readCharPort = new Port('readc', this.readChar.bind(this), undefined, this);
@@ -21,10 +21,12 @@ export class ConsoleDevice extends Device {
     this.writeCharPort = new Port('writec', undefined, this.writeChar.bind(this), this);
     this.writeIntPort = new Port('writei', undefined, this.writeInt.bind(this), this);
 
-    this.ports = [ this.writeCharPort, this.writeIntPort, this.readCharPort, this.readIntPort ];
+    this.ports = [this.writeCharPort, this.writeIntPort, this.readCharPort, this.readIntPort];
   }
 
-  get waiting() { return this._waiting }
+  get waiting() {
+    return this._waiting;
+  }
   set waiting(value) {
     if (value === this._waiting) return;
     this._waiting = value;
@@ -89,10 +91,10 @@ export class ConsoleDevice extends Device {
         int = (int << 8) | c;
       }
     }
-    
+
     return int;
   }
-  
+
   readChar(simulation: Simulation) {
     if (this.inputBytes.length === 0) {
       this.readCharPort.waitingRead = true;
@@ -106,7 +108,7 @@ export class ConsoleDevice extends Device {
     this.emit('write int', unsignedToSigned(value));
     return false;
   }
-  
+
   writeChar(simulation: Simulation, value: number) {
     if (value === 0) return false;
     this.emit('write char', String.fromCharCode(value));
@@ -124,9 +126,9 @@ export class ConsoleDevice extends Device {
     this.emit('input buffer', this.inputBytes);
     return byte!;
   }
-  
+
   addBytes(bytes: number[]) {
-    for (let byte of bytes) this.inputBytes.push(byte & 0xFF);
+    for (let byte of bytes) this.inputBytes.push(byte & 0xff);
     this.emit('input buffer', this.inputBytes);
     if (this.readCharPort.waitingRead) {
       this.readCharPort.endReadWaiting();
