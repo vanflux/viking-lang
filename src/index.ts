@@ -8,17 +8,52 @@ import { Memory } from './simulator/memory';
 import { RegisterBank } from './simulator/registerBank';
 import { Simulation } from './simulator/simulation';
 import { getAllPseudos } from './assembler/pseudos';
+import { Compiler } from './compiler/compiler';
 
 export async function main() {
-  const code = readFileSync('src/ex1.asm', 'utf8');
+  /*
+  // Multi level expression problem
+  const code = `
+    a = 3;
+    b = 2;
+    c = (a - 1) + (1 - (b + a));
+  `;
+  */
+
+  const start = Date.now();
+
+  const code = `
+  a = 10;
+  b = 5;
+  c = 7;
+  d = 52;
+
+  ea = (a + a) - (b + d + a) + (c + c + a) - (d + (a + (c + c + c)));
+  eb = (a + a) - (b + d + a) + (c + c + a) - (d + (a + (c + c + c)));
+  ec = (a + a) - (b + d + a) + (c + c + a) - (d + (a + (c + c + c)));
+  ed = (a + a) - (b + d + a) + (c + c + a) - (d + (a + (c + c + c)));
+  ee = (a + a) - (b + d + a) + (c + c + a) - (d + (a + (c + c + c)));
+  ef = (a + a) - (b + d + a) + (c + c + a) - (d + (a + (c + c + c)));
+  eg = (a + a) - (b + d + a) + (c + c + a) - (d + (a + (c + c + c)));
+  eh = (a + a) - (b + d + a) + (c + c + a) - (d + (a + (c + c + c)));
+
+  z = 1
+  y = 2
+  x = 3
+  v = 4
+  `;
+  
+  const compiler = new Compiler();
+  const compiled = compiler.compile(code);
+  console.log('[Compiled]');
+  console.log(compiled);
+
   const architecture = ArchitectureManager.getViking16Arch();
   const pseudoConverter = new PseudoConverter(getAllPseudos());
-  const assembler = new Assembler(architecture, code, pseudoConverter);
+  const assembler = new Assembler(architecture, compiled, pseudoConverter);
   const result = assembler.assemble();
 
-  const disassembler = new Disassembler(architecture);
-  const instructions = disassembler.disassemble(result.rawObjectCode!);
-  console.log(instructions.map(x => x.pc + '->' + x.instruction?.toString()).join('\n'));
+  return;
 
   const memory = Memory.createFromArchitecture(architecture);
   const registerBank = RegisterBank.createFromArchitecture(architecture);
@@ -40,9 +75,11 @@ export async function main() {
     console.log('PC:', simulation.getPC(), simulation.getPC().toString(16));
     console.log('Cycles:', simulation.getCycles());
   });
-  //simulation.on('cycles update', cycles => console.log('cycles update', cycles));
   simulation.setRawObjCode(result.rawObjectCode!);
   simulation.run();
+
+  const end = Date.now();
+  console.log('Time:', end-start, 'ms');
 }
 
 main();
