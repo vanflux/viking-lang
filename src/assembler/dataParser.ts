@@ -64,7 +64,7 @@ function extractValues(str: string) {
     for (let i = 0; i < str.length; i++) {
         let c = str[i];
 
-        if ((c === '"' && lastC !== '\\')) {            
+        if ((c === '"' && lastC !== '\\')) {
             if (capturingQuote) {
                 if (startIndex !== i) values.push({
                     type: 'text',

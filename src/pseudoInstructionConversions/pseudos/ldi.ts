@@ -27,13 +27,13 @@ export class PC_Ldi implements Pseudo {
                             new Instruction(operationLdr, [ operands[0], operands[1] ]),
                         ];
                     } else {
-                        // ldi r1, const -> [ ldr r1, const(first byte)   ldc r1, const(second byte) ]  (16 bits)
+                        // ldi r1, const -> [ ldc r1, const(first byte)   ldc r1, const(second byte) ]  (16 bits)
                         // -128 >= const <= 256
 
                         let bytes = utils.numberToBytes(literal, architecture.getByteWidth());
                         if (bytes.length === 0) throw new Error('Convert number to bytes error');
                         return [
-                            new Instruction(operationLdr, [ operands[0], new Operand(bytes.shift(), Operand.LITERAL) ]),
+                            new Instruction(operationLdc, [ operands[0], new Operand(bytes.shift(), Operand.LITERAL) ]),
                             ...bytes.map(byte => new Instruction(operationLdc, [ operands[0], new Operand(byte, Operand.LITERAL) ])),
                         ];
                     }
