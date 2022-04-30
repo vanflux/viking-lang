@@ -1,4 +1,4 @@
-import { AssignExpression, Ast, Expression, LiteralExpression, SubExpression, MathExpression, VarReference, IfStatement, TestExpression, Statement, PrintStatement } from "./ast";
+import { AssignExpression, Ast, Expression, LiteralExpression, SubExpression, MathExpression, VarReference, IfStatement, TestExpression, Statement, PrintStatement, WhileStatement } from "./ast";
 
 export class CodeGen {
   code: string[] = [];
@@ -58,7 +58,7 @@ export class CodeGen {
     this.code.push(`bnz ${reg}, ${symbol}`);
   }
 
-  genJmp(reg: string, symbol: string) {
+  genJmp(symbol: string) {
     this.code.push(`bnz r7, ${symbol}`);
   }
 
@@ -232,6 +232,7 @@ export class CodeGen {
     const valueAllocator = new ValueAllocator();
     let nextTmpNum = 0;
     let nextIfNum = 0;
+    let nextWhileNum = 0;
 
     const genExpression = (expr: Expression, id: number) => {
       if (expr instanceof MathExpression) {
@@ -362,13 +363,25 @@ export class CodeGen {
           if (statement.elseStatements) {
             this.genSymbol(`else_${ifNum}`);
             genStatements(statement.elseStatements);
-            this.genJmp(tmpReg, `if_end_${ifNum}`);
+            this.genJmp(`if_end_${ifNum}`);
           }
           if (statement.ifStatements) {
             this.genSymbol(`if_${ifNum}`);
             genStatements(statement.ifStatements);
           }
           this.genSymbol(`if_end_${ifNum}`);
+        } else if (statement instanceof WhileStatement) {
+          const whileNum = nextWhileNum++;
+          if (!statement.executeFirst) this.genJmp(`while_cond_${whileNum}`);
+          this.genSymbol(`while_start_${whileNum}`);
+          genStatements(statement.statements);
+          this.genSymbol(`while_cond_${whileNum}`);
+          const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+          genExpression(statement.conditionExpression, tmpId);
+          const tmpReg = valueAllocator.ensureOnRegister(tmpId);
+          valueAllocator.deallocateId(tmpId);
+          this.genJmpIfRegIsNotZero(tmpReg, `while_start_${whileNum}`);
+          this.genSymbol(`while_end_${whileNum}`);
         } else if (statement instanceof PrintStatement) {
           const tmpId = valueAllocator.getTmpId(nextTmpNum++);
           genExpression(statement.expression, tmpId);

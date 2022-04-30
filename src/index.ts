@@ -72,16 +72,43 @@ export async function main() {
   print(4);
   `;*/
 
+  // TODO: Fix that problem
+
+  // when the code is being generated the "a" variable
+  // is deallocated from register and allocated to stack
+  // ONLY ON ELSE STAGE, if the else is not executed
+  // the "a" variable is not saved to stack, after the
+  // if statement the code tries to load from stack and
+  // the value is zero instead 8.
+
+  // something similar happens with the while statement
+  // the next statements after the while doesnt know
+  // where the variables are
+
+  // solution 1: after each if else block restore the
+  // variables to the same registers or stack position
+
   const code = `
-  a = 4;
+  a = 8;
   b = 4;
-  if (a < b) {
-    print(0);
+  if (b < a) {
+
   } else {
-    print(1);
+    e = 1;
+    f = 1;
+    g = 1;
   }
-  
+  print(a)
   `;
+
+  /*const code = `
+  i = 0;
+  while(i < 5) {
+    print(i);
+    print(99)
+    i = i + 1;
+  }
+  `;*/
   
   const compiler = new Compiler();
   const compiled = compiler.compile(code);
