@@ -1,4 +1,4 @@
-import { AssignExpression, Ast, Expression, LiteralExpression, SubExpression, MathExpression, VarReference, IfStatement, TestExpression, Statement } from "./ast";
+import { AssignExpression, Ast, Expression, LiteralExpression, SubExpression, MathExpression, VarReference, IfStatement, TestExpression, Statement, PrintStatement } from "./ast";
 
 export class CodeGen {
   code: string[] = [];
@@ -64,6 +64,10 @@ export class CodeGen {
 
   genSymbol(symbolName: string) {
     this.code.push(`${symbolName}`);
+  }
+
+  genPrintNumber(reg: string) {
+    this.code.push(`stw ${reg}, 0xf002`);
   }
 
   genComment(comment: string) {
@@ -365,6 +369,11 @@ export class CodeGen {
             genStatements(statement.ifStatements);
           }
           this.genSymbol(`if_end_${ifNum}`);
+        } else if (statement instanceof PrintStatement) {
+          const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+          genExpression(statement.expression, tmpId);
+          const tmpReg = valueAllocator.ensureOnRegister(tmpId);
+          this.genPrintNumber(tmpReg);
         }
       }
     };

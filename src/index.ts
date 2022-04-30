@@ -41,7 +41,7 @@ export async function main() {
   v = 4
   `;*/
 
-  const code = `
+  /*const code = `
   a = 3;
   b = 6;
   if (a < (b - 2)) {
@@ -52,6 +52,35 @@ export async function main() {
   } else {
     h = 20;
   }
+  `;*/
+
+  /*const code = `
+  a = 3;
+  b = 6;
+  print(0);
+  if (a < b - 2) {
+    print(1);
+    c = a;
+    if (a < c) {
+      print(2);
+      d = 10;
+    }
+  } else {
+    print(3);
+    h = 20;
+  }
+  print(4);
+  `;*/
+
+  const code = `
+  a = 4;
+  b = 4;
+  if (a < b) {
+    print(0);
+  } else {
+    print(1);
+  }
+  
   `;
   
   const compiler = new Compiler();
@@ -64,7 +93,8 @@ export async function main() {
   const assembler = new Assembler(architecture, compiled, pseudoConverter);
   const result = assembler.assemble();
 
-  return;
+
+
 
   const memory = Memory.createFromArchitecture(architecture);
   const registerBank = RegisterBank.createFromArchitecture(architecture);
@@ -81,10 +111,10 @@ export async function main() {
   //simulation.on('pc update', pc => console.log('pc update', pc));
   simulation.on('run ended', () => {
     console.log('[Simulation] Run ended!');
-    console.log('Registers:');
+    /*console.log('Registers:');
     registerBank.print();
     console.log('PC:', simulation.getPC(), simulation.getPC().toString(16));
-    console.log('Cycles:', simulation.getCycles());
+    console.log('Cycles:', simulation.getCycles());*/
   });
   simulation.setRawObjCode(result.rawObjectCode!);
   simulation.run();

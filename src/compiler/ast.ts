@@ -75,6 +75,16 @@ export class SubExpression implements Expression {
 
 // Statements
 
+export class PrintStatement implements Statement {
+  constructor(
+    public expression: Expression,
+  ) {}
+  process<T>(func: ProcessFunc<T>, ctx?: T) {
+    ctx = func(this, ctx);
+    this.expression.process(func, ctx);
+  }
+}
+
 export class IfStatement implements Statement {
   constructor(
     public conditionExpression: Expression,
@@ -139,6 +149,9 @@ export class Ast {
         statements.push(new WhileStatement(true, conditionExpression, bodyStatements));
       } else if (child1.text === '{') {
         statements.push(...ctx.statement().flatMap(statementToAst));
+      } else if (child1.text === 'print') {
+        const expression = expressionToAst(ctx.paren_expr()!);
+        statements.push(new PrintStatement(expression));
       } else if (child1 instanceof ExprContext) {
         statements.push(expressionToAst(child1));
       }

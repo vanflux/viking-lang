@@ -41,9 +41,10 @@ export class tinycParser extends Parser {
 	public static readonly T__10 = 11;
 	public static readonly T__11 = 12;
 	public static readonly T__12 = 13;
-	public static readonly STRING = 14;
-	public static readonly INT = 15;
-	public static readonly WS = 16;
+	public static readonly T__13 = 14;
+	public static readonly STRING = 15;
+	public static readonly INT = 16;
+	public static readonly WS = 17;
 	public static readonly RULE_program = 0;
 	public static readonly RULE_statement = 1;
 	public static readonly RULE_paren_expr = 2;
@@ -60,13 +61,13 @@ export class tinycParser extends Parser {
 	];
 
 	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
-		undefined, "'if'", "'else'", "'while'", "'do'", "';'", "'{'", "'}'", "'('", 
-		"')'", "'='", "'<'", "'+'", "'-'",
+		undefined, "'if'", "'else'", "'while'", "'do'", "';'", "'{'", "'}'", "'print'", 
+		"'('", "')'", "'='", "'<'", "'+'", "'-'",
 	];
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-		"STRING", "INT", "WS",
+		undefined, "STRING", "INT", "WS",
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(tinycParser._LITERAL_NAMES, tinycParser._SYMBOLIC_NAMES, []);
 
@@ -115,7 +116,7 @@ export class tinycParser extends Parser {
 				this.state = 21;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-			} while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << tinycParser.T__0) | (1 << tinycParser.T__2) | (1 << tinycParser.T__3) | (1 << tinycParser.T__4) | (1 << tinycParser.T__5) | (1 << tinycParser.T__7) | (1 << tinycParser.STRING) | (1 << tinycParser.INT))) !== 0));
+			} while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << tinycParser.T__0) | (1 << tinycParser.T__2) | (1 << tinycParser.T__3) | (1 << tinycParser.T__4) | (1 << tinycParser.T__5) | (1 << tinycParser.T__7) | (1 << tinycParser.T__8) | (1 << tinycParser.STRING) | (1 << tinycParser.INT))) !== 0));
 			}
 		}
 		catch (re) {
@@ -138,7 +139,7 @@ export class tinycParser extends Parser {
 		this.enterRule(_localctx, 2, tinycParser.RULE_statement);
 		let _la: number;
 		try {
-			this.state = 55;
+			this.state = 59;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 2, this._ctx) ) {
 			case 1:
@@ -205,7 +206,7 @@ export class tinycParser extends Parser {
 				this.state = 47;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << tinycParser.T__0) | (1 << tinycParser.T__2) | (1 << tinycParser.T__3) | (1 << tinycParser.T__4) | (1 << tinycParser.T__5) | (1 << tinycParser.T__7) | (1 << tinycParser.STRING) | (1 << tinycParser.INT))) !== 0)) {
+				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << tinycParser.T__0) | (1 << tinycParser.T__2) | (1 << tinycParser.T__3) | (1 << tinycParser.T__4) | (1 << tinycParser.T__5) | (1 << tinycParser.T__7) | (1 << tinycParser.T__8) | (1 << tinycParser.STRING) | (1 << tinycParser.INT))) !== 0)) {
 					{
 					{
 					this.state = 44;
@@ -225,8 +226,10 @@ export class tinycParser extends Parser {
 				this.enterOuterAlt(_localctx, 6);
 				{
 				this.state = 51;
-				this.expr();
+				this.match(tinycParser.T__7);
 				this.state = 52;
+				this.paren_expr();
+				this.state = 53;
 				this.match(tinycParser.T__4);
 				}
 				break;
@@ -234,7 +237,17 @@ export class tinycParser extends Parser {
 			case 7:
 				this.enterOuterAlt(_localctx, 7);
 				{
-				this.state = 54;
+				this.state = 55;
+				this.expr();
+				this.state = 56;
+				this.match(tinycParser.T__4);
+				}
+				break;
+
+			case 8:
+				this.enterOuterAlt(_localctx, 8);
+				{
+				this.state = 58;
 				this.match(tinycParser.T__4);
 				}
 				break;
@@ -261,12 +274,12 @@ export class tinycParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 57;
-			this.match(tinycParser.T__7);
-			this.state = 58;
-			this.expr();
-			this.state = 59;
+			this.state = 61;
 			this.match(tinycParser.T__8);
+			this.state = 62;
+			this.expr();
+			this.state = 63;
+			this.match(tinycParser.T__9);
 			}
 		}
 		catch (re) {
@@ -288,13 +301,13 @@ export class tinycParser extends Parser {
 		let _localctx: ExprContext = new ExprContext(this._ctx, this.state);
 		this.enterRule(_localctx, 6, tinycParser.RULE_expr);
 		try {
-			this.state = 66;
+			this.state = 70;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 3, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 61;
+				this.state = 65;
 				this.test();
 				}
 				break;
@@ -302,11 +315,11 @@ export class tinycParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 62;
+				this.state = 66;
 				this.id_();
-				this.state = 63;
-				this.match(tinycParser.T__9);
-				this.state = 64;
+				this.state = 67;
+				this.match(tinycParser.T__10);
+				this.state = 68;
 				this.expr();
 				}
 				break;
@@ -331,13 +344,13 @@ export class tinycParser extends Parser {
 		let _localctx: TestContext = new TestContext(this._ctx, this.state);
 		this.enterRule(_localctx, 8, tinycParser.RULE_test);
 		try {
-			this.state = 73;
+			this.state = 77;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 4, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 68;
+				this.state = 72;
 				this.sum_(0);
 				}
 				break;
@@ -345,11 +358,11 @@ export class tinycParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 69;
+				this.state = 73;
 				this.sum_(0);
-				this.state = 70;
-				this.match(tinycParser.T__10);
-				this.state = 71;
+				this.state = 74;
+				this.match(tinycParser.T__11);
+				this.state = 75;
 				this.sum_(0);
 				}
 				break;
@@ -389,11 +402,11 @@ export class tinycParser extends Parser {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 76;
+			this.state = 80;
 			this.term();
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 86;
+			this.state = 90;
 			this._errHandler.sync(this);
 			_alt = this.interpreter.adaptivePredict(this._input, 6, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
@@ -403,20 +416,20 @@ export class tinycParser extends Parser {
 					}
 					_prevctx = _localctx;
 					{
-					this.state = 84;
+					this.state = 88;
 					this._errHandler.sync(this);
 					switch ( this.interpreter.adaptivePredict(this._input, 5, this._ctx) ) {
 					case 1:
 						{
 						_localctx = new Sum_Context(_parentctx, _parentState);
 						this.pushNewRecursionContext(_localctx, _startState, tinycParser.RULE_sum_);
-						this.state = 78;
+						this.state = 82;
 						if (!(this.precpred(this._ctx, 2))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 2)");
 						}
-						this.state = 79;
-						this.match(tinycParser.T__11);
-						this.state = 80;
+						this.state = 83;
+						this.match(tinycParser.T__12);
+						this.state = 84;
 						this.term();
 						}
 						break;
@@ -425,20 +438,20 @@ export class tinycParser extends Parser {
 						{
 						_localctx = new Sum_Context(_parentctx, _parentState);
 						this.pushNewRecursionContext(_localctx, _startState, tinycParser.RULE_sum_);
-						this.state = 81;
+						this.state = 85;
 						if (!(this.precpred(this._ctx, 1))) {
 							throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 						}
-						this.state = 82;
-						this.match(tinycParser.T__12);
-						this.state = 83;
+						this.state = 86;
+						this.match(tinycParser.T__13);
+						this.state = 87;
 						this.term();
 						}
 						break;
 					}
 					}
 				}
-				this.state = 88;
+				this.state = 92;
 				this._errHandler.sync(this);
 				_alt = this.interpreter.adaptivePredict(this._input, 6, this._ctx);
 			}
@@ -463,27 +476,27 @@ export class tinycParser extends Parser {
 		let _localctx: TermContext = new TermContext(this._ctx, this.state);
 		this.enterRule(_localctx, 12, tinycParser.RULE_term);
 		try {
-			this.state = 92;
+			this.state = 96;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case tinycParser.STRING:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 89;
+				this.state = 93;
 				this.id_();
 				}
 				break;
 			case tinycParser.INT:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 90;
+				this.state = 94;
 				this.integer();
 				}
 				break;
-			case tinycParser.T__7:
+			case tinycParser.T__8:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 91;
+				this.state = 95;
 				this.paren_expr();
 				}
 				break;
@@ -512,7 +525,7 @@ export class tinycParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 94;
+			this.state = 98;
 			this.match(tinycParser.STRING);
 			}
 		}
@@ -537,7 +550,7 @@ export class tinycParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 96;
+			this.state = 100;
 			this.match(tinycParser.INT);
 			}
 		}
@@ -575,47 +588,48 @@ export class tinycParser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03\x12e\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03\x13i\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x03\x02\x06\x02\x16\n\x02\r\x02\x0E" +
 		"\x02\x17\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03" +
 		"\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03" +
 		"\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x07\x030\n\x03\f\x03\x0E\x03" +
-		"3\v\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x05\x03:\n\x03\x03\x04" +
-		"\x03\x04\x03\x04\x03\x04\x03\x05\x03\x05\x03\x05\x03\x05\x03\x05\x05\x05" +
-		"E\n\x05\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x05\x06L\n\x06\x03\x07" +
-		"\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x07\x07" +
-		"W\n\x07\f\x07\x0E\x07Z\v\x07\x03\b\x03\b\x03\b\x05\b_\n\b\x03\t\x03\t" +
-		"\x03\n\x03\n\x03\n\x02\x02\x03\f\v\x02\x02\x04\x02\x06\x02\b\x02\n\x02" +
-		"\f\x02\x0E\x02\x10\x02\x12\x02\x02\x02\x02i\x02\x15\x03\x02\x02\x02\x04" +
-		"9\x03\x02\x02\x02\x06;\x03\x02\x02\x02\bD\x03\x02\x02\x02\nK\x03\x02\x02" +
-		"\x02\fM\x03\x02\x02\x02\x0E^\x03\x02\x02\x02\x10`\x03\x02\x02\x02\x12" +
-		"b\x03\x02\x02\x02\x14\x16\x05\x04\x03\x02\x15\x14\x03\x02\x02\x02\x16" +
-		"\x17\x03\x02\x02\x02\x17\x15\x03\x02\x02\x02\x17\x18\x03\x02\x02\x02\x18" +
-		"\x03\x03\x02\x02\x02\x19\x1A\x07\x03\x02\x02\x1A\x1B\x05\x06\x04\x02\x1B" +
-		"\x1C\x05\x04\x03\x02\x1C:\x03\x02\x02\x02\x1D\x1E\x07\x03\x02\x02\x1E" +
-		"\x1F\x05\x06\x04\x02\x1F \x05\x04\x03\x02 !\x07\x04\x02\x02!\"\x05\x04" +
-		"\x03\x02\":\x03\x02\x02\x02#$\x07\x05\x02\x02$%\x05\x06\x04\x02%&\x05" +
-		"\x04\x03\x02&:\x03\x02\x02\x02\'(\x07\x06\x02\x02()\x05\x04\x03\x02)*" +
-		"\x07\x05\x02\x02*+\x05\x06\x04\x02+,\x07\x07\x02\x02,:\x03\x02\x02\x02" +
-		"-1\x07\b\x02\x02.0\x05\x04\x03\x02/.\x03\x02\x02\x0203\x03\x02\x02\x02" +
-		"1/\x03\x02\x02\x0212\x03\x02\x02\x0224\x03\x02\x02\x0231\x03\x02\x02\x02" +
-		"4:\x07\t\x02\x0256\x05\b\x05\x0267\x07\x07\x02\x027:\x03\x02\x02\x028" +
-		":\x07\x07\x02\x029\x19\x03\x02\x02\x029\x1D\x03\x02\x02\x029#\x03\x02" +
-		"\x02\x029\'\x03\x02\x02\x029-\x03\x02\x02\x0295\x03\x02\x02\x0298\x03" +
-		"\x02\x02\x02:\x05\x03\x02\x02\x02;<\x07\n\x02\x02<=\x05\b\x05\x02=>\x07" +
-		"\v\x02\x02>\x07\x03\x02\x02\x02?E\x05\n\x06\x02@A\x05\x10\t\x02AB\x07" +
-		"\f\x02\x02BC\x05\b\x05\x02CE\x03\x02\x02\x02D?\x03\x02\x02\x02D@\x03\x02" +
-		"\x02\x02E\t\x03\x02\x02\x02FL\x05\f\x07\x02GH\x05\f\x07\x02HI\x07\r\x02" +
-		"\x02IJ\x05\f\x07\x02JL\x03\x02\x02\x02KF\x03\x02\x02\x02KG\x03\x02\x02" +
-		"\x02L\v\x03\x02\x02\x02MN\b\x07\x01\x02NO\x05\x0E\b\x02OX\x03\x02\x02" +
-		"\x02PQ\f\x04\x02\x02QR\x07\x0E\x02\x02RW\x05\x0E\b\x02ST\f\x03\x02\x02" +
-		"TU\x07\x0F\x02\x02UW\x05\x0E\b\x02VP\x03\x02\x02\x02VS\x03\x02\x02\x02" +
-		"WZ\x03\x02\x02\x02XV\x03\x02\x02\x02XY\x03\x02\x02\x02Y\r\x03\x02\x02" +
-		"\x02ZX\x03\x02\x02\x02[_\x05\x10\t\x02\\_\x05\x12\n\x02]_\x05\x06\x04" +
-		"\x02^[\x03\x02\x02\x02^\\\x03\x02\x02\x02^]\x03\x02\x02\x02_\x0F\x03\x02" +
-		"\x02\x02`a\x07\x10\x02\x02a\x11\x03\x02\x02\x02bc\x07\x11\x02\x02c\x13" +
-		"\x03\x02\x02\x02\n\x1719DKVX^";
+		"3\v\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03" +
+		"\x03\x03\x05\x03>\n\x03\x03\x04\x03\x04\x03\x04\x03\x04\x03\x05\x03\x05" +
+		"\x03\x05\x03\x05\x03\x05\x05\x05I\n\x05\x03\x06\x03\x06\x03\x06\x03\x06" +
+		"\x03\x06\x05\x06P\n\x06\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07" +
+		"\x03\x07\x03\x07\x03\x07\x07\x07[\n\x07\f\x07\x0E\x07^\v\x07\x03\b\x03" +
+		"\b\x03\b\x05\bc\n\b\x03\t\x03\t\x03\n\x03\n\x03\n\x02\x02\x03\f\v\x02" +
+		"\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02\x10\x02\x12\x02\x02\x02" +
+		"\x02n\x02\x15\x03\x02\x02\x02\x04=\x03\x02\x02\x02\x06?\x03\x02\x02\x02" +
+		"\bH\x03\x02\x02\x02\nO\x03\x02\x02\x02\fQ\x03\x02\x02\x02\x0Eb\x03\x02" +
+		"\x02\x02\x10d\x03\x02\x02\x02\x12f\x03\x02\x02\x02\x14\x16\x05\x04\x03" +
+		"\x02\x15\x14\x03\x02\x02\x02\x16\x17\x03\x02\x02\x02\x17\x15\x03\x02\x02" +
+		"\x02\x17\x18\x03\x02\x02\x02\x18\x03\x03\x02\x02\x02\x19\x1A\x07\x03\x02" +
+		"\x02\x1A\x1B\x05\x06\x04\x02\x1B\x1C\x05\x04\x03\x02\x1C>\x03\x02\x02" +
+		"\x02\x1D\x1E\x07\x03\x02\x02\x1E\x1F\x05\x06\x04\x02\x1F \x05\x04\x03" +
+		"\x02 !\x07\x04\x02\x02!\"\x05\x04\x03\x02\">\x03\x02\x02\x02#$\x07\x05" +
+		"\x02\x02$%\x05\x06\x04\x02%&\x05\x04\x03\x02&>\x03\x02\x02\x02\'(\x07" +
+		"\x06\x02\x02()\x05\x04\x03\x02)*\x07\x05\x02\x02*+\x05\x06\x04\x02+,\x07" +
+		"\x07\x02\x02,>\x03\x02\x02\x02-1\x07\b\x02\x02.0\x05\x04\x03\x02/.\x03" +
+		"\x02\x02\x0203\x03\x02\x02\x021/\x03\x02\x02\x0212\x03\x02\x02\x0224\x03" +
+		"\x02\x02\x0231\x03\x02\x02\x024>\x07\t\x02\x0256\x07\n\x02\x0267\x05\x06" +
+		"\x04\x0278\x07\x07\x02\x028>\x03\x02\x02\x029:\x05\b\x05\x02:;\x07\x07" +
+		"\x02\x02;>\x03\x02\x02\x02<>\x07\x07\x02\x02=\x19\x03\x02\x02\x02=\x1D" +
+		"\x03\x02\x02\x02=#\x03\x02\x02\x02=\'\x03\x02\x02\x02=-\x03\x02\x02\x02" +
+		"=5\x03\x02\x02\x02=9\x03\x02\x02\x02=<\x03\x02\x02\x02>\x05\x03\x02\x02" +
+		"\x02?@\x07\v\x02\x02@A\x05\b\x05\x02AB\x07\f\x02\x02B\x07\x03\x02\x02" +
+		"\x02CI\x05\n\x06\x02DE\x05\x10\t\x02EF\x07\r\x02\x02FG\x05\b\x05\x02G" +
+		"I\x03\x02\x02\x02HC\x03\x02\x02\x02HD\x03\x02\x02\x02I\t\x03\x02\x02\x02" +
+		"JP\x05\f\x07\x02KL\x05\f\x07\x02LM\x07\x0E\x02\x02MN\x05\f\x07\x02NP\x03" +
+		"\x02\x02\x02OJ\x03\x02\x02\x02OK\x03\x02\x02\x02P\v\x03\x02\x02\x02QR" +
+		"\b\x07\x01\x02RS\x05\x0E\b\x02S\\\x03\x02\x02\x02TU\f\x04\x02\x02UV\x07" +
+		"\x0F\x02\x02V[\x05\x0E\b\x02WX\f\x03\x02\x02XY\x07\x10\x02\x02Y[\x05\x0E" +
+		"\b\x02ZT\x03\x02\x02\x02ZW\x03\x02\x02\x02[^\x03\x02\x02\x02\\Z\x03\x02" +
+		"\x02\x02\\]\x03\x02\x02\x02]\r\x03\x02\x02\x02^\\\x03\x02\x02\x02_c\x05" +
+		"\x10\t\x02`c\x05\x12\n\x02ac\x05\x06\x04\x02b_\x03\x02\x02\x02b`\x03\x02" +
+		"\x02\x02ba\x03\x02\x02\x02c\x0F\x03\x02\x02\x02de\x07\x11\x02\x02e\x11" +
+		"\x03\x02\x02\x02fg\x07\x12\x02\x02g\x13\x03\x02\x02\x02\n\x171=HOZ\\b";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!tinycParser.__ATN) {

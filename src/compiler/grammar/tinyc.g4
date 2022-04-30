@@ -57,6 +57,7 @@ statement
    | 'while' paren_expr statement
    | 'do' statement 'while' paren_expr ';'
    | '{' statement* '}'
+   | 'print' paren_expr ';'
    | expr ';'
    | ';'
    ;
