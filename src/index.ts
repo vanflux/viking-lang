@@ -11,18 +11,16 @@ import { getAllPseudos } from './assembler/pseudos';
 import { Compiler } from './compiler/compiler';
 
 export async function main() {
-  /*
-  // Multi level expression problem
-  const code = `
-    a = 3;
-    b = 2;
-    c = (a - 1) + (1 - (b + a));
-  `;
-  */
 
   const start = Date.now();
 
-  const code = `
+  /*const code = `
+    a = 3;
+    b = 2;
+    c = (a - 1) + (1 - (b + a));
+  `;*/
+  
+  /*const code = `
   a = 10;
   b = 5;
   c = 7;
@@ -41,6 +39,19 @@ export async function main() {
   y = 2
   x = 3
   v = 4
+  `;*/
+
+  const code = `
+  a = 3;
+  b = 6;
+  if (a < (b - 2)) {
+    c = 5;
+    if (a < c) {
+      d = 10;
+    }
+  } else {
+    h = 20;
+  }
   `;
   
   const compiler = new Compiler();

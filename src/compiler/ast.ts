@@ -184,7 +184,7 @@ export class Ast {
       } else if (ctx instanceof Id_Context) {
         return new VarReference(ctx.text);
       }
-      throw new Error('Unknown expression');
+      throw new Error('Unknown expression: ' + ctx);
     }
 
     this.statements = programToAst(programContext);
