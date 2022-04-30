@@ -6,7 +6,7 @@ import { CommentParser } from './commentParser';
 import { LineParser, LineParseResult } from './lineParser';
 import { Instruction } from '../common/instruction';
 import { Operand } from '../common/operand';
-import utils from '../common/utils';
+import { signedNumberToHex } from '../common/utils';
 
 export interface AdditionalAssembleInfo {
     lineNumber: number;
@@ -15,7 +15,7 @@ export interface AdditionalAssembleInfo {
     parsed?: LineParseResult;
 }
 
-class Assembler {
+export class Assembler {
     private architecture: Architecture;
     private programData: string;
     private pseudoConverter: PseudoConverter;
@@ -150,9 +150,7 @@ class Assembler {
         }
         
         this.rawObjectCode = this.objectCodeArray
-            .map(x => utils.signedNumberToHex(x, 2))
+            .map(x => signedNumberToHex(x, 2))
             .join('');
     }
 };
-
-export default Assembler;

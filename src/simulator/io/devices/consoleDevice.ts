@@ -1,4 +1,4 @@
-import utils from '../../../common/utils';
+import { unsignedToSigned } from '../../../common/utils';
 import { Simulation } from '../../simulation';
 import { Port } from '../port';
 import { Device } from './device';
@@ -103,7 +103,7 @@ export class ConsoleDevice extends Device {
   }
 
   writeInt(simulation: Simulation, value: number) {
-    this.emit('write int', utils.unsignedToSigned(value));
+    this.emit('write int', unsignedToSigned(value));
     return false;
   }
   

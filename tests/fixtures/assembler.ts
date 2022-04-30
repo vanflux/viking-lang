@@ -1,5 +1,5 @@
 import { ArchitectureManager } from "../../src/common/architectureManager";
-import Assembler from "../../src/assembler/assembler";
+import { Assembler } from "../../src/assembler/assembler";
 import { PseudoConverter } from "../../src/assembler/pseudoConverter";
 import { getAllPseudos } from "../../src/assembler/pseudos";
 

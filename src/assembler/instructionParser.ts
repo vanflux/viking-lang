@@ -1,8 +1,8 @@
 import { OperationsManager } from '../common/operations/operationsManager';
-import utils from '../common/utils';
 import { Architecture } from '../common/architecture';
 import { Instruction } from '../common/instruction';
 import { Operand } from '../common/operand';
+import { isInteger } from '../common/utils';
 
 export class InstructionParser {
     private architecture: Architecture;
@@ -60,7 +60,7 @@ export class InstructionParser {
         if (operandValue.length === 0) return null;
 
         if (this.isRegisterName(operandValue)) return 'register';
-        if (utils.isInteger(operandValue)) return 'literal';
+        if (isInteger(operandValue)) return 'literal';
         return 'symbol';
     }
     

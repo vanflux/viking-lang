@@ -1,9 +1,9 @@
-import utils from './utils';
 import { Architecture } from './architecture';
 import { BasicOperation, Operation, PseudoOperation } from './operations/operation';
 import { Operand } from './operand';
 import { OperationsManager } from './operations/operationsManager';
 import { Simulation } from '../simulator/simulation';
+import { signedNumberToHex, signedToUnsigned, unsignedToSigned } from './utils';
 
 export class Instruction {
     static TYPE_R = 'R';
@@ -18,7 +18,7 @@ export class Instruction {
             let opcode = code & 0b1111000000000000;     // 1111 0000 0000 0000
             let rstCode = (code >> 8) & 0b111;          //      0111 0000 0000
             let immediate = code & 0b11111111;          //           1111 1111
-            immediate = utils.unsignedToSigned(immediate, 1);
+            immediate = unsignedToSigned(immediate, 1);
             
             let rst = architecture.getRegisterNameByCode(rstCode);
             
@@ -128,7 +128,7 @@ export class Instruction {
             case Instruction.TYPE_I: {
                 let rst = architecture.getRegisterCode(this.operands[0].getValue());
                 let immediate = this.operands[1].getValue();
-                immediate = utils.signedToUnsigned(immediate, 1);
+                immediate = signedToUnsigned(immediate, 1);
 
                 finalCode |= opcode;    // operation code
                 finalCode |= 1 << 11;   // imm
@@ -178,7 +178,7 @@ export class Instruction {
         return this.operation.getName() + ' ' + this.operands.map(operand => {
             let value = operand.getValue();
             if (operand.getType() === Operand.LITERAL) {
-                value = '0x'+utils.signedNumberToHex(value, 1);
+                value = '0x' + signedNumberToHex(value, 1);
             }
             return value;
         }).join(',');

@@ -3,7 +3,7 @@ import { Pseudo } from '../pseudoConverter';
 import { Instruction } from '../../common/instruction';
 import { Operand } from '../../common/operand';
 import { OperationsManager } from '../../common/operations/operationsManager';
-import utils from '../../common/utils';
+import { numberToBytes } from '../../common/utils';
 
 export class PC_Ldi implements Pseudo {
     convert(instruction: Instruction, architecture: Architecture) {
@@ -30,7 +30,7 @@ export class PC_Ldi implements Pseudo {
                         // ldi r1, const -> [ ldc r1, const(first byte)   ldc r1, const(second byte) ]  (16 bits)
                         // -128 >= const <= 256
 
-                        let bytes = utils.numberToBytes(literal, architecture.getByteWidth());
+                        let bytes = numberToBytes(literal, architecture.getByteWidth());
                         if (bytes.length === 0) throw new Error('Convert number to bytes error');
                         return [
                             new Instruction(operationLdc, [ operands[0], new Operand(bytes.shift(), Operand.LITERAL) ]),

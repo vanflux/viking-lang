@@ -14,7 +14,7 @@ export interface MemoryStorage {
     getWordsFromRange(start: number, end: number): number[];
 };
 
-class Memory extends EventEmitter {
+export class Memory extends EventEmitter {
     static createFromArchitecture (architecture: Architecture) {
         let bitWidth = architecture.getBitWidth();
         let memoryRegions = architecture.getMemoryRegions();
@@ -113,5 +113,3 @@ class Memory extends EventEmitter {
         return result;
     }
 }
-
-export default Memory;

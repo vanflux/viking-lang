@@ -1,11 +1,11 @@
 import { EventEmitter } from 'events';
-import utils from '../common/utils';
 import { Architecture, ArchitectureMemoryRegions } from '../common/architecture';
-import Memory from './memory';
+import { Memory } from './memory';
 import { RegisterBank } from './registerBank';
 import { IOManager } from './io/ioManager';
 import { Port } from './io/port';
 import { Instruction } from '../common/instruction';
+import { sleep } from '../common/utils';
 
 const endSimulationCode = 0x0003;
 
@@ -180,9 +180,9 @@ export class Simulation extends EventEmitter {
 							this.step();
 						}
 						let sleepTime = timePerBlock - (Date.now() - start);
-						if (sleepTime > 0) await utils.sleep(sleepTime);
+						if (sleepTime > 0) await sleep(sleepTime);
 					} else {
-						await utils.sleep(timePerBlock);
+						await sleep(timePerBlock);
 					}
 				} else {
 					this.step();

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { Architecture, ArchitectureRegister } from '../common/architecture';
-import utils from '../common/utils';
+import { unsignedToSigned } from '../common/utils';
 
 export interface Register {
     baseName: string;
@@ -48,7 +48,7 @@ export class RegisterBank extends EventEmitter {
     }
 
     getValue(registerName: string) {
-        return utils.unsignedToSigned(this.registerByName[registerName].value, this.registerByteWidth);
+        return unsignedToSigned(this.registerByName[registerName].value, this.registerByteWidth);
     }
     
     getUValue(registerName: string) {

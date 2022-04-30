@@ -1,10 +1,10 @@
 import { readFileSync } from "fs";
 import { ArchitectureManager } from "./common/architectureManager";
-import Assembler from "./assembler/assembler";
-import Disassembler from "./disassembler/disassembler";
+import { Assembler } from "./assembler/assembler";
+import { Disassembler } from "./disassembler/disassembler";
 import { PseudoConverter } from "./assembler/pseudoConverter";
 import { ConsoleDevice } from "./simulator/io/devices/consoleDevice";
-import Memory from "./simulator/memory";
+import { Memory } from "./simulator/memory";
 import { RegisterBank } from "./simulator/registerBank";
 import { Simulation } from "./simulator/simulation";
 import { getAllPseudos } from "./assembler/pseudos";

@@ -1,7 +1,7 @@
 import { Architecture } from '../common/architecture';
 import { Instruction } from '../common/instruction';
 
-class Disassembler {
+export class Disassembler {
     private architecture: Architecture;
 
     constructor(architecture: Architecture) {
@@ -40,5 +40,3 @@ class Disassembler {
         return result;
     }
 }
-
-export default Disassembler;

@@ -1,6 +1,6 @@
 import { unraw } from 'unraw';
 import { Architecture } from '../common/architecture';
-import utils from '../common/utils';
+import { bytesToNumber, isInteger, numberToBytes } from '../common/utils';
 
 export class DataParser {
     private architecture: Architecture;
@@ -32,8 +32,8 @@ export class DataParser {
                     if (trimmed.length <= 0) break;
 
                     let splitted = trimmed.split(/(?:[?: \t]+)|,/);
-                    if (splitted.some(x => !utils.isInteger(x))) throw new TypeError('Data contains a non-literal');
-                    bytes.push(...splitted.reduce((a, b) => a.concat(utils.numberToBytes(parseInt(b), byteWidth)), [] as number[]));
+                    if (splitted.some(x => !isInteger(x))) throw new TypeError('Data contains a non-literal');
+                    bytes.push(...splitted.reduce((a, b) => a.concat(numberToBytes(parseInt(b), byteWidth)), [] as number[]));
                     break;
                 default:
             }
@@ -49,7 +49,7 @@ export class DataParser {
                 let byte = bytes[i + j];
                 curBytes[j] = byte ? byte : 0;
             }
-            data.push(utils.bytesToNumber(curBytes));
+            data.push(bytesToNumber(curBytes));
         }
         return data;
     }
