@@ -1,6 +1,6 @@
 import { CharStreams, CommonTokenStream } from 'antlr4ts';
-import { tinycLexer as Lexer } from './antlr/tinycLexer';
-import { tinycParser as Parser } from './antlr/tinycParser';
+import { vikingLexer as Lexer } from './antlr/vikingLexer';
+import { vikingParser as Parser } from './antlr/vikingParser';
 import { Ast } from './ast';
 import { CodeGen } from './codegen';
 
@@ -14,9 +14,9 @@ export class Compiler {
 
     const tokenStream = new CommonTokenStream(lexer);
     const parser = new Parser(tokenStream);
-    
-    const parseTre = parser.program();
-    const ast = new Ast(parseTre);
+
+    const parseTree = parser.entry();
+    const ast = new Ast(parseTree);
 
     const codeGen = new CodeGen(ast);
     return codeGen.code.join('\n') + '\n';

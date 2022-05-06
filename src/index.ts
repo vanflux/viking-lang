@@ -11,7 +11,6 @@ import { getAllPseudos } from './assembler/pseudos';
 import { Compiler } from './compiler/compiler';
 
 export async function main() {
-
   const start = Date.now();
 
   /*const code = `
@@ -19,7 +18,7 @@ export async function main() {
     b = 2;
     c = (a - 1) + (1 - (b + a));
   `;*/
-  
+
   /*const code = `
   a = 10;
   b = 5;
@@ -120,9 +119,11 @@ export async function main() {
   `;*/
 
   const code = `
-  printn(100);
+  a = 1;
+  b = - (a + a + a);
+  printn(b);
   `;
-  
+
   const compiler = new Compiler();
   const compiled = compiler.compile(code);
   console.log('[Compiled]');
@@ -132,9 +133,6 @@ export async function main() {
   const pseudoConverter = new PseudoConverter(getAllPseudos());
   const assembler = new Assembler(architecture, compiled, pseudoConverter);
   const result = assembler.assemble();
-
-
-
 
   const memory = Memory.createFromArchitecture(architecture);
   const registerBank = RegisterBank.createFromArchitecture(architecture);
@@ -160,7 +158,7 @@ export async function main() {
   simulation.run();
 
   const end = Date.now();
-  console.log('Time:', end-start, 'ms');
+  console.log('Time:', end - start, 'ms');
 }
 
 main();

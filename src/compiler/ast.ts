@@ -1,12 +1,23 @@
-import { ExprContext, Function_callContext, Id_Context, IntegerContext, Paren_exprContext, ProgramContext, StatementContext, Sum_Context, TermContext, TestContext } from "./antlr/tinycParser";
+import {
+  AddExprContext,
+  AssignExprContext,
+  CallExprContext,
+  EntryContext,
+  ExprContext,
+  NegExprContext,
+  ParenExprContext,
+  RelExprContext,
+  StatContext,
+  TermExprContext,
+} from './antlr/vikingParser';
 
-type ProcessFunc<T=void> = (node: Node, ctx?: T)=>T;
+type ProcessFunc<T = void> = (node: Node, ctx?: T) => T;
 
 export interface Node {
   process<T>(func: ProcessFunc<T>, ctx?: T): void;
 }
-export interface Expression extends Node {};
-export interface Statement extends Node {};
+export interface Expression extends Node {}
+export interface Statement extends Node {}
 
 // Expressions
 
@@ -24,11 +35,16 @@ export class LiteralExpression implements Expression {
   }
 }
 
+export class NegateExpression implements Expression {
+  constructor(public expression: Expression) {}
+  process<T>(func: ProcessFunc<T>, ctx?: T) {
+    ctx = func(this, ctx);
+    this.expression.process(func, ctx);
+  }
+}
+
 export class AssignExpression implements Expression {
-  constructor(
-    public varRef: VarReference,
-    public expression: Expression
-  ) {}
+  constructor(public varRef: VarReference, public expression: Expression) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.varRef.process(func, ctx);
@@ -36,11 +52,8 @@ export class AssignExpression implements Expression {
   }
 }
 
-export class TestExpression implements Expression {
-  constructor(
-    public leftExpression: Expression,
-    public rightExpression: Expression
-  ) {}
+export class RelationalExpression implements Expression {
+  constructor(public operation: '<' | '>', public leftExpression: Expression, public rightExpression: Expression) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.leftExpression.process(func, ctx);
@@ -48,12 +61,8 @@ export class TestExpression implements Expression {
   }
 }
 
-export class MathExpression implements Expression {
-  constructor(
-    public operation: '+' | '-',
-    public leftExpression: Expression,
-    public rightExpression: Expression
-  ) {}
+export class AddExpression implements Expression {
+  constructor(public operation: '+' | '-', public leftExpression: Expression, public rightExpression: Expression) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.leftExpression.process(func, ctx);
@@ -61,55 +70,32 @@ export class MathExpression implements Expression {
   }
 }
 
-export class SubExpression implements Expression {
-  constructor(
-    public leftExpression: Expression,
-    public rightExpression: Expression,
-  ) {}
+export class CallExpression implements Expression {
+  constructor(public funcName: string, public paramExpressions: Expression[]) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
-    this.leftExpression.process(func, ctx);
-    this.rightExpression.process(func, ctx);
+    this.paramExpressions.forEach(x => x.process(func, ctx));
   }
 }
 
 // Statements
 
-export class FuncCallStatement implements Statement {
-  constructor(
-    public funcName: string,
-    public expression: Expression,
-  ) {}
-  process<T>(func: ProcessFunc<T>, ctx?: T) {
-    ctx = func(this, ctx);
-    this.expression.process(func, ctx);
-  }
-}
-
 export class IfStatement implements Statement {
-  constructor(
-    public conditionExpression: Expression,
-    public ifStatements: Statement[],
-    public elseStatements: Statement[]
-  ) {}
+  constructor(public conditionExpression: Expression, public ifStatements: Statement[], public elseStatements: Statement[]) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.conditionExpression.process(func, ctx);
-    this.ifStatements.map(x => x.process(func, ctx));
-    this.elseStatements.map(x => x.process(func, ctx));
+    this.ifStatements.forEach(x => x.process(func, ctx));
+    this.elseStatements.forEach(x => x.process(func, ctx));
   }
 }
 
 export class WhileStatement implements Statement {
-  constructor(
-    public executeFirst: boolean,
-    public conditionExpression: Expression,
-    public statements: Statement[]
-  ) {}
+  constructor(public conditionExpression: Expression, public statements: Statement[]) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.conditionExpression.process(func, ctx);
-    this.statements.map(x => x.process(func, ctx));
+    this.statements.forEach(x => x.process(func, ctx));
   }
 }
 
@@ -126,86 +112,104 @@ export class ExpressionStatement implements Statement {
 export class Ast {
   statements: Statement[];
 
-  constructor(programContext: ProgramContext) {
-    function programToAst(ctx: ProgramContext) {
-      return ctx.statement().flatMap(statementToAst);
+  constructor(entryContext: EntryContext) {
+    function programToAst(ctx: EntryContext) {
+      return ctx.stat().flatMap(statementToAst);
     }
 
-    function statementToAst(ctx: StatementContext): Statement[] {
+    function statementToAst(ctx: StatContext): Statement[] {
       const statements: Statement[] = [];
       if (!ctx.children) return statements;
-      const [child1,,, child4] = ctx.children;
+      const [child1, , , child4] = ctx.children;
       if (child1.text === 'if') {
-        const conditionExpression = expressionToAst(ctx.paren_expr()!);
-        const ifStatements = statementToAst(ctx.statement()[0]);
-        const elseStatements = child4?.text === 'else' ? statementToAst(ctx.statement()[1]) : [];
+        const conditionExpression = expressionToAst(ctx.parenExpr()!);
+        const ifStatements = statementToAst(ctx.stat()[0]);
+        const elseStatements = child4?.text === 'else' ? statementToAst(ctx.stat()[1]) : [];
         statements.push(new IfStatement(conditionExpression, ifStatements, elseStatements));
       } else if (child1.text === 'while') {
-        const conditionExpression = expressionToAst(ctx.paren_expr()!);
-        const bodyStatements = statementToAst(ctx.statement()[0]);
-        statements.push(new WhileStatement(false, conditionExpression, bodyStatements));
-      } else if (child1.text === 'do') {
-        const conditionExpression = expressionToAst(ctx.paren_expr()!);
-        const bodyStatements = statementToAst(ctx.statement()[0]);
-        statements.push(new WhileStatement(true, conditionExpression, bodyStatements));
+        const conditionExpression = expressionToAst(ctx.parenExpr()!);
+        const bodyStatements = statementToAst(ctx.stat()[0]);
+        statements.push(new WhileStatement(conditionExpression, bodyStatements));
       } else if (child1.text === '{') {
-        statements.push(...ctx.statement().flatMap(statementToAst));
+        statements.push(...ctx.stat().flatMap(statementToAst));
       } else if (child1 instanceof ExprContext) {
         statements.push(expressionToAst(child1));
-      } else if (child1 instanceof Function_callContext) {
-        statements.push(new FuncCallStatement(child1.STRING().text, expressionToAst(child1.expr())));
       } else {
         throw new Error('Unhandled statement on ast generation');
       }
       return statements;
     }
 
-    function expressionToAst(ctx: Paren_exprContext | ExprContext | TestContext | Sum_Context | TermContext | Id_Context | IntegerContext): Expression {
-      if (ctx instanceof Paren_exprContext) {
+    function expressionToAst(
+      ctx:
+        | ParenExprContext
+        | ExprContext
+        | NegExprContext
+        | AssignExprContext
+        | RelExprContext
+        | AddExprContext
+        | CallExprContext
+        | TermExprContext
+    ): Expression {
+      if (ctx instanceof ParenExprContext) {
         return expressionToAst(ctx.expr());
       } else if (ctx instanceof ExprContext) {
-        if (ctx.test()) {
-          return expressionToAst(ctx.test()!);
+        if (ctx.assignExpr()) {
+          return expressionToAst(ctx.assignExpr()!);
         } else {
-          return new AssignExpression(new VarReference(ctx.id_()!.text), expressionToAst(ctx.expr()!));
+          return expressionToAst(ctx.parenExpr()!);
         }
-      } else if (ctx instanceof TestContext) {
-        if (ctx.sum_().length === 1) {
-          return expressionToAst(ctx.sum_()[0]);
+      } else if (ctx instanceof NegExprContext) {
+        if (ctx.getChild(0).text !== '-') {
+          return expressionToAst(ctx.relExpr());
         } else {
-          return new TestExpression(expressionToAst(ctx.sum_()[0]), expressionToAst(ctx.sum_()[1]));
+          return new NegateExpression(expressionToAst(ctx.relExpr()));
         }
-      } else if (ctx instanceof Sum_Context) {
-        if (!ctx.sum_()) {
-          return expressionToAst(ctx.term());
+      } else if (ctx instanceof AssignExprContext) {
+        if (ctx.negExpr()) {
+          return expressionToAst(ctx.negExpr()!);
         } else {
-          if (ctx.getChild(1)!.text === '+') {
-            return new MathExpression('+', expressionToAst(ctx.sum_()!), expressionToAst(ctx.term()));
+          return new AssignExpression(new VarReference(ctx.getChild(0).text), expressionToAst(ctx.expr()!));
+        }
+      } else if (ctx instanceof RelExprContext) {
+        if (!ctx.relExpr()) {
+          return expressionToAst(ctx.addExpr());
+        } else {
+          const operation = ctx.getChild(1).text === '<' ? '<' : '>';
+          return new RelationalExpression(operation, expressionToAst(ctx.relExpr()!), expressionToAst(ctx.addExpr()));
+        }
+      } else if (ctx instanceof AddExprContext) {
+        if (!ctx.addExpr()) {
+          return expressionToAst(ctx.callExpr());
+        } else {
+          const operation = ctx.getChild(1).text === '+' ? '+' : '-';
+          return new AddExpression(operation, expressionToAst(ctx.addExpr()!), expressionToAst(ctx.callExpr()));
+        }
+      } else if (ctx instanceof CallExprContext) {
+        if (ctx.termExpr()) {
+          return expressionToAst(ctx.termExpr()!);
+        } else {
+          return new CallExpression(ctx.getChild(0).text, ctx.expr().map(expressionToAst));
+        }
+      } else if (ctx instanceof TermExprContext) {
+        if (ctx.parenExpr()) {
+          return expressionToAst(ctx.parenExpr()!);
+        } else {
+          const text = ctx.text;
+          if (text[0] >= '0' && text[0] <= '9') {
+            return new LiteralExpression(Number(text));
           } else {
-            return new MathExpression('-', expressionToAst(ctx.sum_()!), expressionToAst(ctx.term()));
+            return new VarReference(text);
           }
         }
-      } else if (ctx instanceof TermContext) {
-        const child = ctx.getChild(0);
-        if (
-          child instanceof Id_Context
-          || child instanceof IntegerContext
-          || child instanceof Paren_exprContext
-        ) {
-          return expressionToAst(child);
-        }
-      } else if (ctx instanceof IntegerContext) {
-        return new LiteralExpression(Number(ctx.text));
-      } else if (ctx instanceof Id_Context) {
-        return new VarReference(ctx.text);
       }
       throw new Error('Unknown expression: ' + ctx);
     }
 
-    this.statements = programToAst(programContext);
+    this.statements = programToAst(entryContext);
   }
 
   process<T>(func: ProcessFunc<T>, ctx?: T) {
-    this.statements.map(x => x.process(func, ctx));
+    this.statements.forEach(x => x.process(func, ctx));
   }
 }

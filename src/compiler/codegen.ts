@@ -1,4 +1,17 @@
-import { AssignExpression, Ast, Expression, LiteralExpression, MathExpression, VarReference, IfStatement, TestExpression, Statement, WhileStatement, FuncCallStatement } from "./ast";
+import {
+  AddExpression,
+  AssignExpression,
+  Ast,
+  CallExpression,
+  Expression,
+  IfStatement,
+  LiteralExpression,
+  NegateExpression,
+  RelationalExpression,
+  Statement,
+  VarReference,
+  WhileStatement,
+} from './ast';
 
 export class CodeGen {
   code: string[] = [];
@@ -18,19 +31,19 @@ export class CodeGen {
     if (wpos == 0) {
       this.code.push(`ldw ${destReg}, r6`); // Load stack value to destReg
     } else {
-      this.code.push('mov r5, r6');         // Load Base Stack Pointer to TEMPORARY POINTER
-      this.code.push(`sub r5, ${wpos}`);    // Adjust TEMPORARY POINTER
+      this.code.push('mov r5, r6'); // Load Base Stack Pointer to TEMPORARY POINTER
+      this.code.push(`sub r5, ${wpos}`); // Adjust TEMPORARY POINTER
       this.code.push(`ldw ${destReg}, r5`); // Load stack value to destReg
     }
   }
 
   genRegToStackMov(wpos: number, reg: string) {
     if (wpos == 0) {
-      this.code.push(`stw ${reg}, r6`);     // Save srcReg value on stack
+      this.code.push(`stw ${reg}, r6`); // Save srcReg value on stack
     } else {
-      this.code.push('mov r5, r6');         // Load Base Stack Pointer to TEMPORARY POINTER
-      this.code.push(`sub r5, ${wpos}`);    // Adjust TEMPORARY POINTER
-      this.code.push(`stw ${reg}, r5`);     // Save srcReg value on stack
+      this.code.push('mov r5, r6'); // Load Base Stack Pointer to TEMPORARY POINTER
+      this.code.push(`sub r5, ${wpos}`); // Adjust TEMPORARY POINTER
+      this.code.push(`stw ${reg}, r5`); // Save srcReg value on stack
     }
   }
 
@@ -57,6 +70,10 @@ export class CodeGen {
 
   genRegLessThanRegTest(reg1: string, reg2: string, dest: string) {
     this.code.push(`slt ${dest}, ${reg1}, ${reg2}`);
+  }
+
+  genRegNegate(reg: string) {
+    this.code.push(`neg ${reg}`);
   }
 
   genJmpIfRegIsNotZero(reg: string, symbol: string) {
@@ -87,14 +104,17 @@ export class CodeGen {
     this.genInit();
     const self = this;
 
-    type AllocableValue = ({
-      type: 'tmp',
-      num: number;
-    } | {
-      type: 'var';
-      varName: string;
-    }) & {
-      id: number,
+    type AllocableValue = (
+      | {
+          type: 'tmp';
+          num: number;
+        }
+      | {
+          type: 'var';
+          varName: string;
+        }
+    ) & {
+      id: number;
       changed: boolean;
       register?: string;
       stackPos?: number;
@@ -116,7 +136,7 @@ export class CodeGen {
 
       private allocStackPos(allocable: AllocableValue) {
         let stackPos = 0;
-        while(this.usedStackPoses.has(stackPos)) stackPos += 2;
+        while (this.usedStackPoses.has(stackPos)) stackPos += 2;
         this.usedStackPoses.add(stackPos);
         allocable.stackPos = stackPos;
         return stackPos;
@@ -138,7 +158,7 @@ export class CodeGen {
         return register;
       }
 
-      private loadOnRegister(id: number, loadFromStack=true) {
+      private loadOnRegister(id: number, loadFromStack = true) {
         const allocable = this.getAllocable(id);
         const register = this.freeRegister();
         if (allocable.stackPos != undefined && loadFromStack) {
@@ -171,7 +191,7 @@ export class CodeGen {
 
         // If isnt initialized, allocate some register
         if (!dstAllocable.register && dstAllocable.stackPos == undefined) this.loadOnRegister(dstId);
-        
+
         if (srcAllocable.register) {
           if (dstAllocable.register) {
             self.genRegToRegMov(srcAllocable.register, dstAllocable.register);
@@ -247,11 +267,8 @@ export class CodeGen {
     let nextWhileNum = 0;
 
     const genExpression = (expr: Expression, id: number) => {
-      if (expr instanceof MathExpression) {
-        if (
-          (expr.leftExpression instanceof MathExpression || expr.leftExpression instanceof VarReference)
-          && (expr.rightExpression instanceof MathExpression || expr.rightExpression instanceof VarReference)
-        ) {
+      if (expr instanceof AddExpression) {
+        if (!(expr.leftExpression instanceof LiteralExpression) && !(expr.rightExpression instanceof LiteralExpression)) {
           //this.genComment('Evaluating math/var + math/var start');
           genExpression(expr.leftExpression, id);
           const srcId = valueAllocator.getTmpId(nextTmpNum++);
@@ -262,25 +279,19 @@ export class CodeGen {
           valueAllocator.deallocateId(srcId);
           valueAllocator.informChanged(id);
           //this.genComment('Evaluated math/var + math/var end');
-        } else if (
-          (expr.leftExpression instanceof MathExpression || expr.leftExpression instanceof VarReference)
-          && expr.rightExpression instanceof LiteralExpression
-        ) {
+        } else if (!(expr.leftExpression instanceof LiteralExpression) && expr.rightExpression instanceof LiteralExpression) {
           //this.genComment('Evaluating math/var ' + expr.operation + ' ' + expr.rightExpression.value + ' math/var start');
           genExpression(expr.leftExpression, id);
           const dstReg = valueAllocator.ensureOnRegister(id);
           this.genRegLitMath(expr.operation, expr.rightExpression.value, dstReg);
           valueAllocator.informChanged(id);
           //this.genComment('Evaluated math/var ' + expr.operation + ' ' + expr.rightExpression.value + ' math/var end');
-        } else if (
-          expr.leftExpression instanceof LiteralExpression
-          && (expr.rightExpression instanceof MathExpression || expr.rightExpression instanceof VarReference)
-        ) {
+        } else if (expr.leftExpression instanceof LiteralExpression && !(expr.rightExpression instanceof LiteralExpression)) {
           //this.genComment('Evaluating ' + expr.leftExpression.value + ' ' + expr.operation + ' math/var start');
           genExpression(expr.rightExpression, id);
           if (expr.operation === '-') {
             const srcId = valueAllocator.getTmpId(nextTmpNum++);
-            valueAllocator.setLiteral(srcId, expr.leftExpression.value)
+            valueAllocator.setLiteral(srcId, expr.leftExpression.value);
             const dstReg = valueAllocator.ensureOnRegister(id);
             const srcReg = valueAllocator.ensureOnRegister(srcId);
             this.genRegToRegMath(expr.operation, srcReg, dstReg, dstReg);
@@ -303,14 +314,9 @@ export class CodeGen {
         } else {
           throw new Error('Unsupported codegen expression evaluation');
         }
-      } else if (expr instanceof TestExpression) {
-
-
-
-        if (
-          (expr.leftExpression instanceof MathExpression || expr.leftExpression instanceof VarReference)
-          && (expr.rightExpression instanceof MathExpression || expr.rightExpression instanceof VarReference)
-        ) {
+      } else if (expr instanceof RelationalExpression) {
+        // generate code based on expr.operation
+        if (!(expr.leftExpression instanceof LiteralExpression) && !(expr.rightExpression instanceof LiteralExpression)) {
           genExpression(expr.leftExpression, id);
           const srcId = valueAllocator.getTmpId(nextTmpNum++);
           genExpression(expr.rightExpression, srcId);
@@ -319,24 +325,18 @@ export class CodeGen {
           this.genRegLessThanRegTest(dstReg, srcReg, dstReg);
           valueAllocator.deallocateId(srcId);
           valueAllocator.informChanged(id);
-        } else if (
-          (expr.leftExpression instanceof MathExpression || expr.leftExpression instanceof VarReference)
-          && expr.rightExpression instanceof LiteralExpression
-        ) {
+        } else if (!(expr.leftExpression instanceof LiteralExpression) && expr.rightExpression instanceof LiteralExpression) {
           genExpression(expr.leftExpression, id);
           const srcId = valueAllocator.getTmpId(nextTmpNum++);
-          valueAllocator.setLiteral(srcId, expr.rightExpression.value)
+          valueAllocator.setLiteral(srcId, expr.rightExpression.value);
           const dstReg = valueAllocator.ensureOnRegister(id);
           const srcReg = valueAllocator.ensureOnRegister(srcId);
           this.genRegLessThanRegTest(dstReg, srcReg, dstReg);
           valueAllocator.informChanged(id);
-        } else if (
-          expr.leftExpression instanceof LiteralExpression
-          && (expr.rightExpression instanceof MathExpression || expr.rightExpression instanceof VarReference)
-        ) {
+        } else if (expr.leftExpression instanceof LiteralExpression && !(expr.rightExpression instanceof LiteralExpression)) {
           genExpression(expr.rightExpression, id);
           const srcId = valueAllocator.getTmpId(nextTmpNum++);
-          valueAllocator.setLiteral(srcId, expr.leftExpression.value)
+          valueAllocator.setLiteral(srcId, expr.leftExpression.value);
           const dstReg = valueAllocator.ensureOnRegister(id);
           const srcReg = valueAllocator.ensureOnRegister(srcId);
           this.genRegLessThanRegTest(srcReg, dstReg, dstReg);
@@ -347,16 +347,37 @@ export class CodeGen {
         } else {
           throw new Error('Unsupported codegen expression evaluation');
         }
-
-
-
+      } else if (expr instanceof CallExpression) {
+        const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+        if (expr.paramExpressions.length !== 1)
+          throw new Error('At this point, code gen doesnt support multiple params on call expression');
+        genExpression(expr.paramExpressions[0], tmpId);
+        const tmpReg = valueAllocator.ensureOnRegister(tmpId);
+        switch (expr.funcName) {
+          case 'printc':
+            this.genPrintChar(tmpReg);
+            break;
+          case 'printn':
+            this.genPrintNumber(tmpReg);
+            break;
+          default:
+            throw new Error('Function not found: ' + expr.funcName);
+        }
+      } else if (expr instanceof NegateExpression) {
+        if (expr.expression instanceof LiteralExpression) {
+          valueAllocator.setLiteral(id, -expr.expression.value);
+        } else {
+          genExpression(expr.expression, id);
+          const reg = valueAllocator.ensureOnRegister(id);
+          this.genRegNegate(reg);
+        }
       } else if (expr instanceof VarReference) {
         const srcId = valueAllocator.getVarId(expr.varName);
         valueAllocator.setValue(id, srcId);
       } else if (expr instanceof LiteralExpression) {
         valueAllocator.setLiteral(id, expr.value);
       }
-    }
+    };
 
     const genStatements = (statements: Statement[]) => {
       for (const statement of statements) {
@@ -365,6 +386,8 @@ export class CodeGen {
           const dstVar = statement.varRef.varName;
           const dstId = valueAllocator.getVarId(dstVar);
           genExpression(expr, dstId);
+        } else if (statement instanceof CallExpression) {
+          genExpression(statement, 0);
         } else if (statement instanceof IfStatement) {
           const ifNum = nextIfNum++;
           const tmpId = valueAllocator.getTmpId(nextTmpNum++);
@@ -395,20 +418,6 @@ export class CodeGen {
           this.genJmpIfRegIsNotZero(tmpReg, `while_start_${whileNum}`);
           this.genSymbol(`while_end_${whileNum}`);*/
           throw new Error('While statement has bugs...');
-        } else if (statement instanceof FuncCallStatement) {
-          const tmpId = valueAllocator.getTmpId(nextTmpNum++);
-          genExpression(statement.expression, tmpId);
-          const tmpReg = valueAllocator.ensureOnRegister(tmpId);
-          switch (statement.funcName) {
-            case 'printc':
-              this.genPrintChar(tmpReg);
-              break;
-            case 'printn':
-              this.genPrintNumber(tmpReg);
-              break;
-            default:
-              throw new Error('Function not found: ' + statement.funcName);
-          }
         }
       }
     };
