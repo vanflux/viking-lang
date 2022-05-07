@@ -1,29 +1,20 @@
 import { expect } from 'chai';
-import { simpleVariableAssignment } from '../../fixtures/c-programs/simple-variable-assignment';
 import { compileAll } from '../../fixtures/compiler';
 import { assembleAll } from '../../fixtures/assembler';
-import { complexVariableAssignment } from '../../fixtures/c-programs/complex-variable-assignment';
 import { simulateOutputingConsole } from '../../fixtures/simulator';
 import { printStatements } from '../../fixtures/c-programs/print-statements';
+import { complexExpressions } from '../../fixtures/c-programs/complex-expressions';
 
 describe('Assembler asm programs tests', () => {
   // All of these expected results are the programs
   // assembled by the official viking assembler
 
-  it('Compile simple variable assignment', async () => {
-    const code = simpleVariableAssignment();
+  it('Compile complex expressions', async () => {
+    const code = complexExpressions();
     const assembly = compileAll(code);
     const { rawObjectCode } = assembleAll(assembly);
     const output = await simulateOutputingConsole(rawObjectCode!);
-    expect(output).to.deep.eq({ numbers: [5], chars: [] });
-  });
-
-  it('Compile complex variable assignment', async () => {
-    const code = complexVariableAssignment();
-    const assembly = compileAll(code);
-    const { rawObjectCode } = assembleAll(assembly);
-    const output = await simulateOutputingConsole(rawObjectCode!);
-    expect(output).to.deep.eq({ numbers: [-182], chars: [] });
+    expect(output).to.deep.eq({ numbers: [102, 103, 92, -21, -1, -98, -99, -88, 25, 8, -627, -628, -620], chars: [] });
   });
 
   it('Compile print statements', async () => {

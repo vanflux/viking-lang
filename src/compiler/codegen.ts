@@ -4,6 +4,7 @@ import {
   Ast,
   CallExpression,
   Expression,
+  ExpressionStatement,
   IfStatement,
   LiteralExpression,
   NegateExpression,
@@ -142,12 +143,12 @@ export class CodeGen {
         return stackPos;
       }
 
-      private freeRegister() {
+      private freeRegister(blacklist: string[]) {
         if (this.availableRegisters.length > 0) return this.availableRegisters.shift()!;
         // TODO: deallocate the less used...
         // needs some modifications on set value, when setting -> we need
         // blacklist the two registers involved on set from deallocation
-        const oldAllocable = this.allocables.find(x => x.register);
+        const oldAllocable = this.allocables.find(x => x.register && !blacklist.includes(x.register));
         if (!oldAllocable) throw new Error('Compiler tried to allocate too many registers');
         const register = oldAllocable.register!;
         if (oldAllocable.changed) {
@@ -158,9 +159,9 @@ export class CodeGen {
         return register;
       }
 
-      private loadOnRegister(id: number, loadFromStack = true) {
+      private loadOnRegister(id: number, blacklist: string[]=[], loadFromStack = true) {
         const allocable = this.getAllocable(id);
-        const register = this.freeRegister();
+        const register = this.freeRegister(blacklist);
         if (allocable.stackPos != undefined && loadFromStack) {
           self.genStackToRegMov(allocable.stackPos, register);
         }
@@ -168,24 +169,26 @@ export class CodeGen {
         return register;
       }
 
-      ensureOnRegister(id: number) {
+      ensureOnRegister(id: number, blacklist: string[]=[]) {
         const allocable = this.getAllocable(id);
         if (allocable.register) return allocable.register;
-        return this.loadOnRegister(id, true);
+        return this.loadOnRegister(id, blacklist, true);
       }
 
-      setLiteral(id: number, literal: number) {
+      setLiteral(id: number, literal: number, blacklist: string[]=[]) {
         const allocable = this.getAllocable(id);
         if (allocable.register) {
           self.genLitToRegMov(literal, allocable.register);
         } else {
-          const register = this.loadOnRegister(id, false);
+          const register = this.loadOnRegister(id, blacklist, false);
           self.genLitToRegMov(literal, register);
           allocable.changed = true;
         }
       }
 
       setValue(dstId: number, srcId: number) {
+        if (dstId === srcId) return;
+
         const dstAllocable = this.getAllocable(dstId);
         const srcAllocable = this.getAllocable(srcId);
 
@@ -266,55 +269,107 @@ export class CodeGen {
     let nextIfNum = 0;
     let nextWhileNum = 0;
 
-    const genExpression = (expr: Expression, id: number) => {
+    const genExpression = (expr: Expression, outId?: number): {type: 'literal' | 'non-literal', value: number, tmp: boolean} => {
       if (expr instanceof AddExpression) {
-        if (!(expr.leftExpression instanceof LiteralExpression) && !(expr.rightExpression instanceof LiteralExpression)) {
-          //this.genComment('Evaluating math/var + math/var start');
-          genExpression(expr.leftExpression, id);
-          const srcId = valueAllocator.getTmpId(nextTmpNum++);
-          genExpression(expr.rightExpression, srcId);
-          const dstReg = valueAllocator.ensureOnRegister(id);
-          const srcReg = valueAllocator.ensureOnRegister(srcId);
-          this.genRegToRegMath(expr.operation, dstReg, srcReg, dstReg);
-          valueAllocator.deallocateId(srcId);
-          valueAllocator.informChanged(id);
-          //this.genComment('Evaluated math/var + math/var end');
-        } else if (!(expr.leftExpression instanceof LiteralExpression) && expr.rightExpression instanceof LiteralExpression) {
-          //this.genComment('Evaluating math/var ' + expr.operation + ' ' + expr.rightExpression.value + ' math/var start');
-          genExpression(expr.leftExpression, id);
-          const dstReg = valueAllocator.ensureOnRegister(id);
-          this.genRegLitMath(expr.operation, expr.rightExpression.value, dstReg);
-          valueAllocator.informChanged(id);
-          //this.genComment('Evaluated math/var ' + expr.operation + ' ' + expr.rightExpression.value + ' math/var end');
-        } else if (expr.leftExpression instanceof LiteralExpression && !(expr.rightExpression instanceof LiteralExpression)) {
-          //this.genComment('Evaluating ' + expr.leftExpression.value + ' ' + expr.operation + ' math/var start');
-          genExpression(expr.rightExpression, id);
-          if (expr.operation === '-') {
-            const srcId = valueAllocator.getTmpId(nextTmpNum++);
-            valueAllocator.setLiteral(srcId, expr.leftExpression.value);
-            const dstReg = valueAllocator.ensureOnRegister(id);
-            const srcReg = valueAllocator.ensureOnRegister(srcId);
-            this.genRegToRegMath(expr.operation, srcReg, dstReg, dstReg);
-            valueAllocator.deallocateId(srcId);
-          } else {
-            const dstReg = valueAllocator.ensureOnRegister(id);
-            this.genRegLitMath(expr.operation, expr.leftExpression.value, dstReg);
-          }
-          valueAllocator.informChanged(id);
-          //this.genComment('Evaluated ' + expr.leftExpression.value + ' ' + expr.operation + ' math/var end');
-        } else if (expr.leftExpression instanceof LiteralExpression && expr.rightExpression instanceof LiteralExpression) {
-          //this.genComment('Evaluating ' + expr.leftExpression.value + ' ' + expr.operation + ' ' + expr.rightExpression.value);
+        const {type: type1, value: value1, tmp: tmp1} = genExpression(expr.leftExpression, outId);
+        let type2, value2, tmp2, tmpAux: number | undefined;
+        if (type1 == 'non-literal' && !tmp1) {
+          tmpAux = valueAllocator.getTmpId(nextTmpNum++);
+          ({type: type2, value: value2, tmp: tmp2} = genExpression(expr.rightExpression, tmpAux));
+          if (type2 == 'literal') valueAllocator.deallocateId(tmpAux);
+        } else {
+          ({type: type2, value: value2, tmp: tmp2} = genExpression(expr.rightExpression, outId));
+        }
+        
+        if (type1 === 'literal' && type2 === 'literal') {
           if (expr.operation === '+') {
-            valueAllocator.setLiteral(id, expr.leftExpression.value + expr.rightExpression.value);
-          } else if (expr.operation === '-') {
-            valueAllocator.setLiteral(id, expr.leftExpression.value - expr.rightExpression.value);
+            return { type: 'literal', value: value1 + value2, tmp: false };
           } else {
-            throw new Error('Unsupported literal literal expression evaluation');
+            return { type: 'literal', value: value1 - value2, tmp: false };
+          }
+        } else if (type1 === 'literal' && type2 === 'non-literal') {
+          if (expr.operation === '-') {
+            if (outId != undefined) {
+              const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+              valueAllocator.setLiteral(tmpId, value1);
+              const regTmp = valueAllocator.ensureOnRegister(tmpId);
+              const regOut = valueAllocator.ensureOnRegister(outId, [regTmp]);
+              const reg2 = valueAllocator.ensureOnRegister(value2, [regTmp, regOut]);
+              this.genRegToRegMath(expr.operation, regTmp, reg2, regOut);
+              valueAllocator.informChanged(outId);
+              if (tmp2) valueAllocator.deallocateId(value2);
+              valueAllocator.deallocateId(tmpId);
+              return { type: 'non-literal', value: outId, tmp: false };
+            } else {
+              const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+              valueAllocator.setLiteral(tmpId, value1);
+              const regTmp = valueAllocator.ensureOnRegister(tmpId);
+              const reg2 = valueAllocator.ensureOnRegister(value2, [regTmp]);
+              this.genRegToRegMath(expr.operation, regTmp, reg2, regTmp);
+              valueAllocator.informChanged(tmpId);
+              if (tmp2) valueAllocator.deallocateId(value2);
+              return { type: 'non-literal', value: tmpId, tmp: true };
+            }
+          } else {
+            if (outId != undefined) {
+              const regOut = valueAllocator.ensureOnRegister(outId);
+              valueAllocator.setValue(outId, value2);
+              this.genRegLitMath(expr.operation, value1, regOut);
+              valueAllocator.informChanged(outId);
+              if (tmp2) valueAllocator.deallocateId(value2);
+              return { type: 'non-literal', value: outId, tmp: false };
+            } else {
+              const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+              valueAllocator.setValue(tmpId, value2);
+              const regTmp = valueAllocator.ensureOnRegister(tmpId);
+              this.genRegLitMath(expr.operation, value1, regTmp);
+              valueAllocator.informChanged(tmpId);
+              if (tmp2) valueAllocator.deallocateId(value2);
+              return { type: 'non-literal', value: tmpId, tmp: true };
+            }
+          }
+        } else if (type1 === 'non-literal' && type2 === 'literal') {
+          if (outId != undefined) {
+            const regOut = valueAllocator.ensureOnRegister(outId);
+            valueAllocator.setValue(outId, value1);
+            this.genRegLitMath(expr.operation, value2, regOut);
+            valueAllocator.informChanged(outId);
+            if (tmp1) valueAllocator.deallocateId(value1);
+            return { type: 'non-literal', value: outId, tmp: false };
+          } else {
+            const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+            valueAllocator.setValue(tmpId, value1);
+            const regTmp = valueAllocator.ensureOnRegister(tmpId);
+            this.genRegLitMath(expr.operation, value2, regTmp);
+            valueAllocator.informChanged(tmpId);
+            if (tmp1) valueAllocator.deallocateId(value1);
+            return { type: 'non-literal', value: tmpId, tmp: true };
           }
         } else {
-          throw new Error('Unsupported codegen expression evaluation');
+          if (outId != undefined) {
+            const reg1 = valueAllocator.ensureOnRegister(value1);
+            const reg2 = valueAllocator.ensureOnRegister(value2, [reg1]);
+            const regOut = valueAllocator.ensureOnRegister(outId, [reg1, reg2]);
+            this.genRegToRegMath(expr.operation, reg1, reg2, regOut);
+            valueAllocator.informChanged(outId);
+            if (tmp1) valueAllocator.deallocateId(value1);
+            if (tmp2) valueAllocator.deallocateId(value2);
+            if (tmpAux != undefined) valueAllocator.deallocateId(tmpAux);
+            return { type: 'non-literal', value: outId, tmp: false };
+          } else {
+            const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+            const regTmp = valueAllocator.ensureOnRegister(tmpId);
+            const reg1 = valueAllocator.ensureOnRegister(value1, [regTmp]);
+            const reg2 = valueAllocator.ensureOnRegister(value2, [regTmp, reg1]);
+            this.genRegToRegMath(expr.operation, reg1, reg2, regTmp);
+            valueAllocator.informChanged(tmpId);
+            if (tmp1) valueAllocator.deallocateId(value1);
+            if (tmp2) valueAllocator.deallocateId(value2);
+            if (tmpAux != undefined) valueAllocator.deallocateId(tmpAux);
+            return { type: 'non-literal', value: tmpId!, tmp: true };
+          }
         }
-      } else if (expr instanceof RelationalExpression) {
+      } /*else if (expr instanceof RelationalExpression) {
         // generate code based on expr.operation
         if (!(expr.leftExpression instanceof LiteralExpression) && !(expr.rightExpression instanceof LiteralExpression)) {
           genExpression(expr.leftExpression, id);
@@ -347,12 +402,28 @@ export class CodeGen {
         } else {
           throw new Error('Unsupported codegen expression evaluation');
         }
+      }*/ else if (expr instanceof AssignExpression) {
+        const dstVar = expr.varRef.varName;
+        const dstId = valueAllocator.getVarId(dstVar);
+        const {type, value, tmp} = genExpression(expr.expression, dstId);
+        if (type === 'literal') {
+          valueAllocator.setLiteral(dstId, value);
+        }
+        if (tmp) valueAllocator.deallocateId(value);
+        return { type: 'literal', value: 0, tmp: false };
       } else if (expr instanceof CallExpression) {
-        const tmpId = valueAllocator.getTmpId(nextTmpNum++);
         if (expr.paramExpressions.length !== 1)
           throw new Error('At this point, code gen doesnt support multiple params on call expression');
-        genExpression(expr.paramExpressions[0], tmpId);
-        const tmpReg = valueAllocator.ensureOnRegister(tmpId);
+        const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+        const {type, value, tmp} = genExpression(expr.paramExpressions[0], tmpId);
+
+        let tmpReg;
+        if (type === 'literal') {
+          valueAllocator.setLiteral(tmpId, value);
+          tmpReg = valueAllocator.ensureOnRegister(tmpId);
+        } else {
+          tmpReg = valueAllocator.ensureOnRegister(value);
+        }
         switch (expr.funcName) {
           case 'printc':
             this.genPrintChar(tmpReg);
@@ -363,33 +434,45 @@ export class CodeGen {
           default:
             throw new Error('Function not found: ' + expr.funcName);
         }
+        valueAllocator.deallocateId(tmpId);
+        if (tmp) valueAllocator.deallocateId(value);
+        return { type: 'literal', value: 0, tmp: false };
       } else if (expr instanceof NegateExpression) {
         if (expr.expression instanceof LiteralExpression) {
-          valueAllocator.setLiteral(id, -expr.expression.value);
+          return { type: 'literal', value: -expr.expression.value, tmp: false };
         } else {
-          genExpression(expr.expression, id);
-          const reg = valueAllocator.ensureOnRegister(id);
-          this.genRegNegate(reg);
+          const {type, value} = genExpression(expr.expression, outId);
+          if (type === 'literal') {
+            return { type: 'literal', value: -value, tmp: false };
+          } else {
+            if (outId != undefined) {
+              const reg = valueAllocator.ensureOnRegister(outId);
+              this.genRegNegate(reg);
+              return { type: 'non-literal', value: outId, tmp: false };
+            } else {
+              const tmpId = valueAllocator.getTmpId(nextTmpNum++);
+              valueAllocator.setValue(tmpId, value);
+              const reg = valueAllocator.ensureOnRegister(tmpId);
+              this.genRegNegate(reg);
+              return { type: 'non-literal', value: tmpId, tmp: true };
+            }
+          }
         }
       } else if (expr instanceof VarReference) {
-        const srcId = valueAllocator.getVarId(expr.varName);
-        valueAllocator.setValue(id, srcId);
+        return { type: 'non-literal', value: valueAllocator.getVarId(expr.varName), tmp: false };
       } else if (expr instanceof LiteralExpression) {
-        valueAllocator.setLiteral(id, expr.value);
+        return { type: 'literal', value: expr.value, tmp: false };
       }
+      throw new Error('Unsupported expression');
     };
 
     const genStatements = (statements: Statement[]) => {
       for (const statement of statements) {
-        if (statement instanceof AssignExpression) {
-          const expr = statement.expression;
-          const dstVar = statement.varRef.varName;
-          const dstId = valueAllocator.getVarId(dstVar);
-          genExpression(expr, dstId);
-        } else if (statement instanceof CallExpression) {
-          genExpression(statement, 0);
+        if (statement instanceof ExpressionStatement) {
+          const { value, tmp } = genExpression(statement.expression);
+          if (tmp) valueAllocator.deallocateId(value);
         } else if (statement instanceof IfStatement) {
-          const ifNum = nextIfNum++;
+          /*const ifNum = nextIfNum++;
           const tmpId = valueAllocator.getTmpId(nextTmpNum++);
           genExpression(statement.conditionExpression, tmpId);
           const tmpReg = valueAllocator.ensureOnRegister(tmpId);
@@ -404,7 +487,8 @@ export class CodeGen {
             this.genSymbol(`if_${ifNum}`);
             genStatements(statement.ifStatements);
           }
-          this.genSymbol(`if_end_${ifNum}`);
+          this.genSymbol(`if_end_${ifNum}`);*/
+          throw new Error('If statement has bugs...');
         } else if (statement instanceof WhileStatement) {
           /*const whileNum = nextWhileNum++;
           if (!statement.executeFirst) this.genJmp(`while_cond_${whileNum}`);

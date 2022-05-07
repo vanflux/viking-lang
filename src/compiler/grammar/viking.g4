@@ -53,13 +53,8 @@ expr
    ;
 
 assignExpr
-   : negExpr
-   | ID '=' expr
-   ;
-
-negExpr
    : relExpr
-   | '-' relExpr
+   | ID '=' expr
    ;
 
 relExpr
@@ -68,8 +63,13 @@ relExpr
    ;
 
 addExpr
+   : negExpr
+   | addExpr ('+'|'-') negExpr
+   ;
+
+negExpr
    : callExpr
-   | addExpr ('+'|'-') callExpr
+   | '-' callExpr
    ;
 
 callExpr
@@ -84,7 +84,7 @@ termExpr
    ;
 
 ID
-   : [a-zA-Z] +
+   : [a-zA-Z] + [0-9] *
    ;
 
 DIGITS

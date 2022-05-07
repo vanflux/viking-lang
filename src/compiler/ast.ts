@@ -14,6 +14,7 @@ import {
 type ProcessFunc<T = void> = (node: Node, ctx?: T) => T;
 
 export interface Node {
+  text: string;
   process<T>(func: ProcessFunc<T>, ctx?: T): void;
 }
 export interface Expression extends Node {}
@@ -22,21 +23,21 @@ export interface Statement extends Node {}
 // Expressions
 
 export class VarReference implements Expression {
-  constructor(public varName: string) {}
+  constructor(public text: string, public varName: string) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     func(this, ctx);
   }
 }
 
 export class LiteralExpression implements Expression {
-  constructor(public value: number) {}
+  constructor(public text: string, public value: number) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     func(this, ctx);
   }
 }
 
 export class NegateExpression implements Expression {
-  constructor(public expression: Expression) {}
+  constructor(public text: string, public expression: Expression) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.expression.process(func, ctx);
@@ -44,7 +45,7 @@ export class NegateExpression implements Expression {
 }
 
 export class AssignExpression implements Expression {
-  constructor(public varRef: VarReference, public expression: Expression) {}
+  constructor(public text: string, public varRef: VarReference, public expression: Expression) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.varRef.process(func, ctx);
@@ -53,7 +54,7 @@ export class AssignExpression implements Expression {
 }
 
 export class RelationalExpression implements Expression {
-  constructor(public operation: '<' | '>', public leftExpression: Expression, public rightExpression: Expression) {}
+  constructor(public text: string, public operation: '<' | '>', public leftExpression: Expression, public rightExpression: Expression) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.leftExpression.process(func, ctx);
@@ -62,7 +63,7 @@ export class RelationalExpression implements Expression {
 }
 
 export class AddExpression implements Expression {
-  constructor(public operation: '+' | '-', public leftExpression: Expression, public rightExpression: Expression) {}
+  constructor(public text: string, public operation: '+' | '-', public leftExpression: Expression, public rightExpression: Expression) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.leftExpression.process(func, ctx);
@@ -71,7 +72,7 @@ export class AddExpression implements Expression {
 }
 
 export class CallExpression implements Expression {
-  constructor(public funcName: string, public paramExpressions: Expression[]) {}
+  constructor(public text: string, public funcName: string, public paramExpressions: Expression[]) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.paramExpressions.forEach(x => x.process(func, ctx));
@@ -81,7 +82,7 @@ export class CallExpression implements Expression {
 // Statements
 
 export class IfStatement implements Statement {
-  constructor(public conditionExpression: Expression, public ifStatements: Statement[], public elseStatements: Statement[]) {}
+  constructor(public text: string, public conditionExpression: Expression, public ifStatements: Statement[], public elseStatements: Statement[]) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.conditionExpression.process(func, ctx);
@@ -91,7 +92,7 @@ export class IfStatement implements Statement {
 }
 
 export class WhileStatement implements Statement {
-  constructor(public conditionExpression: Expression, public statements: Statement[]) {}
+  constructor(public text: string, public conditionExpression: Expression, public statements: Statement[]) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.conditionExpression.process(func, ctx);
@@ -100,7 +101,7 @@ export class WhileStatement implements Statement {
 }
 
 export class ExpressionStatement implements Statement {
-  constructor(public expression: Expression) {}
+  constructor(public text: string, public expression: Expression) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.expression.process(func, ctx);
@@ -125,15 +126,15 @@ export class Ast {
         const conditionExpression = expressionToAst(ctx.parenExpr()!);
         const ifStatements = statementToAst(ctx.stat()[0]);
         const elseStatements = child4?.text === 'else' ? statementToAst(ctx.stat()[1]) : [];
-        statements.push(new IfStatement(conditionExpression, ifStatements, elseStatements));
+        statements.push(new IfStatement(ctx.text, conditionExpression, ifStatements, elseStatements));
       } else if (child1.text === 'while') {
         const conditionExpression = expressionToAst(ctx.parenExpr()!);
         const bodyStatements = statementToAst(ctx.stat()[0]);
-        statements.push(new WhileStatement(conditionExpression, bodyStatements));
+        statements.push(new WhileStatement(ctx.text,conditionExpression, bodyStatements));
       } else if (child1.text === '{') {
         statements.push(...ctx.stat().flatMap(statementToAst));
       } else if (child1 instanceof ExprContext) {
-        statements.push(expressionToAst(child1));
+        statements.push(new ExpressionStatement(ctx.text, expressionToAst(child1)));
       } else {
         throw new Error('Unhandled statement on ast generation');
       }
@@ -161,35 +162,35 @@ export class Ast {
         }
       } else if (ctx instanceof NegExprContext) {
         if (ctx.getChild(0).text !== '-') {
-          return expressionToAst(ctx.relExpr());
+          return expressionToAst(ctx.callExpr());
         } else {
-          return new NegateExpression(expressionToAst(ctx.relExpr()));
+          return new NegateExpression(ctx.text,expressionToAst(ctx.callExpr()));
         }
       } else if (ctx instanceof AssignExprContext) {
-        if (ctx.negExpr()) {
-          return expressionToAst(ctx.negExpr()!);
+        if (ctx.relExpr()) {
+          return expressionToAst(ctx.relExpr()!);
         } else {
-          return new AssignExpression(new VarReference(ctx.getChild(0).text), expressionToAst(ctx.expr()!));
+          return new AssignExpression(ctx.text, new VarReference(ctx.getChild(0).text, ctx.getChild(0).text), expressionToAst(ctx.expr()!));
         }
       } else if (ctx instanceof RelExprContext) {
         if (!ctx.relExpr()) {
           return expressionToAst(ctx.addExpr());
         } else {
           const operation = ctx.getChild(1).text === '<' ? '<' : '>';
-          return new RelationalExpression(operation, expressionToAst(ctx.relExpr()!), expressionToAst(ctx.addExpr()));
+          return new RelationalExpression(ctx.text,operation, expressionToAst(ctx.relExpr()!), expressionToAst(ctx.addExpr()));
         }
       } else if (ctx instanceof AddExprContext) {
         if (!ctx.addExpr()) {
-          return expressionToAst(ctx.callExpr());
+          return expressionToAst(ctx.negExpr());
         } else {
           const operation = ctx.getChild(1).text === '+' ? '+' : '-';
-          return new AddExpression(operation, expressionToAst(ctx.addExpr()!), expressionToAst(ctx.callExpr()));
+          return new AddExpression(ctx.text, operation, expressionToAst(ctx.addExpr()!), expressionToAst(ctx.negExpr()));
         }
       } else if (ctx instanceof CallExprContext) {
         if (ctx.termExpr()) {
           return expressionToAst(ctx.termExpr()!);
         } else {
-          return new CallExpression(ctx.getChild(0).text, ctx.expr().map(expressionToAst));
+          return new CallExpression(ctx.text, ctx.getChild(0).text, ctx.expr().map(expressionToAst));
         }
       } else if (ctx instanceof TermExprContext) {
         if (ctx.parenExpr()) {
@@ -197,9 +198,9 @@ export class Ast {
         } else {
           const text = ctx.text;
           if (text[0] >= '0' && text[0] <= '9') {
-            return new LiteralExpression(Number(text));
+            return new LiteralExpression(text, Number(text));
           } else {
-            return new VarReference(text);
+            return new VarReference(text, text);
           }
         }
       }

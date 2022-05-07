@@ -109,19 +109,14 @@ export async function main() {
   }
   `;*/
 
-  /*const code = `
+  const code = `
   printc(84);
   printc(69);
   printc(83);
   printc(84);
   printn(1);
-  printn(-1);
-  `;*/
-
-  const code = `
-  a = 1;
-  b = - (a + a + a);
-  printn(b);
+  a = 4;
+  printn(-(-(-(1+a))));
   `;
 
   const compiler = new Compiler();
