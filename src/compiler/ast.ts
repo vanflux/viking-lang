@@ -82,7 +82,12 @@ export class CallExpression implements Expression {
 // Statements
 
 export class IfStatement implements Statement {
-  constructor(public text: string, public conditionExpression: Expression, public ifStatements: Statement[], public elseStatements: Statement[]) {}
+  constructor(
+    public text: string,
+    public conditionExpression: Expression,
+    public ifStatements: Statement[],
+    public elseStatements: Statement[]
+  ) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.conditionExpression.process(func, ctx);
@@ -130,7 +135,7 @@ export class Ast {
       } else if (child1.text === 'while') {
         const conditionExpression = expressionToAst(ctx.parenExpr()!);
         const bodyStatements = statementToAst(ctx.stat()[0]);
-        statements.push(new WhileStatement(ctx.text,conditionExpression, bodyStatements));
+        statements.push(new WhileStatement(ctx.text, conditionExpression, bodyStatements));
       } else if (child1.text === '{') {
         statements.push(...ctx.stat().flatMap(statementToAst));
       } else if (child1 instanceof ExprContext) {
@@ -164,7 +169,7 @@ export class Ast {
         if (ctx.getChild(0).text !== '-') {
           return expressionToAst(ctx.callExpr());
         } else {
-          return new NegateExpression(ctx.text,expressionToAst(ctx.callExpr()));
+          return new NegateExpression(ctx.text, expressionToAst(ctx.callExpr()));
         }
       } else if (ctx instanceof AssignExprContext) {
         if (ctx.relExpr()) {
@@ -177,7 +182,7 @@ export class Ast {
           return expressionToAst(ctx.addExpr());
         } else {
           const operation = ctx.getChild(1).text === '<' ? '<' : '>';
-          return new RelationalExpression(ctx.text,operation, expressionToAst(ctx.relExpr()!), expressionToAst(ctx.addExpr()));
+          return new RelationalExpression(ctx.text, operation, expressionToAst(ctx.relExpr()!), expressionToAst(ctx.addExpr()));
         }
       } else if (ctx instanceof AddExprContext) {
         if (!ctx.addExpr()) {

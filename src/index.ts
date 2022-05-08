@@ -9,6 +9,8 @@ import { RegisterBank } from './simulator/registerBank';
 import { Simulation } from './simulator/simulation';
 import { getAllPseudos } from './assembler/pseudos';
 import { Compiler } from './compiler/compiler';
+import { ValueAllocator } from './compiler/code-gen/value-allocator';
+import { Generator } from './compiler/code-gen/generator';
 
 export async function main() {
   const start = Date.now();
@@ -109,14 +111,43 @@ export async function main() {
   }
   `;*/
 
+  /*const gen = new Generator();
+  const valueAllocator = new ValueAllocator(gen);
+  const id1 = valueAllocator.allocateId();
+  const id2 = valueAllocator.allocateId();
+  const id3 = valueAllocator.allocateId();
+  const id4 = valueAllocator.allocateId();
+  const id5 = valueAllocator.allocateId();
+  valueAllocator.setLiteral(id1, 1);
+  valueAllocator.ensureOnRegister(id1, true);
+  valueAllocator.setValue(id1, id2);
+  valueAllocator.setValue(id2, id3);
+  valueAllocator.setValue(id3, id4);
+  valueAllocator.setValue(id4, id5);
+  console.log(valueAllocator);*/
+
   const code = `
-  printc(84);
-  printc(69);
-  printc(83);
-  printc(84);
-  printn(1);
-  a = 4;
-  printn(-(-(-(1+a))));
+  a = 2;
+  b = 5;
+  c = 90;
+  d = -23;
+  e = -777;
+
+  printn(a + 100);
+  printn(101 + a);
+  printn(a + c);
+  printn(a + d);
+
+  printn(1 - a);
+  printn(a - 100);
+  printn(-101 + a);
+  printn(a - c);
+  printn(a - d);
+
+  x1 = (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d)));
+  x2 = 1 - (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d)));
+  
+  printn(x1);
   `;
 
   const compiler = new Compiler();
