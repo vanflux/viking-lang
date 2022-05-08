@@ -127,19 +127,21 @@ export async function main() {
   console.log(valueAllocator);*/
 
   const code = `
+  a = 2;
   b = 5;
-  f = 6;
-  g = 4;
+  c = 90;
+  d = -23;
+  e = -777;
 
-  printn(b < b);
-  printn(b < f);
-  printn(b < g);
-  printn(b < 5);
-  printn(b < 6);
-  printn(b < 4);
-  printn(5 < b);
-  printn(5 < f);
-  printn(5 < g);
+  x1 = (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d)));
+  x2 = 1 - (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d)));
+  x3 = - (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d)));
+  x4 = (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d))) - (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d)));
+  
+  printn(x1);
+  printn(x2);
+  printn(x3);
+  printn(x4);
   `;
 
   const compiler = new Compiler();

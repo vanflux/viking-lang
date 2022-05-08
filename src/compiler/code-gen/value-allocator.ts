@@ -91,7 +91,7 @@ export class ValueAllocator {
    * Deallocate register of the allocable if has an allocated register AND save to stack if save == true
    * @param id
    */
-  private deallocRegister(id: number, save = true) {
+  deallocRegister(id: number, save = true) {
     const allocable = this.getAllocable(id);
     if (!allocable.register) return;
     if (allocable.changed && save) {
@@ -226,5 +226,14 @@ export class ValueAllocator {
     this.deallocStackPos(id);
     this.deallocRegister(id, false);
     this.allocables.splice(this.allocables.findIndex(x => x.id === id), 1);
+  }
+
+  fork() {
+    const allocator = new ValueAllocator(this.gen);
+    allocator.allocables = this.allocables.map(x => ({...x}));
+    allocator.usedStackPoses = new Set(this.usedStackPoses);
+    allocator.availableRegisters = [...this.availableRegisters];
+    allocator.nextId = this.nextId;
+    return allocator;
   }
 }
