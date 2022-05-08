@@ -59,14 +59,14 @@ export class ValueAllocator {
     const allocable = this.getAllocable(id);
     if (allocable.register) return;
 
-    // TODO: deallocate the less used...
-    // needs some modifications on set value, when setting -> we need
-    // blacklist the two registers involved on set from deallocation
     let register: string;
     if (this.availableRegisters.length > 0) {
       register = this.availableRegisters.shift()!;
     } else {
-      const oldAllocable = this.allocables.find(x => x.register && !blacklist.includes(x.register));
+      // TODO: add rule to deallocate the less used
+      const usableAllocables = this.allocables.filter(x => x.register && !blacklist.includes(x.register));
+      const oldAllocable = usableAllocables.find(x => !x.changed) || usableAllocables[0];
+      
       if (!oldAllocable) throw new Error('No allocable for next register, compiler register allocation bug');
       if (!oldAllocable.register) throw new Error('Next register allocable has no register, compiler register allocation bug');
       register = oldAllocable.register;

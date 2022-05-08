@@ -2,6 +2,7 @@ import {
   AddExpression,
   AssignExpression,
   Ast,
+  BinaryExpression,
   CallExpression,
   Expression,
   ExpressionStatement,
@@ -31,25 +32,25 @@ export class CodeGen {
       varIdMap.get(varName) !== undefined ? varIdMap.get(varName)! : varIdMap.set(varName, valueAllocator.allocateId()).get(varName)!;
 
     const genExpression = (expr: Expression): number => {
-      if (expr instanceof AddExpression) {
+      if (expr instanceof BinaryExpression) {
         if (!(expr.leftExpression instanceof LiteralExpression) && expr.rightExpression instanceof LiteralExpression) {
           const id = genExpression(expr.leftExpression);
           const reg = valueAllocator.ensureOnRegister(id);
-          this.gen.genRegLitMath(expr.operation, expr.rightExpression.value, reg);
+          this.gen.genRegLitComputation(expr.operation, expr.rightExpression.value, reg);
           return id;
         } else if (expr.leftExpression instanceof LiteralExpression && !(expr.rightExpression instanceof LiteralExpression)) {
-          if (expr.operation === '-') {
+          if (expr.operation === '-' || expr.operation === '<' || expr.operation === '>') {
             const id1 = genExpression(expr.leftExpression);
             const id2 = genExpression(expr.rightExpression);
             const srcReg = valueAllocator.ensureOnRegister(id1);
             const dstReg = valueAllocator.ensureOnRegister(id2, true, [srcReg]);
             valueAllocator.deallocId(id1);
-            this.gen.genRegToRegMath(expr.operation, srcReg, dstReg, dstReg);
+            this.gen.genRegToRegComputation(expr.operation, srcReg, dstReg, dstReg);
             return id2;
           } else {
             const id2 = genExpression(expr.rightExpression);
             const dstReg = valueAllocator.ensureOnRegister(id2);
-            this.gen.genRegLitMath(expr.operation, expr.leftExpression.value, dstReg);
+            this.gen.genRegLitComputation(expr.operation, expr.leftExpression.value, dstReg);
             return id2;
           }
         } else if (expr.leftExpression instanceof LiteralExpression && expr.rightExpression instanceof LiteralExpression) {
@@ -61,8 +62,14 @@ export class CodeGen {
             case '-':
               valueAllocator.setLiteral(id, expr.leftExpression.value - expr.rightExpression.value);
               break;
+            case '<':
+              valueAllocator.setLiteral(id, expr.leftExpression.value < expr.rightExpression.value ? 1 : 0);
+              break;
+            case '>':
+              valueAllocator.setLiteral(id, expr.leftExpression.value > expr.rightExpression.value ? 1 : 0);
+              break;
             default:
-              throw new Error('Unsupported add expression operator');
+              throw new Error('Unsupported computation expression operator');
           }
           return id;
         } else {
@@ -71,44 +78,10 @@ export class CodeGen {
           const srcReg = valueAllocator.ensureOnRegister(id1);
           const dstReg = valueAllocator.ensureOnRegister(id2, true, [srcReg]);
           valueAllocator.deallocId(id1);
-          this.gen.genRegToRegMath(expr.operation, srcReg, dstReg, dstReg);
+          this.gen.genRegToRegComputation(expr.operation, srcReg, dstReg, dstReg);
           return id2;
         }
-      }
-      /*else if (expr instanceof RelationalExpression) {
-        // generate code based on expr.operation
-        if (!(expr.leftExpression instanceof LiteralExpression) && !(expr.rightExpression instanceof LiteralExpression)) {
-          genExpression(expr.leftExpression, id);
-          const srcId = valueAllocator.getTmpId(nextTmpNum++);
-          genExpression(expr.rightExpression, srcId);
-          const dstReg = valueAllocator.ensureOnRegister(id);
-          const srcReg = valueAllocator.ensureOnRegister(srcId);
-          this.genRegLessThanRegTest(dstReg, srcReg, dstReg);
-          valueAllocator.deallocateId(srcId);
-          valueAllocator.informChanged(id);
-        } else if (!(expr.leftExpression instanceof LiteralExpression) && expr.rightExpression instanceof LiteralExpression) {
-          genExpression(expr.leftExpression, id);
-          const srcId = valueAllocator.getTmpId(nextTmpNum++);
-          valueAllocator.setLiteral(srcId, expr.rightExpression.value);
-          const dstReg = valueAllocator.ensureOnRegister(id);
-          const srcReg = valueAllocator.ensureOnRegister(srcId);
-          this.genRegLessThanRegTest(dstReg, srcReg, dstReg);
-          valueAllocator.informChanged(id);
-        } else if (expr.leftExpression instanceof LiteralExpression && !(expr.rightExpression instanceof LiteralExpression)) {
-          genExpression(expr.rightExpression, id);
-          const srcId = valueAllocator.getTmpId(nextTmpNum++);
-          valueAllocator.setLiteral(srcId, expr.leftExpression.value);
-          const dstReg = valueAllocator.ensureOnRegister(id);
-          const srcReg = valueAllocator.ensureOnRegister(srcId);
-          this.genRegLessThanRegTest(srcReg, dstReg, dstReg);
-          valueAllocator.deallocateId(srcId);
-          valueAllocator.informChanged(id);
-        } else if (expr.leftExpression instanceof LiteralExpression && expr.rightExpression instanceof LiteralExpression) {
-          valueAllocator.setLiteral(id, expr.leftExpression.value < expr.rightExpression.value ? 1 : 0);
-        } else {
-          throw new Error('Unsupported codegen expression evaluation');
-        }
-      } else */ if (expr instanceof AssignExpression) {
+      } else if (expr instanceof AssignExpression) {
         const dstVar = expr.varRef.varName;
         const dstId = getVarId(dstVar);
         const srcId = genExpression(expr.expression);

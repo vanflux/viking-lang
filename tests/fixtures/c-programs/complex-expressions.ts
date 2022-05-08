@@ -6,17 +6,6 @@ export function complexExpressions() {
   d = -23;
   e = -777;
 
-  printn(a + 100);
-  printn(101 + a);
-  printn(a + c);
-  printn(a + d);
-
-  printn(1 - a);
-  printn(a - 100);
-  printn(-101 + a);
-  printn(a - c);
-  printn(a - d);
-
   x1 = (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d)));
   x2 = 1 - (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d)));
   x3 = - (((a + 100) + (101 + a)) + ((a + c) - (a + d))) + (((a - 100) + (-101 + a)) + ((a - c) - (a - d)));

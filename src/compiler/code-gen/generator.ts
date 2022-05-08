@@ -43,16 +43,24 @@ export class Generator {
     this.code.push(`mov ${dest}, ${src}`);
   }
 
-  genRegToRegMath(operation: '+' | '-', src1: string, src2: string, dest: string) {
-    this.code.push(`${operation === '+' ? 'add' : 'sub'} ${dest}, ${src1}, ${src2}`);
+  genRegToRegComputation(operation: string, src1: string, src2: string, dest: string) {
+    switch (operation) {
+      case '+': return this.code.push(`add ${dest}, ${src1}, ${src2}`);
+      case '-': return this.code.push(`sub ${dest}, ${src1}, ${src2}`);
+      case '<': return this.code.push(`slt ${dest}, ${src1}, ${src2}`);
+      case '>': return this.code.push(`slt ${dest}, ${src2}, ${src1}`);
+    }
+    throw new Error('Unsupported reg reg computation operation');
   }
 
-  genRegLitMath(operation: '+' | '-', literal: number, dest: string) {
-    this.code.push(`${operation === '+' ? 'add' : 'sub'} ${dest}, ${literal}`);
-  }
-
-  genRegLessThanRegTest(reg1: string, reg2: string, dest: string) {
-    this.code.push(`slt ${dest}, ${reg1}, ${reg2}`);
+  genRegLitComputation(operation: string, literal: number, dest: string) {
+    switch (operation) {
+      case '+': return this.code.push(`add ${dest}, ${literal}`);
+      case '-': return this.code.push(`sub ${dest}, ${literal}`);
+      case '<': return this.code.push(`slt ${dest}, ${literal}`);
+      case '>': return this.code.push(...[`slt ${dest}, ${literal+1}`, `xor ${dest}, 1`]);
+    }
+    throw new Error('Unsupported reg lit computation operation');
   }
 
   genRegNegate(reg: string) {

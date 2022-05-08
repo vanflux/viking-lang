@@ -53,8 +53,8 @@ export class AssignExpression implements Expression {
   }
 }
 
-export class RelationalExpression implements Expression {
-  constructor(public text: string, public operation: '<' | '>', public leftExpression: Expression, public rightExpression: Expression) {}
+export class BinaryExpression implements Expression {
+  constructor(public text: string, public operation: string, public leftExpression: Expression, public rightExpression: Expression) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     ctx = func(this, ctx);
     this.leftExpression.process(func, ctx);
@@ -62,14 +62,8 @@ export class RelationalExpression implements Expression {
   }
 }
 
-export class AddExpression implements Expression {
-  constructor(public text: string, public operation: '+' | '-', public leftExpression: Expression, public rightExpression: Expression) {}
-  process<T>(func: ProcessFunc<T>, ctx?: T) {
-    ctx = func(this, ctx);
-    this.leftExpression.process(func, ctx);
-    this.rightExpression.process(func, ctx);
-  }
-}
+export class RelationalExpression extends BinaryExpression {}
+export class AddExpression extends BinaryExpression {}
 
 export class CallExpression implements Expression {
   constructor(public text: string, public funcName: string, public paramExpressions: Expression[]) {}
