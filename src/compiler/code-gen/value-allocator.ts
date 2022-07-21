@@ -31,7 +31,7 @@ export class ValueAllocator {
    * Allocate some stack position for the allocable if hasnt an allocated stack position
    * @param id
    */
-  private allocStackPos(id: number) {
+  allocStackPos(id: number) {
     let stackPos = 0;
     const allocable = this.getAllocable(id);
     if (allocable.stackPos != undefined) return;
@@ -205,17 +205,16 @@ export class ValueAllocator {
   moveValue(srcId: number, dstId: number) {
     const srcAllocable = this.getAllocable(srcId);
     const dstAllocable = this.getAllocable(dstId);
-    this.deallocStackPos(dstId);
-    this.deallocRegister(dstId, false);
+
+    if (srcAllocable.register === undefined && srcAllocable.stackPos !== undefined) {
+      this.setValue(srcId, dstId);
+    } else {
+      this.deallocRegister(dstId, false);
+      dstAllocable.register = srcAllocable.register;
+      dstAllocable.literal = srcAllocable.literal;
+      dstAllocable.changed = true;
+    }
     this.allocables.splice(this.allocables.findIndex(x => x.id === srcId), 1);
-    dstAllocable.literal = srcAllocable.literal;
-    dstAllocable.register = srcAllocable.register;
-    dstAllocable.stackPos = srcAllocable.stackPos;
-    dstAllocable.changed = srcAllocable.changed;
-    srcAllocable.literal = undefined;
-    srcAllocable.register = undefined;
-    srcAllocable.stackPos = undefined;
-    srcAllocable.changed = false;
   }
 
   /**

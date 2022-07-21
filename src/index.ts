@@ -142,6 +142,11 @@ export async function main() {
   printn(x2);
   printn(x3);
   printn(x4);
+  printn(a);
+  printn(b);
+  printn(c);
+  printn(d);
+  printn(e);
   `;
 
   const compiler = new Compiler();
@@ -166,13 +171,8 @@ export async function main() {
   simulation.registerPorts(consoleDevice.getPorts());
   simulation.setStepInterval(0);
 
-  //simulation.on('pc update', pc => console.log('pc update', pc));
   simulation.on('run ended', () => {
     console.log('[Simulation] Run ended!');
-    /*console.log('Registers:');
-    registerBank.print();
-    console.log('PC:', simulation.getPC(), simulation.getPC().toString(16));
-    console.log('Cycles:', simulation.getCycles());*/
   });
   simulation.setRawObjCode(result.rawObjectCode!);
   simulation.run();

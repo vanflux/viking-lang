@@ -140,6 +140,19 @@ export class CodeGen {
   }
 
   private genStatements(statements: Statement[], valueAllocator: ValueAllocator) {
+    const getVarId = (varName: string) => {
+      if (this.varIdMap.get(varName) === undefined) this.varIdMap.set(varName, valueAllocator.allocateId());
+      return this.varIdMap.get(varName)!;
+    };
+
+    statements.forEach(statement => {
+      statement.process(node => {
+        if (!(node instanceof VarReference)) return;
+        const id = getVarId(node.varName);
+        valueAllocator.allocStackPos(id);
+      });
+    });
+
     for (const statement of statements) {
       if (statement instanceof ExpressionStatement) {
         this.genExpression(statement.expression, valueAllocator);
