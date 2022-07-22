@@ -149,7 +149,7 @@ export async function main() {
   printn(e);
   `;*/
 
-  const code = `
+  /*const code = `
   a = 1;
   b = 2;
   c = 3;
@@ -171,6 +171,54 @@ export async function main() {
   printn(c);
   printn(d);
   printn(e);
+  `;*/
+
+  /*const code = `
+  a = 0;
+  b = 2;
+  while(a < 5) {
+    printn(a);
+    a = a + 1;
+    b = b + 2;
+  }
+  printn(a);
+  printn(b);
+  `;*/
+
+  /*const code = `
+  a = 0;
+  b = 1;
+  while(a < 30) {
+    a = a + 1;
+    if (a > 5+1-3+b) {
+      if (a < 9-b) {
+        printn(a);
+      } else {
+        if (a+1 > 13) {
+          if (a-2 < 18) {
+            printn(a);
+          }
+        }
+      }
+    }
+  }
+  `;*/
+
+  const code = `
+  x = 0;
+  y = 0;
+  width = 4;
+  height = 4;
+  while(y < height) {
+    x = 0;
+    while(x < width) {
+      printn(x);
+      printn(y);
+      printn(1000);
+      x = x + 1;
+    }
+    y = y + 1;
+  }
   `;
 
   const compiler = new Compiler();

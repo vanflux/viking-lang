@@ -21,6 +21,7 @@ export class CodeGen {
   gen: Generator;
   varIdMap: Map<string, number>;
   nextIfNum = 0;
+  nextWhileNum = 0;
 
   constructor(ast: Ast) {
     this.gen = new Generator();
@@ -177,18 +178,19 @@ export class CodeGen {
         }
         this.gen.genSymbol(`if_end_${ifNum}`);
       } else if (statement instanceof WhileStatement) {
-        /*const whileNum = nextWhileNum++;
-        if (!statement.executeFirst) this.genJmp(`while_cond_${whileNum}`);
-        this.genSymbol(`while_start_${whileNum}`);
-        genStatements(statement.statements);
-        this.genSymbol(`while_cond_${whileNum}`);
-        const tmpId = valueAllocator.getTmpId(nextTmpNum++);
-        genExpression(statement.conditionExpression, tmpId);
-        const tmpReg = valueAllocator.ensureOnRegister(tmpId);
-        valueAllocator.deallocateId(tmpId);
-        this.genJmpIfRegIsNotZero(tmpReg, `while_start_${whileNum}`);
-        this.genSymbol(`while_end_${whileNum}`);*/
-        throw new Error('While statement has bugs...');
+        const whileNum = this.nextWhileNum++;
+        this.gen.genSymbol(`while_start_${whileNum}`);
+        const id = this.genExpression(statement.conditionExpression, valueAllocator);
+        const reg = valueAllocator.ensureOnRegister(id);
+        valueAllocator.deallocId(id);
+        this.gen.genJmpIfRegIsZero(reg, `while_end_${whileNum}`);
+        const initialValueAllocator = valueAllocator.fork();
+        this.genStatements(statement.statements, initialValueAllocator);
+        initialValueAllocator.converge(valueAllocator);
+        this.gen.genJmp(`while_start_${whileNum}`);
+        this.gen.genSymbol(`while_end_${whileNum}`);
+      } else {
+        throw new Error('Unsupported statement');
       }
     }
   }

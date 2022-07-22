@@ -76,7 +76,7 @@ export class ValueAllocator {
       if (!oldAllocable.register) throw new Error('Next register allocable has no register, compiler register allocation bug');
       register = oldAllocable.register;
       this.deallocRegister(oldAllocable.id);
-      this.availableRegisters.splice(this.availableRegisters.indexOf(register));
+      this.availableRegisters.splice(this.availableRegisters.indexOf(register), 1);
     }
 
     if (load) {
@@ -213,13 +213,14 @@ export class ValueAllocator {
 
     if (srcAllocable.register === undefined && srcAllocable.stackPos !== undefined) {
       this.setValue(srcId, dstId);
+      this.deallocId(srcId);
     } else {
       this.deallocRegister(dstId, false);
       dstAllocable.register = srcAllocable.register;
       dstAllocable.literal = srcAllocable.literal;
       dstAllocable.changed = true;
+      this.allocables.splice(this.allocables.findIndex(x => x.id === srcId), 1);
     }
-    this.allocables.splice(this.allocables.findIndex(x => x.id === srcId), 1);
   }
 
   /**
@@ -267,7 +268,7 @@ export class ValueAllocator {
         // If the value was allocated on register
 
         if (thisAllocable.register !== vAllocable.register) {
-          this.gen.genComment('Deallocating ' + thisAllocable.register + ' because it need to be on ' + vAllocable.register);
+          this.gen.genComment('Deallocating ' + (thisAllocable.register || thisAllocable.id) + ' because it need to be on ' + vAllocable.register);
           this.deallocRegister(thisAllocable.id, true);
         }
 

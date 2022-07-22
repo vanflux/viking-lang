@@ -13,6 +13,9 @@ import { nestedIfStatements1 } from '../../fixtures/c-programs/nested-if-stateme
 import { nestedIfStatements2 } from '../../fixtures/c-programs/nested-if-statement-2';
 import { nestedIfStatements3 } from '../../fixtures/c-programs/nested-if-statement-3';
 import { nestedIfStatements4 } from '../../fixtures/c-programs/nested-if-statement-4';
+import { whileStatements1 } from '../../fixtures/c-programs/while-statement-1';
+import { whileStatements2 } from '../../fixtures/c-programs/while-statement-2';
+import { nestedWhileStatements1 } from '../../fixtures/c-programs/nested-while-statement-1';
 
 describe('C programs tests', () => {
 
@@ -85,7 +88,6 @@ describe('C programs tests', () => {
 
   // Nested if tests
 
-
   it('Compile nested if statements case 1', async () => {
     const code = nestedIfStatements1();
     const assembly = compileAll(code);
@@ -116,6 +118,34 @@ describe('C programs tests', () => {
     const { rawObjectCode } = assembleAll(assembly);
     const output = await simulateOutputingConsole(rawObjectCode!);
     expect(output).to.deep.eq({ numbers: [11, 2, 3, 4, 77], chars: [] });
+  });
+
+  // While tests
+
+  it('Compile while statements case 1', async () => {
+    const code = whileStatements1();
+    const assembly = compileAll(code);
+    const { rawObjectCode } = assembleAll(assembly);
+    const output = await simulateOutputingConsole(rawObjectCode!);
+    expect(output).to.deep.eq({ numbers: [0, 1, 2, 3, 4, 5, 12], chars: [] });
+  });
+
+  it('Compile while statements case 2', async () => {
+    const code = whileStatements2();
+    const assembly = compileAll(code);
+    const { rawObjectCode } = assembleAll(assembly);
+    const output = await simulateOutputingConsole(rawObjectCode!);
+    expect(output).to.deep.eq({ numbers: [5, 6, 7, 13, 14, 15, 16, 17, 18, 19], chars: [] });
+  });
+
+  // Nested while tests
+
+  it('Compile nested while statements case 1', async () => {
+    const code = nestedWhileStatements1();
+    const assembly = compileAll(code);
+    const { rawObjectCode } = assembleAll(assembly);
+    const output = await simulateOutputingConsole(rawObjectCode!);
+    expect(output).to.deep.eq({ numbers: [0, 0, 1000, 1, 0, 1000, 2, 0, 1000, 3, 0, 1000, 0, 1, 1000, 1, 1, 1000, 2, 1, 1000, 3, 1, 1000, 0, 2, 1000, 1, 2, 1000, 2, 2, 1000, 3, 2, 1000, 0, 3, 1000, 1, 3, 1000, 2, 3, 1000, 3, 3, 1000], chars: [] });
   });
 
 });

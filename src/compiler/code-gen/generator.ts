@@ -71,6 +71,10 @@ export class Generator {
     this.code.push(`bnz ${reg}, ${symbol}`);
   }
 
+  genJmpIfRegIsZero(reg: string, symbol: string) {
+    this.code.push(`bez ${reg}, ${symbol}`);
+  }
+
   genJmp(symbol: string) {
     this.code.push(`bnz r7, ${symbol}`);
   }
