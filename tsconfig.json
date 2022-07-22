@@ -6,7 +6,7 @@
     "src/entry.ts"
   ],
   "compilerOptions": {
-    "target": "es2022",
+    "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "Node",
     "outDir": "./dist",
