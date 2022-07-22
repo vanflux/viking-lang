@@ -16,7 +16,7 @@
     "url": "git+https://github.com/vanflux/viking-lang.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/vanflux/viking-lang/issues"
   },

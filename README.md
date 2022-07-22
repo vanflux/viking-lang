@@ -7,3 +7,7 @@ Viking is an architecture developed by [sjohann81](https://github.com/sjohann81/
 The current goal is to build a simple compiler to generate assembly code from a C like language(viking-lang).
 
 If you go to `compiler` branch you'll see that I haven't worked on for a long time. I have this problem of starting things, stopping, continuing, stopping...
+
+## License
+
+This project is under the 3-clause BSD License. [Used Licences](LICENSE-BUNDLE.txt).
