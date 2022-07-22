@@ -16,6 +16,7 @@ import { nestedIfStatements4 } from '../../fixtures/c-programs/nested-if-stateme
 import { whileStatements1 } from '../../fixtures/c-programs/while-statement-1';
 import { whileStatements2 } from '../../fixtures/c-programs/while-statement-2';
 import { nestedWhileStatements1 } from '../../fixtures/c-programs/nested-while-statement-1';
+import { fibonacciProgram } from '../../fixtures/c-programs/fibonacci';
 
 describe('C programs tests', () => {
 
@@ -146,6 +147,24 @@ describe('C programs tests', () => {
     const { rawObjectCode } = assembleAll(assembly);
     const output = await simulateOutputingConsole(rawObjectCode!);
     expect(output).to.deep.eq({ numbers: [0, 0, 1000, 1, 0, 1000, 2, 0, 1000, 3, 0, 1000, 0, 1, 1000, 1, 1, 1000, 2, 1, 1000, 3, 1, 1000, 0, 2, 1000, 1, 2, 1000, 2, 2, 1000, 3, 2, 1000, 0, 3, 1000, 1, 3, 1000, 2, 3, 1000, 3, 3, 1000], chars: [] });
+  });
+
+  // Complete programs
+
+  [
+    {until: 64, expected: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55]},
+    {until: 127, expected: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89]},
+    {until: 128, expected: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89]},
+    {until: 255, expected: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233]},
+    {until: 256, expected: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233]},
+  ].forEach(({until, expected}) => {
+    it(`Compile fibonacci until ${until}`, async () => {
+      const code = fibonacciProgram(until);
+      const assembly = compileAll(code);
+      const { rawObjectCode } = assembleAll(assembly);
+      const output = await simulateOutputingConsole(rawObjectCode!);
+      expect(output).to.deep.eq({ numbers: expected, chars: [] });
+    });
   });
 
 });

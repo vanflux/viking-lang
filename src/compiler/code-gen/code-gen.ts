@@ -49,6 +49,7 @@ export class CodeGen {
         const id = this.genExpression(expr.leftExpression, valueAllocator);
         const reg = valueAllocator.ensureOnRegister(id);
         this.gen.genRegLitComputation(expr.operation, expr.rightExpression.value, reg);
+        valueAllocator.informChanged(id);
         return id;
       } else if (expr.leftExpression instanceof LiteralExpression && !(expr.rightExpression instanceof LiteralExpression)) {
         if (expr.operation === '-' || expr.operation === '<' || expr.operation === '>') {
@@ -58,11 +59,13 @@ export class CodeGen {
           const dstReg = valueAllocator.ensureOnRegister(id2, true, [srcReg]);
           valueAllocator.deallocId(id1);
           this.gen.genRegToRegComputation(expr.operation, srcReg, dstReg, dstReg);
+          valueAllocator.informChanged(id2);
           return id2;
         } else {
           const id2 = this.genExpression(expr.rightExpression, valueAllocator);
           const dstReg = valueAllocator.ensureOnRegister(id2);
           this.gen.genRegLitComputation(expr.operation, expr.leftExpression.value, dstReg);
+          valueAllocator.informChanged(id2);
           return id2;
         }
       } else if (expr.leftExpression instanceof LiteralExpression && expr.rightExpression instanceof LiteralExpression) {
@@ -91,6 +94,7 @@ export class CodeGen {
         const dstReg = valueAllocator.ensureOnRegister(id2, true, [srcReg]);
         valueAllocator.deallocId(id1);
         this.gen.genRegToRegComputation(expr.operation, srcReg, dstReg, dstReg);
+        valueAllocator.informChanged(id2);
         return id2;
       }
     } else if (expr instanceof AssignExpression) {
@@ -126,6 +130,7 @@ export class CodeGen {
         const id = this.genExpression(expr.expression, valueAllocator);
         const reg = valueAllocator.ensureOnRegister(id);
         this.gen.genRegNegate(reg);
+        valueAllocator.informChanged(id);
         return id;
       }
     } else if (expr instanceof VarReference) {
@@ -180,13 +185,13 @@ export class CodeGen {
       } else if (statement instanceof WhileStatement) {
         const whileNum = this.nextWhileNum++;
         this.gen.genSymbol(`while_start_${whileNum}`);
+        const initialValueAllocator = valueAllocator.fork();
         const id = this.genExpression(statement.conditionExpression, valueAllocator);
         const reg = valueAllocator.ensureOnRegister(id);
         valueAllocator.deallocId(id);
         this.gen.genJmpIfRegIsZero(reg, `while_end_${whileNum}`);
-        const initialValueAllocator = valueAllocator.fork();
-        this.genStatements(statement.statements, initialValueAllocator);
-        initialValueAllocator.converge(valueAllocator);
+        this.genStatements(statement.statements, valueAllocator);
+        valueAllocator.converge(initialValueAllocator);
         this.gen.genJmp(`while_start_${whileNum}`);
         this.gen.genSymbol(`while_end_${whileNum}`);
       } else {
