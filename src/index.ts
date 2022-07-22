@@ -126,7 +126,7 @@ export async function main() {
   valueAllocator.setValue(id4, id5);
   console.log(valueAllocator);*/
 
-  const code = `
+  /*const code = `
   a = 2;
   b = 5;
   c = 90;
@@ -142,6 +142,30 @@ export async function main() {
   printn(x2);
   printn(x3);
   printn(x4);
+  printn(a);
+  printn(b);
+  printn(c);
+  printn(d);
+  printn(e);
+  `;*/
+
+  const code = `
+  a = 1;
+  b = 2;
+  c = 3;
+  d = 4;
+  if (a > b) {
+    e = 77;
+    a = 11;
+  } else {
+    if (c > d) {
+      e = 88;
+      a = 22;
+    } else {
+      e = 99;
+      a = 33;
+    }
+  }
   printn(a);
   printn(b);
   printn(c);

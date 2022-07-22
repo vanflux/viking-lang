@@ -162,14 +162,18 @@ export class CodeGen {
         const reg = valueAllocator.ensureOnRegister(id);
         valueAllocator.deallocId(id);
         this.gen.genJmpIfRegIsNotZero(reg, `if_${ifNum}`);
+        const elseValueAllocator = valueAllocator.fork();
+        const ifValueAllocator = valueAllocator.fork();
         if (statement.elseStatements) {
           this.gen.genSymbol(`else_${ifNum}`);
-          this.genStatements(statement.elseStatements, valueAllocator);
+          this.genStatements(statement.elseStatements, elseValueAllocator);
+          elseValueAllocator.converge(valueAllocator);
           this.gen.genJmp(`if_end_${ifNum}`);
         }
         if (statement.ifStatements) {
           this.gen.genSymbol(`if_${ifNum}`);
-          this.genStatements(statement.ifStatements, valueAllocator);
+          this.genStatements(statement.ifStatements, ifValueAllocator);
+          ifValueAllocator.converge(valueAllocator);
         }
         this.gen.genSymbol(`if_end_${ifNum}`);
       } else if (statement instanceof WhileStatement) {

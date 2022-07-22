@@ -11,7 +11,8 @@ export interface AllocableValue {
 export class ValueAllocator {
   private allocables: AllocableValue[] = [];
   private usedStackPoses = new Set<number>();
-  private availableRegisters = ['r1', 'r2', 'r3', 'r4'];
+  private allRegisters = ['r1', 'r2', 'r3', 'r4'];
+  private availableRegisters = this.allRegisters.slice();
   private nextId = 0;
 
   constructor(private gen: Generator) {}
@@ -59,9 +60,13 @@ export class ValueAllocator {
     const allocable = this.getAllocable(id);
     if (allocable.register) return;
 
+    const possibleAvailableRegisters = this.availableRegisters.filter(x => !blacklist.includes(x));
+
     let register: string;
-    if (this.availableRegisters.length > 0) {
-      register = this.availableRegisters.shift()!;
+    if (possibleAvailableRegisters.length > 0) {
+      register = possibleAvailableRegisters.shift()!;
+      const index = this.availableRegisters.indexOf(register);
+      this.availableRegisters.splice(index, 1);
     } else {
       // TODO: add rule to deallocate the less used
       const usableAllocables = this.allocables.filter(x => x.register && !blacklist.includes(x.register));
@@ -234,5 +239,44 @@ export class ValueAllocator {
     allocator.availableRegisters = [...this.availableRegisters];
     allocator.nextId = this.nextId;
     return allocator;
+  }
+
+  converge(v: ValueAllocator) {
+    for (const vAllocable of v.allocables) {
+      // vAllocable need to have stackPos
+      if (vAllocable.stackPos === undefined) {
+        throw new Error('Value allocator cannot converge, vAllocable stack pos is undefined, id: ' + vAllocable.id);
+      }
+
+      // vAllocable and thisAllocable stackPos need to be the SAME
+      // ok ok we can swap, but on this compiler we keep the variable allocated on the same stackPos
+      const thisAllocable = this.getAllocable(vAllocable.id);
+      if (thisAllocable.stackPos !== vAllocable.stackPos) {
+        throw new Error('Value allocator cannot converge, the same allocables are allocated on different stack positions, this: ' + thisAllocable.stackPos + ', v: ' + vAllocable.stackPos);
+      }
+
+      if (vAllocable.register === undefined) {
+        // If the value was allocated ONLY on the stack
+
+        if (thisAllocable.register !== undefined && thisAllocable.changed) {
+          // If now is allocated on register and it has changed -> send it to the stack (save to stack)
+          this.gen.genComment('Deallocating ' + thisAllocable.register + ' because it need to be on the stack ' + thisAllocable.stackPos);
+          this.deallocRegister(thisAllocable.id, true);
+        }
+      } else {
+        // If the value was allocated on register
+
+        if (thisAllocable.register !== vAllocable.register) {
+          this.gen.genComment('Deallocating ' + thisAllocable.register + ' because it need to be on ' + vAllocable.register);
+          this.deallocRegister(thisAllocable.id, true);
+        }
+
+        if (thisAllocable.register === undefined) {
+          this.gen.genComment('Ensuring that ' + thisAllocable.id + ' is on ' + vAllocable.register);
+          this.ensureOnRegister(thisAllocable.id, true, this.allRegisters.filter(x => x !== vAllocable.register));
+        }
+      }
+      
+    }
   }
 }
