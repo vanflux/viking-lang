@@ -11,21 +11,28 @@ import { Compiler } from './compiler';
 export async function main() {
   const start = Date.now();
 
-  const code = `
+  const langCode = `
   a = 0;
+  b = 1;
   printn(a);
+  while (b < 128) {
+    printn(b);
+    c = a + b;
+    a = b;
+    b = c;
   }
   `;
 
-  const compiler = new Compiler();
-  const compiled = compiler.compile(code);
-  console.log('[Compiled]');
-  console.log(compiled);
-
   const architecture = ArchitectureManager.getViking16Arch();
+  
+  const compiler = new Compiler(architecture);
+  const { code: asmCode } = compiler.compile(langCode);
+  console.log('[ASM]');
+  console.log(asmCode);
+
   const pseudoConverter = new PseudoConverter(getAllPseudos());
-  const assembler = new Assembler(architecture, compiled, pseudoConverter);
-  const result = assembler.assemble();
+  const assembler = new Assembler(architecture, pseudoConverter);
+  const { rawObjectCode } = assembler.assemble(asmCode);
 
   const memory = Memory.createFromArchitecture(architecture);
   const registerBank = RegisterBank.createFromArchitecture(architecture);
@@ -41,12 +48,12 @@ export async function main() {
 
   simulation.on('run ended', () => {
     console.log('[Simulation] Run ended!');
+    
+    const end = Date.now();
+    console.log('Time:', end - start, 'ms');
   });
-  simulation.setRawObjCode(result.rawObjectCode!);
+  simulation.setRawObjCode(rawObjectCode!);
   simulation.run();
-
-  const end = Date.now();
-  console.log('Time:', end - start, 'ms');
 }
 
 main();

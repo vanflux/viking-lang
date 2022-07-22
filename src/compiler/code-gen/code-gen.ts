@@ -1,3 +1,4 @@
+import { Architecture } from '../../common';
 import {
   AddExpression,
   AssignExpression,
@@ -23,13 +24,18 @@ export class CodeGen {
   nextIfNum = 0;
   nextWhileNum = 0;
 
-  constructor(ast: Ast) {
+  constructor(
+    private architecture: Architecture,
+    private ast: Ast
+  ) {
     this.gen = new Generator();
     this.varIdMap = new Map<string, number>();
 
-    const valueAllocator = new ValueAllocator(this.gen);
+    const registers = this.architecture.getRegisters();
+    const generalPurposeRegisters = registers.filter(r => r.aliases.length === 0).map(r => r.name);
+    const valueAllocator = new ValueAllocator(generalPurposeRegisters, this.gen);
     this.gen.genInit();
-    this.genStatements(ast.statements, valueAllocator);
+    this.genStatements(this.ast.statements, valueAllocator);
     this.gen.genEnd();
 
     //console.log(valueAllocator);

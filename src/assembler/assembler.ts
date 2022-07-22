@@ -12,35 +12,39 @@ export interface AdditionalAssembleInfo {
   parsed?: LineParseResult;
 }
 
+export interface AssemblerResult {
+  rawObjectCode?: string,
+  objectCodeArray: number[],
+  symbolTable: {[name: string]: number},
+  instructions: Instruction[],
+  additionalInfos: AdditionalAssembleInfo[],
+}
+
 export class Assembler {
-  private architecture: Architecture;
-  private programData: string;
-  private pseudoConverter: PseudoConverter;
-  private extraSymbolTable: { [name: string]: number };
-  private lines: string[];
-  private sequence: (number | Instruction)[];
-  private symbolTable: { [name: string]: number };
-  private objectCodeArray: number[];
-  private instructions: Instruction[];
-  private additionalInfos: AdditionalAssembleInfo[];
+  private programData!: string;
+  private extraSymbolTable: { [name: string]: number } = {};
+  private lines!: string[];
+  private sequence!: (number | Instruction)[];
+  private symbolTable!: { [name: string]: number };
+  private objectCodeArray!: number[];
+  private instructions!: Instruction[];
+  private additionalInfos!: AdditionalAssembleInfo[];
   private rawObjectCode?: string;
 
-  constructor(architecture: Architecture, programData: string, pseudoConverter: PseudoConverter) {
-    this.architecture = architecture;
+  public constructor(
+    private architecture: Architecture,
+    private pseudoConverter: PseudoConverter,
+  ) {}
+
+  public assemble(programData: string): AssemblerResult {
     this.programData = programData;
-    this.pseudoConverter = pseudoConverter;
-    this.extraSymbolTable = {};
-
     this.lines = this.programData.split('\n');
-
     this.sequence = [];
     this.symbolTable = {};
     this.objectCodeArray = [];
     this.instructions = [];
     this.additionalInfos = [];
-  }
 
-  assemble() {
     this.pass1();
     this.pass2();
     this.pass3();
@@ -54,13 +58,13 @@ export class Assembler {
     };
   }
 
-  addExtraSymbolTable(symbolTable: { [name: string]: number }) {
+  public addExtraSymbolTable(symbolTable: { [name: string]: number }) {
     Object.assign(this.extraSymbolTable, symbolTable);
   }
 
   // Process instructions, pseudo-instructions, symbols.
   // Doesnt substitute symbols in instructions.
-  pass1() {
+  private pass1() {
     let pc = 0;
 
     let instructionParser = new InstructionParser(this.architecture);
@@ -113,7 +117,7 @@ export class Assembler {
   }
 
   // Substitute symbols with their values
-  pass2() {
+  private pass2() {
     for (let instruction of this.instructions) {
       let operands = instruction.getOperands();
       for (let operand of operands) {
@@ -136,7 +140,7 @@ export class Assembler {
   }
 
   // Assemble object code
-  pass3() {
+  private pass3() {
     // Assemble
     for (let item of this.sequence) {
       if (typeof item === 'number') {

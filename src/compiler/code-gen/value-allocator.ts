@@ -11,11 +11,15 @@ export interface AllocableValue {
 export class ValueAllocator {
   private allocables: AllocableValue[] = [];
   private usedStackPoses = new Set<number>();
-  private allRegisters = ['r1', 'r2', 'r3', 'r4'];
-  private availableRegisters = this.allRegisters.slice();
+  private availableRegisters: string[];
   private nextId = 0;
 
-  constructor(private gen: Generator) {}
+  constructor(
+    private allRegisters: string[],
+    private gen: Generator,
+  ) {
+    this.availableRegisters = this.allRegisters.slice();
+  }
 
   /**
    * Find allocable by id
@@ -234,7 +238,7 @@ export class ValueAllocator {
   }
 
   fork() {
-    const allocator = new ValueAllocator(this.gen);
+    const allocator = new ValueAllocator(this.allRegisters, this.gen);
     allocator.allocables = this.allocables.map(x => ({...x}));
     allocator.usedStackPoses = new Set(this.usedStackPoses);
     allocator.availableRegisters = [...this.availableRegisters];
