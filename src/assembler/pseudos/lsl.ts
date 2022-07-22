@@ -1,7 +1,7 @@
-import { Architecture } from '../../common/architecture';
-import { Instruction } from '../../common/instruction';
+import { Architecture } from '../../common';
+import { Instruction } from '../../common';
 import { Pseudo } from '../pseudoConverter';
-import { OperationsManager } from '../../common/operations/operationsManager';
+import { OperationsManager } from '../../common';
 
 export class PC_Lsl implements Pseudo {
   convert(instruction: Instruction, architecture: Architecture) {

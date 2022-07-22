@@ -1,8 +1,8 @@
-import { OperationsManager } from '../common/operations/operationsManager';
-import { Architecture } from '../common/architecture';
-import { Instruction } from '../common/instruction';
-import { Operand } from '../common/operand';
-import { isInteger } from '../common/utils';
+import { OperationsManager } from '../common';
+import { Architecture } from '../common';
+import { Instruction } from '../common';
+import { Operand } from '../common';
+import { isInteger } from '../common';
 
 export class InstructionParser {
   private architecture: Architecture;

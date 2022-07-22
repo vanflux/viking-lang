@@ -1,4 +1,4 @@
-import { Simulation } from '../../../simulator/simulation';
+import { Simulation } from '../../../simulator';
 import { BasicOperation } from '../operation';
 
 export class B_Asr extends BasicOperation {

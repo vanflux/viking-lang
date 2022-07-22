@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { Simulation } from '../simulation';
-import { Device } from './devices/device';
+import { Device } from './devices';
 
 export type PortReadHandler = (simulation: Simulation) => void;
 export type PortWriteHandler = (simulation: Simulation, value: number) => boolean;

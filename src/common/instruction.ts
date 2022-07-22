@@ -1,8 +1,8 @@
 import { Architecture } from './architecture';
-import { BasicOperation, Operation, PseudoOperation } from './operations/operation';
+import { BasicOperation, Operation, PseudoOperation } from './operations';
 import { Operand } from './operand';
-import { OperationsManager } from './operations/operationsManager';
-import { Simulation } from '../simulator/simulation';
+import { OperationsManager } from './operations';
+import { Simulation } from '../simulator';
 import { signedNumberToHex, signedToUnsigned, unsignedToSigned } from './utils';
 
 export class Instruction {

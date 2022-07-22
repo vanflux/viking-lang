@@ -1,12 +1,9 @@
-import { Architecture } from '../common/architecture';
-import { PseudoConverter } from './pseudoConverter';
-import { InstructionParser } from './instructionParser';
-import { DataParser } from './dataParser';
-import { CommentParser } from './commentParser';
-import { LineParser, LineParseResult } from './lineParser';
-import { Instruction } from '../common/instruction';
-import { Operand } from '../common/operand';
-import { signedNumberToHex } from '../common/utils';
+import { Architecture, Instruction, Operand, signedNumberToHex } from "../common";
+import { CommentParser } from "./commentParser";
+import { DataParser } from "./dataParser";
+import { InstructionParser } from "./instructionParser";
+import { LineParser, LineParseResult } from "./lineParser";
+import { PseudoConverter } from "./pseudoConverter";
 
 export interface AdditionalAssembleInfo {
   lineNumber: number;

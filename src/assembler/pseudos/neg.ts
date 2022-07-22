@@ -1,8 +1,8 @@
-import { Architecture } from '../../common/architecture';
-import { Instruction } from '../../common/instruction';
-import { Operand } from '../../common/operand';
+import { Architecture } from '../../common';
+import { Instruction } from '../../common';
+import { Operand } from '../../common';
 import { Pseudo } from '../pseudoConverter';
-import { OperationsManager } from '../../common/operations/operationsManager';
+import { OperationsManager } from '../../common';
 
 export class PC_Neg implements Pseudo {
   convert(instruction: Instruction, architecture: Architecture) {

@@ -1,9 +1,9 @@
-import { Architecture } from '../../common/architecture';
+import { Architecture } from '../../common';
 import { Pseudo } from '../pseudoConverter';
-import { Instruction } from '../../common/instruction';
-import { Operand } from '../../common/operand';
-import { OperationsManager } from '../../common/operations/operationsManager';
-import { numberToBytes } from '../../common/utils';
+import { Instruction } from '../../common';
+import { Operand } from '../../common';
+import { OperationsManager } from '../../common';
+import { numberToBytes } from '../../common';
 
 export class PC_Ldi implements Pseudo {
   convert(instruction: Instruction, architecture: Architecture) {

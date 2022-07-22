@@ -1,4 +1,4 @@
-import { unsignedToSigned } from '../../../common/utils';
+import { unsignedToSigned } from '../../../common';
 import { Simulation } from '../../simulation';
 import { Port } from '../port';
 import { Device } from './device';

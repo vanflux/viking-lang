@@ -1,4 +1,10 @@
 {
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "src/entry.ts"
+  ],
   "compilerOptions": {
     "target": "es2022",
     "module": "CommonJS",

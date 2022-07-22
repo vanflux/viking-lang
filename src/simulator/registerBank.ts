@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { Architecture, ArchitectureRegister } from '../common/architecture';
-import { unsignedToSigned } from '../common/utils';
+import { Architecture, ArchitectureRegister } from '../common';
+import { unsignedToSigned } from '../common';
 
 export interface Register {
   baseName: string;

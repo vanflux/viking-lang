@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Architecture, ArchitectureMemoryRegions } from '../common/architecture';
+import { Architecture, ArchitectureMemoryRegions } from '../common';
 import { MemoryStorage16 } from './memoryStorage16';
 
 export interface MemoryStorage {

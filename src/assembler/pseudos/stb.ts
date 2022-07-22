@@ -1,7 +1,7 @@
-import { Architecture } from '../../common/architecture';
-import { Instruction } from '../../common/instruction';
-import { Operand } from '../../common/operand';
-import { OperationsManager } from '../../common/operations/operationsManager';
+import { Architecture } from '../../common';
+import { Instruction } from '../../common';
+import { Operand } from '../../common';
+import { OperationsManager } from '../../common';
 import { Pseudo } from '../pseudoConverter';
 
 export class PC_Stb implements Pseudo {

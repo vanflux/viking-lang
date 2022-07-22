@@ -1,6 +1,6 @@
 import { unraw } from 'unraw';
-import { Architecture } from '../common/architecture';
-import { bytesToNumber, isInteger, numberToBytes } from '../common/utils';
+import { Architecture } from '../common';
+import { bytesToNumber, isInteger, numberToBytes } from '../common';
 
 export class DataParser {
   private architecture: Architecture;

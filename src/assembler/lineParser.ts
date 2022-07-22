@@ -1,4 +1,4 @@
-import { Instruction } from '../common/instruction';
+import { Instruction } from '../common';
 import { CommentParser } from './commentParser';
 import { DataParser } from './dataParser';
 import { InstructionParser } from './instructionParser';

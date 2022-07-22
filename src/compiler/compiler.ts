@@ -2,7 +2,7 @@ import { CharStreams, CommonTokenStream } from 'antlr4ts';
 import { vikingLexer as Lexer } from './antlr/vikingLexer';
 import { vikingParser as Parser } from './antlr/vikingParser';
 import { Ast } from './ast';
-import { CodeGen } from './code-gen/code-gen';
+import { CodeGen } from './code-gen';
 
 // Making compiler
 // https://tomassetti.me/parse-tree-abstract-syntax-tree/
