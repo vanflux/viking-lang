@@ -24,7 +24,7 @@ export async function main() {
   `;
 
   const architecture = ArchitectureManager.getViking16Arch();
-  
+
   const compiler = new Compiler(architecture);
   const { code: asmCode } = compiler.compile(langCode);
   console.log('[ASM]');
@@ -48,7 +48,7 @@ export async function main() {
 
   simulation.on('run ended', () => {
     console.log('[Simulation] Run ended!');
-    
+
     const end = Date.now();
     console.log('Time:', end - start, 'ms');
   });

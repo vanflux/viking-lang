@@ -45,18 +45,24 @@ export class Generator {
 
   genRegToRegComputation(operation: string, src1: string, src2: string, dest: string) {
     switch (operation) {
-      case '+': return this.code.push(`add ${dest}, ${src1}, ${src2}`);
-      case '-': return this.code.push(`sub ${dest}, ${src1}, ${src2}`);
-      case '<': return this.code.push(`slt ${dest}, ${src1}, ${src2}`);
-      case '>': return this.code.push(`slt ${dest}, ${src2}, ${src1}`);
+      case '+':
+        return this.code.push(`add ${dest}, ${src1}, ${src2}`);
+      case '-':
+        return this.code.push(`sub ${dest}, ${src1}, ${src2}`);
+      case '<':
+        return this.code.push(`slt ${dest}, ${src1}, ${src2}`);
+      case '>':
+        return this.code.push(`slt ${dest}, ${src2}, ${src1}`);
     }
     throw new Error('Unsupported reg reg computation operation');
   }
 
   genRegLitComputation(operation: string, literal: number, dest: string) {
     switch (operation) {
-      case '+': return this.code.push(`add ${dest}, ${literal}`);
-      case '-': return this.code.push(`sub ${dest}, ${literal}`);
+      case '+':
+        return this.code.push(`add ${dest}, ${literal}`);
+      case '-':
+        return this.code.push(`sub ${dest}, ${literal}`);
       case '<': {
         if (literal >= 128 || literal < 0) {
           this.genLitToRegMov(literal, 'at');
@@ -68,16 +74,16 @@ export class Generator {
       }
       case '>': {
         if (literal >= 128 || literal < 0) {
-          this.genLitToRegMov(literal+1, 'at');
+          this.genLitToRegMov(literal + 1, 'at');
           this.code.push(`slt ${dest}, ${dest}, at`);
         } else {
-          this.code.push(`slt ${dest}, ${literal+1}`);
+          this.code.push(`slt ${dest}, ${literal + 1}`);
         }
         this.code.push(`xor ${dest}, 1`);
         return;
       }
     }
-    
+
     throw new Error('Unsupported reg lit computation operation');
   }
 

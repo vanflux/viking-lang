@@ -1,9 +1,9 @@
-import { Architecture, Instruction, Operand, signedNumberToHex } from "../common";
-import { CommentParser } from "./commentParser";
-import { DataParser } from "./dataParser";
-import { InstructionParser } from "./instructionParser";
-import { LineParser, LineParseResult } from "./lineParser";
-import { PseudoConverter } from "./pseudoConverter";
+import { Architecture, Instruction, Operand, signedNumberToHex } from '../common';
+import { CommentParser } from './commentParser';
+import { DataParser } from './dataParser';
+import { InstructionParser } from './instructionParser';
+import { LineParser, LineParseResult } from './lineParser';
+import { PseudoConverter } from './pseudoConverter';
 
 export interface AdditionalAssembleInfo {
   lineNumber: number;
@@ -13,11 +13,11 @@ export interface AdditionalAssembleInfo {
 }
 
 export interface AssemblerResult {
-  rawObjectCode?: string,
-  objectCodeArray: number[],
-  symbolTable: {[name: string]: number},
-  instructions: Instruction[],
-  additionalInfos: AdditionalAssembleInfo[],
+  rawObjectCode?: string;
+  objectCodeArray: number[];
+  symbolTable: { [name: string]: number };
+  instructions: Instruction[];
+  additionalInfos: AdditionalAssembleInfo[];
 }
 
 export class Assembler {
@@ -31,10 +31,7 @@ export class Assembler {
   private additionalInfos!: AdditionalAssembleInfo[];
   private rawObjectCode?: string;
 
-  public constructor(
-    private architecture: Architecture,
-    private pseudoConverter: PseudoConverter,
-  ) {}
+  public constructor(private architecture: Architecture, private pseudoConverter: PseudoConverter) {}
 
   public assemble(programData: string): AssemblerResult {
     this.programData = programData;

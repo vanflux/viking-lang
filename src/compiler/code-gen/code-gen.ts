@@ -24,10 +24,7 @@ export class CodeGen {
   nextIfNum = 0;
   nextWhileNum = 0;
 
-  constructor(
-    private architecture: Architecture,
-    private ast: Ast
-  ) {
+  constructor(private architecture: Architecture, private ast: Ast) {
     this.gen = new Generator();
     this.varIdMap = new Map<string, number>();
 
@@ -111,8 +108,7 @@ export class CodeGen {
       valueAllocator.ensureOnRegister(dstId);
       return dstId;
     } else if (expr instanceof CallExpression) {
-      if (expr.paramExpressions.length !== 1)
-        throw new Error('At this point, code gen doesnt support multiple params on call expression');
+      if (expr.paramExpressions.length !== 1) throw new Error('At this point, code gen doesnt support multiple params on call expression');
       const id = this.genExpression(expr.paramExpressions[0], valueAllocator);
       const reg = valueAllocator.ensureOnRegister(id);
       valueAllocator.deallocId(id);

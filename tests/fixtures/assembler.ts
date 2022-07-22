@@ -6,6 +6,6 @@ import { getAllPseudos } from '../../src/assembler/pseudos';
 export function assembleAll(code: string) {
   const architecture = ArchitectureManager.getViking16Arch();
   const pseudoConverter = new PseudoConverter(getAllPseudos());
-  const assembler = new Assembler(architecture, code, pseudoConverter);
-  return assembler.assemble();
+  const assembler = new Assembler(architecture, pseudoConverter);
+  return assembler.assemble(code);
 }

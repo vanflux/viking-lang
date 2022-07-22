@@ -14,9 +14,7 @@ export interface CompilerResult {
 }
 
 export class Compiler {
-  public constructor(
-    private architecture: Architecture,
-  ) {}
+  public constructor(private architecture: Architecture) {}
 
   public compile(code: string): CompilerResult {
     const inputStream = CharStreams.fromString(code);

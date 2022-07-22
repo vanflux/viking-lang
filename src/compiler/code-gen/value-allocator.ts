@@ -14,17 +14,14 @@ export class ValueAllocator {
   private availableRegisters: string[];
   private nextId = 0;
 
-  constructor(
-    private allRegisters: string[],
-    private gen: Generator,
-  ) {
+  constructor(private allRegisters: string[], private gen: Generator) {
     this.availableRegisters = this.allRegisters.slice();
   }
 
   /**
    * Find allocable by id
-   * @param id 
-   * @returns 
+   * @param id
+   * @returns
    */
   private getAllocable(id: number) {
     const allocable = this.allocables.find(x => x.id === id);
@@ -75,7 +72,7 @@ export class ValueAllocator {
       // TODO: add rule to deallocate the less used
       const usableAllocables = this.allocables.filter(x => x.register && !blacklist.includes(x.register));
       const oldAllocable = usableAllocables.find(x => !x.changed) || usableAllocables[0];
-      
+
       if (!oldAllocable) throw new Error('No allocable for next register, compiler register allocation bug');
       if (!oldAllocable.register) throw new Error('Next register allocable has no register, compiler register allocation bug');
       register = oldAllocable.register;
@@ -127,8 +124,8 @@ export class ValueAllocator {
 
   /**
    * Set allocable value with a literal
-   * @param id 
-   * @param literal 
+   * @param id
+   * @param literal
    */
   setLiteral(id: number, literal: number) {
     const allocable = this.getAllocable(id);
@@ -139,9 +136,9 @@ export class ValueAllocator {
 
   /**
    * Set allocable value with another
-   * @param srcId 
-   * @param dstId 
-   * @returns 
+   * @param srcId
+   * @param dstId
+   * @returns
    */
   setValue(srcId: number, dstId: number) {
     if (dstId === srcId) return;
@@ -186,7 +183,7 @@ export class ValueAllocator {
 
   /**
    * Inform that the allocable register has changes to be saved if needed
-   * @param id 
+   * @param id
    */
   informChanged(id: number) {
     const allocable = this.getAllocable(id);
@@ -195,7 +192,7 @@ export class ValueAllocator {
 
   /**
    * Allocate an value
-   * @returns 
+   * @returns
    */
   allocateId() {
     const allocable: AllocableValue = {
@@ -208,8 +205,8 @@ export class ValueAllocator {
 
   /**
    * Basically, move the ownership of allocations from one to another allocable
-   * @param srcId 
-   * @param dstId 
+   * @param srcId
+   * @param dstId
    */
   moveValue(srcId: number, dstId: number) {
     const srcAllocable = this.getAllocable(srcId);
@@ -223,23 +220,29 @@ export class ValueAllocator {
       dstAllocable.register = srcAllocable.register;
       dstAllocable.literal = srcAllocable.literal;
       dstAllocable.changed = true;
-      this.allocables.splice(this.allocables.findIndex(x => x.id === srcId), 1);
+      this.allocables.splice(
+        this.allocables.findIndex(x => x.id === srcId),
+        1
+      );
     }
   }
 
   /**
    * Completelly deallocate an allocable
-   * @param id 
+   * @param id
    */
   deallocId(id: number) {
     this.deallocStackPos(id);
     this.deallocRegister(id, false);
-    this.allocables.splice(this.allocables.findIndex(x => x.id === id), 1);
+    this.allocables.splice(
+      this.allocables.findIndex(x => x.id === id),
+      1
+    );
   }
 
   fork() {
     const allocator = new ValueAllocator(this.allRegisters, this.gen);
-    allocator.allocables = this.allocables.map(x => ({...x}));
+    allocator.allocables = this.allocables.map(x => ({ ...x }));
     allocator.usedStackPoses = new Set(this.usedStackPoses);
     allocator.availableRegisters = [...this.availableRegisters];
     allocator.nextId = this.nextId;
@@ -257,7 +260,12 @@ export class ValueAllocator {
       // ok ok we can swap, but on this compiler we keep the variable allocated on the same stackPos
       const thisAllocable = this.getAllocable(vAllocable.id);
       if (thisAllocable.stackPos !== vAllocable.stackPos) {
-        throw new Error('Value allocator cannot converge, the same allocables are allocated on different stack positions, this: ' + thisAllocable.stackPos + ', v: ' + vAllocable.stackPos);
+        throw new Error(
+          'Value allocator cannot converge, the same allocables are allocated on different stack positions, this: ' +
+            thisAllocable.stackPos +
+            ', v: ' +
+            vAllocable.stackPos
+        );
       }
 
       if (vAllocable.register === undefined) {
@@ -272,16 +280,21 @@ export class ValueAllocator {
         // If the value was allocated on register
 
         if (thisAllocable.register !== vAllocable.register) {
-          this.gen.genComment('Deallocating ' + (thisAllocable.register || thisAllocable.id) + ' because it need to be on ' + vAllocable.register);
+          this.gen.genComment(
+            'Deallocating ' + (thisAllocable.register || thisAllocable.id) + ' because it need to be on ' + vAllocable.register
+          );
           this.deallocRegister(thisAllocable.id, true);
         }
 
         if (thisAllocable.register === undefined) {
           this.gen.genComment('Ensuring that ' + thisAllocable.id + ' is on ' + vAllocable.register);
-          this.ensureOnRegister(thisAllocable.id, true, this.allRegisters.filter(x => x !== vAllocable.register));
+          this.ensureOnRegister(
+            thisAllocable.id,
+            true,
+            this.allRegisters.filter(x => x !== vAllocable.register)
+          );
         }
       }
-      
     }
   }
 }

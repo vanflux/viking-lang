@@ -1,6 +1,6 @@
 # Viking Lang
 
-Core repository for viking *things*: assembler, compiler and simulator/debugger.
+Core repository for viking _things_: assembler, compiler and simulator/debugger.
 
 Viking is an architecture developed by [sjohann81](https://github.com/sjohann81/viking) for educational purposes, but I decided to extend this and re-implement the assembler and the [simulator](https://github.com/vanflux/viking-sim-web).
 

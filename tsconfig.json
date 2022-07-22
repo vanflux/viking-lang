@@ -1,10 +1,6 @@
 {
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "src/entry.ts"
-  ],
+  "include": ["src/**/*"],
+  "exclude": ["src/entry.ts"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "CommonJS",
