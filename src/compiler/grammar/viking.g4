@@ -50,7 +50,26 @@ callExpr
 termExpr
    : ID
    | DIGITS
+   | stringExpr
+   ;
+
+stringExpr
+   : STRING
    | parenExpr
+   ;
+
+STRING
+   : '"' STRING_CHAR+ '"'
+   ;
+
+fragment
+STRING_CHAR
+   : ~["\\\n\r]
+   | '\\\n'
+   | '\\\r\n'
+   | '\\' ['"?abfnrtv\\]
+   | '\\' [0-7] [0-7]? [0-7]?
+   | '\\x' [0-9a-fA-F]+
    ;
 
 ID

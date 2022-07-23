@@ -8,7 +8,8 @@ import {
   Expression,
   ExpressionStatement,
   IfStatement,
-  LiteralExpression,
+  NumberLiteralExpression,
+  StringLiteralExpression,
   NegateExpression,
   RelationalExpression,
   Statement,
@@ -19,21 +20,21 @@ import { Generator } from './generator';
 import { ValueAllocator } from './value-allocator';
 
 export class CodeGen {
-  gen: Generator;
-  varIdMap: Map<string, number>;
+  gen = new Generator();
+  varIdMap = new Map<string, number>();
   nextIfNum = 0;
   nextWhileNum = 0;
+  nextStringLiteralNum = 0;
+  stringLiteralData = new Map<string, string>();
 
   constructor(private architecture: Architecture, private ast: Ast) {
-    this.gen = new Generator();
-    this.varIdMap = new Map<string, number>();
-
     const registers = this.architecture.getRegisters();
     const generalPurposeRegisters = registers.filter(r => r.aliases.length === 0).map(r => r.name);
     const valueAllocator = new ValueAllocator(generalPurposeRegisters, this.gen);
     this.gen.genInit();
     this.genStatements(this.ast.statements, valueAllocator);
     this.gen.genEnd();
+    this.genStringLiteralData();
 
     //console.log(valueAllocator);
     //console.log(this.varIdMap);
@@ -48,13 +49,13 @@ export class CodeGen {
       return this.varIdMap.get(varName)!;
     };
     if (expr instanceof BinaryExpression) {
-      if (!(expr.leftExpression instanceof LiteralExpression) && expr.rightExpression instanceof LiteralExpression) {
+      if (!(expr.leftExpression instanceof NumberLiteralExpression) && expr.rightExpression instanceof NumberLiteralExpression) {
         const id = this.genExpression(expr.leftExpression, valueAllocator);
         const reg = valueAllocator.ensureOnRegister(id);
         this.gen.genRegLitComputation(expr.operation, expr.rightExpression.value, reg);
         valueAllocator.informChanged(id);
         return id;
-      } else if (expr.leftExpression instanceof LiteralExpression && !(expr.rightExpression instanceof LiteralExpression)) {
+      } else if (expr.leftExpression instanceof NumberLiteralExpression && !(expr.rightExpression instanceof NumberLiteralExpression)) {
         if (expr.operation === '-' || expr.operation === '<' || expr.operation === '>') {
           const id1 = this.genExpression(expr.leftExpression, valueAllocator);
           const id2 = this.genExpression(expr.rightExpression, valueAllocator);
@@ -71,7 +72,7 @@ export class CodeGen {
           valueAllocator.informChanged(id2);
           return id2;
         }
-      } else if (expr.leftExpression instanceof LiteralExpression && expr.rightExpression instanceof LiteralExpression) {
+      } else if (expr.leftExpression instanceof NumberLiteralExpression && expr.rightExpression instanceof NumberLiteralExpression) {
         const id = newTmpId();
         switch (expr.operation) {
           case '+':
@@ -124,7 +125,7 @@ export class CodeGen {
       }
       return id;
     } else if (expr instanceof NegateExpression) {
-      if (expr.expression instanceof LiteralExpression) {
+      if (expr.expression instanceof NumberLiteralExpression) {
         const id = newTmpId();
         valueAllocator.setLiteral(id, -expr.expression.value);
         return id;
@@ -139,12 +140,27 @@ export class CodeGen {
       const id = newTmpId();
       valueAllocator.setValue(getVarId(expr.varName), id);
       return id;
-    } else if (expr instanceof LiteralExpression) {
+    } else if (expr instanceof NumberLiteralExpression) {
       const id = newTmpId();
       valueAllocator.setLiteral(id, expr.value);
       return id;
+    } else if (expr instanceof StringLiteralExpression) {
+      const id = newTmpId();
+      valueAllocator.setLiteral(id, this.addStringLiteralData(expr.value));
+      return id;
     }
     throw new Error('Unsupported expression');
+  }
+
+  private genStringLiteralData() {
+    this.stringLiteralData.forEach((symbol, value) => this.gen.genStringLiteral(symbol, value));
+  }
+
+  private addStringLiteralData(value: string) {
+    if (this.stringLiteralData.has(value)) return this.stringLiteralData.get(value)!;
+    const symbol = 'str_lit_' + this.nextStringLiteralNum++;
+    this.stringLiteralData.set(value, symbol);
+    return symbol;
   }
 
   private genStatements(statements: Statement[], valueAllocator: ValueAllocator) {

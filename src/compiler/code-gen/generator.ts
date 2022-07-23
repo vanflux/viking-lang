@@ -30,8 +30,8 @@ export class Generator {
     }
   }
 
-  genLitToRegMov(literal: number, reg: string) {
-    if (literal >= 128 && literal <= 255) {
+  genLitToRegMov(literal: number | string, reg: string) {
+    if (typeof literal === 'number' && literal >= 128 && literal <= 255) {
       this.code.push(`ldc ${reg}, 0`);
       this.code.push(`ldc ${reg}, ${literal}`);
     } else {
@@ -105,6 +105,10 @@ export class Generator {
 
   genSymbol(symbolName: string) {
     this.code.push(`${symbolName}`);
+  }
+
+  genStringLiteral(symbolName: string, value: string) {
+    this.code.push(`${symbolName} "${value}"`);
   }
 
   genPrintChar(reg: string) {

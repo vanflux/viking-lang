@@ -5,7 +5,7 @@ export interface AllocableValue {
   changed: boolean;
   register?: string;
   stackPos?: number;
-  literal?: number;
+  literal?: number | string;
 }
 
 export class ValueAllocator {
@@ -127,7 +127,7 @@ export class ValueAllocator {
    * @param id
    * @param literal
    */
-  setLiteral(id: number, literal: number) {
+  setLiteral(id: number, literal: number | string) {
     const allocable = this.getAllocable(id);
     this.deallocRegister(id, false);
     allocable.literal = literal;

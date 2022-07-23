@@ -8,6 +8,7 @@ import {
   ParenExprContext,
   RelExprContext,
   StatContext,
+  StringExprContext,
   TermExprContext,
 } from './antlr/vikingParser';
 
@@ -29,8 +30,15 @@ export class VarReference implements Expression {
   }
 }
 
-export class LiteralExpression implements Expression {
+export class NumberLiteralExpression implements Expression {
   constructor(public text: string, public value: number) {}
+  process<T>(func: ProcessFunc<T>, ctx?: T) {
+    func(this, ctx);
+  }
+}
+
+export class StringLiteralExpression implements Expression {
+  constructor(public text: string, public value: string) {}
   process<T>(func: ProcessFunc<T>, ctx?: T) {
     func(this, ctx);
   }
@@ -150,6 +158,7 @@ export class Ast {
         | AddExprContext
         | CallExprContext
         | TermExprContext
+        | StringExprContext
     ): Expression {
       if (ctx instanceof ParenExprContext) {
         return expressionToAst(ctx.expr());
@@ -192,15 +201,23 @@ export class Ast {
           return new CallExpression(ctx.text, ctx.getChild(0).text, ctx.expr().map(expressionToAst));
         }
       } else if (ctx instanceof TermExprContext) {
-        if (ctx.parenExpr()) {
-          return expressionToAst(ctx.parenExpr()!);
+        if (ctx.stringExpr()) {
+          return expressionToAst(ctx.stringExpr()!);
         } else {
           const text = ctx.text;
           if (text[0] >= '0' && text[0] <= '9') {
-            return new LiteralExpression(text, Number(text));
+            return new NumberLiteralExpression(text, Number(text));
           } else {
             return new VarReference(text, text);
           }
+        }
+      } else if (ctx instanceof StringExprContext) {
+        if (ctx.parenExpr()) {
+          return expressionToAst(ctx.parenExpr()!);
+        } else {
+          const text = ctx.STRING()!.text;
+          const value = text.slice(1, text.length - 1);
+          return new StringLiteralExpression(ctx.text, value);
         }
       }
       throw new Error('Unknown expression: ' + ctx);

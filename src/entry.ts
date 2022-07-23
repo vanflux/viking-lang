@@ -12,15 +12,10 @@ export async function main() {
   const start = Date.now();
 
   const langCode = `
-  a = 0;
-  b = 1;
-  printn(a);
-  while (b < 128) {
-    printn(b);
-    c = a + b;
-    a = b;
-    b = c;
-  }
+  d = "a";
+  e = "b";
+  f = "aasdkljas \\n\\r\\x0d";
+  printn(d);
   `;
 
   const architecture = ArchitectureManager.getViking16Arch();
