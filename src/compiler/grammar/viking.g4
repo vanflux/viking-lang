@@ -43,18 +43,28 @@ negExpr
    ;
 
 callExpr
-   : termExpr
+   : stringExpr
    | ID '(' expr (',' expr)* ')'
+   ;
+
+stringExpr
+   : STRING
+   | arrayExpr
+   ;
+
+arrayExpr
+   : '[' expr (',' expr)* ']'
+   | arrayAccessExpr
+   ;
+
+arrayAccessExpr
+   : termExpr '[' expr ']'
+   | termExpr
    ;
 
 termExpr
    : ID
    | DIGITS
-   | stringExpr
-   ;
-
-stringExpr
-   : STRING
    | parenExpr
    ;
 

@@ -7,7 +7,7 @@
     "start": "ts-node-dev --respawn --transpile-only --exit-child src/entry.ts",
     "build": "tsc",
     "test": "mocha --slow -1 -r ts-node/register 'tests/**/*.ts'",
-    "antlr4ts": "antlr4ts -visitor src/compiler/grammar/viking.g4 -o src/compiler/antlr",
+    "antlr4ts": "cd src/compiler/grammar && antlr4ts -visitor viking.g4 -o ../antlr",
     "coverage": "nyc --reporter=lcov --reporter=text-summary npm t",
     "format": "prettier --ignore-path .gitignore --write ."
   },

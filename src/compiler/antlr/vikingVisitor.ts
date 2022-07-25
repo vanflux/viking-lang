@@ -1,4 +1,4 @@
-// Generated from src/compiler/grammar/viking.g4 by ANTLR 4.9.0-SNAPSHOT
+// Generated from viking.g4 by ANTLR 4.9.0-SNAPSHOT
 
 
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
@@ -12,8 +12,10 @@ import { RelExprContext } from "./vikingParser";
 import { AddExprContext } from "./vikingParser";
 import { NegExprContext } from "./vikingParser";
 import { CallExprContext } from "./vikingParser";
-import { TermExprContext } from "./vikingParser";
 import { StringExprContext } from "./vikingParser";
+import { ArrayExprContext } from "./vikingParser";
+import { ArrayAccessExprContext } from "./vikingParser";
+import { TermExprContext } from "./vikingParser";
 
 
 /**
@@ -88,17 +90,31 @@ export interface vikingVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitCallExpr?: (ctx: CallExprContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `vikingParser.termExpr`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitTermExpr?: (ctx: TermExprContext) => Result;
-
-	/**
 	 * Visit a parse tree produced by `vikingParser.stringExpr`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	visitStringExpr?: (ctx: StringExprContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.arrayExpr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitArrayExpr?: (ctx: ArrayExprContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.arrayAccessExpr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitArrayAccessExpr?: (ctx: ArrayAccessExprContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.termExpr`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitTermExpr?: (ctx: TermExprContext) => Result;
 }
 

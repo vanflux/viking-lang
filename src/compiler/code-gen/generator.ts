@@ -1,5 +1,11 @@
+import { Architecture } from "../../common";
+
 export class Generator {
   public code: string[] = [];
+
+  constructor(
+    private architecture: Architecture
+  ) {}
 
   genInit() {
     this.code.push('main');
@@ -8,6 +14,37 @@ export class Generator {
 
   genEnd() {
     this.code.push('hcf');
+  }
+
+  genOffsetMemToRegMov(
+    offset: number | string,
+    offsetIsReg: boolean,
+    memAddr: number | string,
+    memAddrIsReg: boolean,
+    destReg: string
+  ) {
+    if (offset === 0) {
+      this.code.push(`ldw ${destReg}, ${memAddr}`); // Load memory address value to destReg
+    } else {
+      if (typeof offset === 'number' && typeof memAddr === 'number') {
+        this.genLitToRegMov(memAddr + offset * this.architecture.getByteWidth(), 'r0');
+      } else {
+        if (memAddrIsReg) {
+          this.code.push(`mov r0, ${memAddr}`); // Load memory address pointer to temporary register
+        } else {
+          this.genLitToRegMov(memAddr, 'r0');
+        }
+        for (let i = 0; i < this.architecture.getByteWidth(); i++) {
+          // Apply offset to temporary pointer
+          if (offsetIsReg) {
+            this.code.push(`add r0, r0, ${offset}`);
+          } else {
+            this.code.push(`add r0, ${offset}`);
+          }
+        }
+      }
+      this.code.push(`ldw ${destReg}, r0`); // Load value to destReg
+    }
   }
 
   genStackToRegMov(wpos: number, destReg: string) {
@@ -109,6 +146,10 @@ export class Generator {
 
   genStringLiteral(symbolName: string, value: string) {
     this.code.push(`${symbolName} "${value}"`);
+  }
+
+  genNumbersLiteral(symbolName: string, numbers: number[]) {
+    this.code.push(`${symbolName} ${numbers.join(' ')}`);
   }
 
   genPrintChar(reg: string) {

@@ -1,4 +1,4 @@
-// Generated from src/compiler/grammar/viking.g4 by ANTLR 4.9.0-SNAPSHOT
+// Generated from viking.g4 by ANTLR 4.9.0-SNAPSHOT
 
 
 import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
@@ -12,8 +12,10 @@ import { RelExprContext } from "./vikingParser";
 import { AddExprContext } from "./vikingParser";
 import { NegExprContext } from "./vikingParser";
 import { CallExprContext } from "./vikingParser";
-import { TermExprContext } from "./vikingParser";
 import { StringExprContext } from "./vikingParser";
+import { ArrayExprContext } from "./vikingParser";
+import { ArrayAccessExprContext } from "./vikingParser";
+import { TermExprContext } from "./vikingParser";
 
 
 /**
@@ -121,17 +123,6 @@ export interface vikingListener extends ParseTreeListener {
 	exitCallExpr?: (ctx: CallExprContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `vikingParser.termExpr`.
-	 * @param ctx the parse tree
-	 */
-	enterTermExpr?: (ctx: TermExprContext) => void;
-	/**
-	 * Exit a parse tree produced by `vikingParser.termExpr`.
-	 * @param ctx the parse tree
-	 */
-	exitTermExpr?: (ctx: TermExprContext) => void;
-
-	/**
 	 * Enter a parse tree produced by `vikingParser.stringExpr`.
 	 * @param ctx the parse tree
 	 */
@@ -141,5 +132,38 @@ export interface vikingListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitStringExpr?: (ctx: StringExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `vikingParser.arrayExpr`.
+	 * @param ctx the parse tree
+	 */
+	enterArrayExpr?: (ctx: ArrayExprContext) => void;
+	/**
+	 * Exit a parse tree produced by `vikingParser.arrayExpr`.
+	 * @param ctx the parse tree
+	 */
+	exitArrayExpr?: (ctx: ArrayExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `vikingParser.arrayAccessExpr`.
+	 * @param ctx the parse tree
+	 */
+	enterArrayAccessExpr?: (ctx: ArrayAccessExprContext) => void;
+	/**
+	 * Exit a parse tree produced by `vikingParser.arrayAccessExpr`.
+	 * @param ctx the parse tree
+	 */
+	exitArrayAccessExpr?: (ctx: ArrayAccessExprContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `vikingParser.termExpr`.
+	 * @param ctx the parse tree
+	 */
+	enterTermExpr?: (ctx: TermExprContext) => void;
+	/**
+	 * Exit a parse tree produced by `vikingParser.termExpr`.
+	 * @param ctx the parse tree
+	 */
+	exitTermExpr?: (ctx: TermExprContext) => void;
 }
 

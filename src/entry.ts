@@ -12,10 +12,30 @@ export async function main() {
   const start = Date.now();
 
   const langCode = `
-  d = "a";
-  e = "b";
-  f = "aasdkljas \\n\\r\\x0d";
-  printn(d);
+  map = [
+    0,0,0,0,
+    0,1,0,0,
+    0,0,0,0,
+    0,0,0,0
+  ];
+  width = 4;
+  i = 0;
+  x = 0;
+  y = 0;
+  while(i < 16) {
+    if (map[i] > 0) {
+      printc(90);
+    } else {
+      printc(32);
+    }
+    x = x + 1;
+    if (x > width - 1) {
+      x = 0;
+      y = y + 1;
+      printc(10);
+    }
+    i = i + 1;
+  }
   `;
 
   const architecture = ArchitectureManager.getViking16Arch();

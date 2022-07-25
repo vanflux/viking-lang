@@ -15,19 +15,24 @@ import {
   Statement,
   VarReference,
   WhileStatement,
+  ArrayLiteralExpression,
+  ArrayAccessExpression,
 } from '../ast';
 import { Generator } from './generator';
 import { ValueAllocator } from './value-allocator';
 
 export class CodeGen {
-  gen = new Generator();
+  gen: Generator;
   varIdMap = new Map<string, number>();
   nextIfNum = 0;
   nextWhileNum = 0;
   nextStringLiteralNum = 0;
-  stringLiteralData = new Map<string, string>();
+  nextArrayLiteralNum = 0;
+  stringLiteralData = new Map<string, string>(); // Symbol per string value
+  arrayLiteralData = new Map<string, number[]>(); // Array literal data per symbol
 
   constructor(private architecture: Architecture, private ast: Ast) {
+    this.gen = new Generator(this.architecture);
     const registers = this.architecture.getRegisters();
     const generalPurposeRegisters = registers.filter(r => r.aliases.length === 0).map(r => r.name);
     const valueAllocator = new ValueAllocator(generalPurposeRegisters, this.gen);
@@ -35,10 +40,24 @@ export class CodeGen {
     this.genStatements(this.ast.statements, valueAllocator);
     this.gen.genEnd();
     this.genStringLiteralData();
+    this.genArrayLiteralData();
 
     //console.log(valueAllocator);
     //console.log(this.varIdMap);
     //console.log('code length', this.gen.code.length);
+  }
+
+  private addArrayLiteralData(values: number[]) {
+    const symbol = 'arr_lit_' + this.nextArrayLiteralNum++;
+    this.arrayLiteralData.set(symbol, values);
+    return symbol;
+  }
+
+  private addStringLiteralData(value: string) {
+    if (this.stringLiteralData.has(value)) return this.stringLiteralData.get(value)!;
+    const symbol = 'str_lit_' + this.nextStringLiteralNum++;
+    this.stringLiteralData.set(value, symbol);
+    return symbol;
   }
 
   private genExpression(expr: Expression, valueAllocator: ValueAllocator): number {
@@ -148,19 +167,40 @@ export class CodeGen {
       const id = newTmpId();
       valueAllocator.setLiteral(id, this.addStringLiteralData(expr.value));
       return id;
+    } else if (expr instanceof ArrayLiteralExpression) {
+      const id = newTmpId();
+      if (expr.expressions.some(x => !(x instanceof NumberLiteralExpression))) throw new Error('Only number literals are allowed on global array declarations');
+      const numberLiteralExpressions = expr.expressions as NumberLiteralExpression[];
+      const values = numberLiteralExpressions.map(x => x.value);
+      valueAllocator.setLiteral(id, this.addArrayLiteralData(values));
+      return id;
+    } else if (expr instanceof ArrayAccessExpression) {
+      const id = newTmpId();
+      let arrayId, array, offsetId, offset, arrayIsReg = false, offsetIsReg = false;
+      let blacklist: string[] = [];
+      if (expr.array instanceof NumberLiteralExpression) {
+        array = expr.array.value;
+      } else {
+        arrayId = this.genExpression(expr.array, valueAllocator);
+        array = valueAllocator.ensureOnRegister(arrayId, true, blacklist);
+        arrayIsReg = true;
+        blacklist.push(array);
+      }
+      if (expr.offset instanceof NumberLiteralExpression) {
+        offset = expr.offset.value;
+      } else {
+        offsetId = this.genExpression(expr.offset, valueAllocator);
+        offset = valueAllocator.ensureOnRegister(offsetId, true, blacklist);
+        offsetIsReg = true;
+        blacklist.push(offset);
+      }
+      const destReg = valueAllocator.ensureOnRegister(id, false, blacklist);
+      if (arrayId !== undefined) valueAllocator.deallocId(arrayId);
+      if (offsetId !== undefined) valueAllocator.deallocId(offsetId);
+      this.gen.genOffsetMemToRegMov(offset, offsetIsReg, array, arrayIsReg, destReg);
+      return id;
     }
     throw new Error('Unsupported expression');
-  }
-
-  private genStringLiteralData() {
-    this.stringLiteralData.forEach((symbol, value) => this.gen.genStringLiteral(symbol, value));
-  }
-
-  private addStringLiteralData(value: string) {
-    if (this.stringLiteralData.has(value)) return this.stringLiteralData.get(value)!;
-    const symbol = 'str_lit_' + this.nextStringLiteralNum++;
-    this.stringLiteralData.set(value, symbol);
-    return symbol;
   }
 
   private genStatements(statements: Statement[], valueAllocator: ValueAllocator) {
@@ -216,5 +256,13 @@ export class CodeGen {
         throw new Error('Unsupported statement');
       }
     }
+  }
+
+  private genStringLiteralData() {
+    this.stringLiteralData.forEach((symbol, value) => this.gen.genStringLiteral(symbol, value));
+  }
+
+  private genArrayLiteralData() {
+    this.arrayLiteralData.forEach((values, symbol) => this.gen.genNumbersLiteral(symbol, values));
   }
 }
