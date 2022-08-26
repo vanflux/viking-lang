@@ -1,17 +1,46 @@
 grammar viking;
 
 entry
-   : stat +
+   : externalStmt +
    ;
 
-stat
-   : 'if' parenExpr stat
-   | 'if' parenExpr stat 'else' stat
-   | 'while' parenExpr stat
-   | '{' stat* '}'
+// Statements
+
+externalStmt
+   : varDeclStmt
+   | fnDeclStmt
+   ;
+
+stmt
+   : ifStmt
+   | whileStmt
+   | stmtBlock
    | expr ';'
    | ';'
    ;
+
+stmtBlock
+   : '{' stmt* '}'
+   ;
+
+ifStmt
+   : 'if' parenExpr stmt
+   | 'if' parenExpr stmt 'else' stmt
+   ;
+
+whileStmt
+   : 'while' parenExpr stmt
+   ;
+
+varDeclStmt
+   : TYPE ID '=' expr ';'
+   ;
+
+fnDeclStmt
+   : TYPE ID '(' (TYPE ID (',' TYPE ID)*)? ')' stmt
+   ;
+
+// Expressions
 
 parenExpr
    : '(' expr ')'
@@ -66,6 +95,12 @@ termExpr
    : ID
    | DIGITS
    | parenExpr
+   ;
+
+// Tokens
+
+TYPE
+   : 'int'
    ;
 
 STRING

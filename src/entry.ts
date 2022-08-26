@@ -12,29 +12,22 @@ export async function main() {
   const start = Date.now();
 
   const langCode = `
-  map = [
-    0,0,0,0,
-    0,1,0,0,
-    0,0,0,0,
-    0,0,0,0
-  ];
-  width = 4;
-  i = 0;
-  x = 0;
-  y = 0;
-  while(i < 16) {
-    if (map[i] > 0) {
-      printc(90);
-    } else {
-      printc(32);
+  int test(int a, int b) {
+    int c = a + b;
+    int d = 0;
+    int e = 1;
+    while (d < 10) {
+      c = c + e;
+      if (e < 5) {
+        e = e + 1;
+      } else {
+        e = e + 2;
+        c = c + 1;
+      }
+      d = d + 1;
     }
-    x = x + 1;
-    if (x > width - 1) {
-      x = 0;
-      y = y + 1;
-      printc(10);
-    }
-    i = i + 1;
+    int f = ((-(1 - c)) + 55 + 3 - (c + c));
+    return 5 - f;
   }
   `;
 

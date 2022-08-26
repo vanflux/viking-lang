@@ -44,37 +44,45 @@ export class vikingParser extends Parser {
 	public static readonly T__13 = 14;
 	public static readonly T__14 = 15;
 	public static readonly T__15 = 16;
-	public static readonly STRING = 17;
-	public static readonly ID = 18;
-	public static readonly DIGITS = 19;
-	public static readonly WS = 20;
+	public static readonly TYPE = 17;
+	public static readonly STRING = 18;
+	public static readonly ID = 19;
+	public static readonly DIGITS = 20;
+	public static readonly WS = 21;
 	public static readonly RULE_entry = 0;
-	public static readonly RULE_stat = 1;
-	public static readonly RULE_parenExpr = 2;
-	public static readonly RULE_expr = 3;
-	public static readonly RULE_assignExpr = 4;
-	public static readonly RULE_relExpr = 5;
-	public static readonly RULE_addExpr = 6;
-	public static readonly RULE_negExpr = 7;
-	public static readonly RULE_callExpr = 8;
-	public static readonly RULE_stringExpr = 9;
-	public static readonly RULE_arrayExpr = 10;
-	public static readonly RULE_arrayAccessExpr = 11;
-	public static readonly RULE_termExpr = 12;
+	public static readonly RULE_externalStmt = 1;
+	public static readonly RULE_stmt = 2;
+	public static readonly RULE_stmtBlock = 3;
+	public static readonly RULE_ifStmt = 4;
+	public static readonly RULE_whileStmt = 5;
+	public static readonly RULE_varDeclStmt = 6;
+	public static readonly RULE_fnDeclStmt = 7;
+	public static readonly RULE_parenExpr = 8;
+	public static readonly RULE_expr = 9;
+	public static readonly RULE_assignExpr = 10;
+	public static readonly RULE_relExpr = 11;
+	public static readonly RULE_addExpr = 12;
+	public static readonly RULE_negExpr = 13;
+	public static readonly RULE_callExpr = 14;
+	public static readonly RULE_stringExpr = 15;
+	public static readonly RULE_arrayExpr = 16;
+	public static readonly RULE_arrayAccessExpr = 17;
+	public static readonly RULE_termExpr = 18;
 	// tslint:disable:no-trailing-whitespace
 	public static readonly ruleNames: string[] = [
-		"entry", "stat", "parenExpr", "expr", "assignExpr", "relExpr", "addExpr", 
+		"entry", "externalStmt", "stmt", "stmtBlock", "ifStmt", "whileStmt", "varDeclStmt", 
+		"fnDeclStmt", "parenExpr", "expr", "assignExpr", "relExpr", "addExpr", 
 		"negExpr", "callExpr", "stringExpr", "arrayExpr", "arrayAccessExpr", "termExpr",
 	];
 
 	private static readonly _LITERAL_NAMES: Array<string | undefined> = [
-		undefined, "'if'", "'else'", "'while'", "'{'", "'}'", "';'", "'('", "')'", 
-		"'='", "'<'", "'>'", "'+'", "'-'", "','", "'['", "']'",
+		undefined, "';'", "'{'", "'}'", "'if'", "'else'", "'while'", "'='", "'('", 
+		"','", "')'", "'<'", "'>'", "'+'", "'-'", "'['", "']'", "'int'",
 	];
 	private static readonly _SYMBOLIC_NAMES: Array<string | undefined> = [
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
 		undefined, undefined, undefined, undefined, undefined, undefined, undefined, 
-		undefined, undefined, undefined, "STRING", "ID", "DIGITS", "WS",
+		undefined, undefined, undefined, "TYPE", "STRING", "ID", "DIGITS", "WS",
 	];
 	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(vikingParser._LITERAL_NAMES, vikingParser._SYMBOLIC_NAMES, []);
 
@@ -110,20 +118,20 @@ export class vikingParser extends Parser {
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 27;
+			this.state = 39;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
 			do {
 				{
 				{
-				this.state = 26;
-				this.stat();
+				this.state = 38;
+				this.externalStmt();
 				}
 				}
-				this.state = 29;
+				this.state = 41;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-			} while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << vikingParser.T__0) | (1 << vikingParser.T__2) | (1 << vikingParser.T__3) | (1 << vikingParser.T__5) | (1 << vikingParser.T__6) | (1 << vikingParser.T__12) | (1 << vikingParser.T__14) | (1 << vikingParser.STRING) | (1 << vikingParser.ID) | (1 << vikingParser.DIGITS))) !== 0));
+			} while (_la === vikingParser.TYPE);
 			}
 		}
 		catch (re) {
@@ -141,95 +149,322 @@ export class vikingParser extends Parser {
 		return _localctx;
 	}
 	// @RuleVersion(0)
-	public stat(): StatContext {
-		let _localctx: StatContext = new StatContext(this._ctx, this.state);
-		this.enterRule(_localctx, 2, vikingParser.RULE_stat);
-		let _la: number;
+	public externalStmt(): ExternalStmtContext {
+		let _localctx: ExternalStmtContext = new ExternalStmtContext(this._ctx, this.state);
+		this.enterRule(_localctx, 2, vikingParser.RULE_externalStmt);
 		try {
-			this.state = 57;
+			this.state = 45;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 2, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 1, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 31;
-				this.match(vikingParser.T__0);
-				this.state = 32;
-				this.parenExpr();
-				this.state = 33;
-				this.stat();
+				this.state = 43;
+				this.varDeclStmt();
 				}
 				break;
 
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 35;
-				this.match(vikingParser.T__0);
-				this.state = 36;
-				this.parenExpr();
-				this.state = 37;
-				this.stat();
-				this.state = 38;
-				this.match(vikingParser.T__1);
-				this.state = 39;
-				this.stat();
+				this.state = 44;
+				this.fnDeclStmt();
 				}
 				break;
-
-			case 3:
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public stmt(): StmtContext {
+		let _localctx: StmtContext = new StmtContext(this._ctx, this.state);
+		this.enterRule(_localctx, 4, vikingParser.RULE_stmt);
+		try {
+			this.state = 55;
+			this._errHandler.sync(this);
+			switch (this._input.LA(1)) {
+			case vikingParser.T__3:
+				this.enterOuterAlt(_localctx, 1);
+				{
+				this.state = 47;
+				this.ifStmt();
+				}
+				break;
+			case vikingParser.T__5:
+				this.enterOuterAlt(_localctx, 2);
+				{
+				this.state = 48;
+				this.whileStmt();
+				}
+				break;
+			case vikingParser.T__1:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 41;
-				this.match(vikingParser.T__2);
-				this.state = 42;
+				this.state = 49;
+				this.stmtBlock();
+				}
+				break;
+			case vikingParser.TYPE:
+				this.enterOuterAlt(_localctx, 4);
+				{
+				this.state = 50;
+				this.varDeclStmt();
+				}
+				break;
+			case vikingParser.T__7:
+			case vikingParser.T__13:
+			case vikingParser.T__14:
+			case vikingParser.STRING:
+			case vikingParser.ID:
+			case vikingParser.DIGITS:
+				this.enterOuterAlt(_localctx, 5);
+				{
+				this.state = 51;
+				this.expr();
+				this.state = 52;
+				this.match(vikingParser.T__0);
+				}
+				break;
+			case vikingParser.T__0:
+				this.enterOuterAlt(_localctx, 6);
+				{
+				this.state = 54;
+				this.match(vikingParser.T__0);
+				}
+				break;
+			default:
+				throw new NoViableAltException(this);
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public stmtBlock(): StmtBlockContext {
+		let _localctx: StmtBlockContext = new StmtBlockContext(this._ctx, this.state);
+		this.enterRule(_localctx, 6, vikingParser.RULE_stmtBlock);
+		let _la: number;
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 57;
+			this.match(vikingParser.T__1);
+			this.state = 61;
+			this._errHandler.sync(this);
+			_la = this._input.LA(1);
+			while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << vikingParser.T__0) | (1 << vikingParser.T__1) | (1 << vikingParser.T__3) | (1 << vikingParser.T__5) | (1 << vikingParser.T__7) | (1 << vikingParser.T__13) | (1 << vikingParser.T__14) | (1 << vikingParser.TYPE) | (1 << vikingParser.STRING) | (1 << vikingParser.ID) | (1 << vikingParser.DIGITS))) !== 0)) {
+				{
+				{
+				this.state = 58;
+				this.stmt();
+				}
+				}
+				this.state = 63;
+				this._errHandler.sync(this);
+				_la = this._input.LA(1);
+			}
+			this.state = 64;
+			this.match(vikingParser.T__2);
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public ifStmt(): IfStmtContext {
+		let _localctx: IfStmtContext = new IfStmtContext(this._ctx, this.state);
+		this.enterRule(_localctx, 8, vikingParser.RULE_ifStmt);
+		try {
+			this.state = 76;
+			this._errHandler.sync(this);
+			switch ( this.interpreter.adaptivePredict(this._input, 4, this._ctx) ) {
+			case 1:
+				this.enterOuterAlt(_localctx, 1);
+				{
+				this.state = 66;
+				this.match(vikingParser.T__3);
+				this.state = 67;
 				this.parenExpr();
-				this.state = 43;
-				this.stat();
+				this.state = 68;
+				this.stmt();
 				}
 				break;
 
-			case 4:
-				this.enterOuterAlt(_localctx, 4);
+			case 2:
+				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 45;
+				this.state = 70;
 				this.match(vikingParser.T__3);
-				this.state = 49;
+				this.state = 71;
+				this.parenExpr();
+				this.state = 72;
+				this.stmt();
+				this.state = 73;
+				this.match(vikingParser.T__4);
+				this.state = 74;
+				this.stmt();
+				}
+				break;
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public whileStmt(): WhileStmtContext {
+		let _localctx: WhileStmtContext = new WhileStmtContext(this._ctx, this.state);
+		this.enterRule(_localctx, 10, vikingParser.RULE_whileStmt);
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 78;
+			this.match(vikingParser.T__5);
+			this.state = 79;
+			this.parenExpr();
+			this.state = 80;
+			this.stmt();
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public varDeclStmt(): VarDeclStmtContext {
+		let _localctx: VarDeclStmtContext = new VarDeclStmtContext(this._ctx, this.state);
+		this.enterRule(_localctx, 12, vikingParser.RULE_varDeclStmt);
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 82;
+			this.match(vikingParser.TYPE);
+			this.state = 83;
+			this.match(vikingParser.ID);
+			this.state = 84;
+			this.match(vikingParser.T__6);
+			this.state = 85;
+			this.expr();
+			this.state = 86;
+			this.match(vikingParser.T__0);
+			}
+		}
+		catch (re) {
+			if (re instanceof RecognitionException) {
+				_localctx.exception = re;
+				this._errHandler.reportError(this, re);
+				this._errHandler.recover(this, re);
+			} else {
+				throw re;
+			}
+		}
+		finally {
+			this.exitRule();
+		}
+		return _localctx;
+	}
+	// @RuleVersion(0)
+	public fnDeclStmt(): FnDeclStmtContext {
+		let _localctx: FnDeclStmtContext = new FnDeclStmtContext(this._ctx, this.state);
+		this.enterRule(_localctx, 14, vikingParser.RULE_fnDeclStmt);
+		let _la: number;
+		try {
+			this.enterOuterAlt(_localctx, 1);
+			{
+			this.state = 88;
+			this.match(vikingParser.TYPE);
+			this.state = 89;
+			this.match(vikingParser.ID);
+			this.state = 90;
+			this.match(vikingParser.T__7);
+			this.state = 101;
+			this._errHandler.sync(this);
+			_la = this._input.LA(1);
+			if (_la === vikingParser.TYPE) {
+				{
+				this.state = 91;
+				this.match(vikingParser.TYPE);
+				this.state = 92;
+				this.match(vikingParser.ID);
+				this.state = 98;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << vikingParser.T__0) | (1 << vikingParser.T__2) | (1 << vikingParser.T__3) | (1 << vikingParser.T__5) | (1 << vikingParser.T__6) | (1 << vikingParser.T__12) | (1 << vikingParser.T__14) | (1 << vikingParser.STRING) | (1 << vikingParser.ID) | (1 << vikingParser.DIGITS))) !== 0)) {
+				while (_la === vikingParser.T__8) {
 					{
 					{
-					this.state = 46;
-					this.stat();
+					this.state = 93;
+					this.match(vikingParser.T__8);
+					this.state = 94;
+					this.match(vikingParser.TYPE);
+					this.state = 95;
+					this.match(vikingParser.ID);
 					}
 					}
-					this.state = 51;
+					this.state = 100;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 52;
-				this.match(vikingParser.T__4);
 				}
-				break;
+			}
 
-			case 5:
-				this.enterOuterAlt(_localctx, 5);
-				{
-				this.state = 53;
-				this.expr();
-				this.state = 54;
-				this.match(vikingParser.T__5);
-				}
-				break;
-
-			case 6:
-				this.enterOuterAlt(_localctx, 6);
-				{
-				this.state = 56;
-				this.match(vikingParser.T__5);
-				}
-				break;
+			this.state = 103;
+			this.match(vikingParser.T__9);
+			this.state = 104;
+			this.stmt();
 			}
 		}
 		catch (re) {
@@ -249,16 +484,16 @@ export class vikingParser extends Parser {
 	// @RuleVersion(0)
 	public parenExpr(): ParenExprContext {
 		let _localctx: ParenExprContext = new ParenExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 4, vikingParser.RULE_parenExpr);
+		this.enterRule(_localctx, 16, vikingParser.RULE_parenExpr);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
-			this.state = 59;
-			this.match(vikingParser.T__6);
-			this.state = 60;
-			this.expr();
-			this.state = 61;
+			this.state = 106;
 			this.match(vikingParser.T__7);
+			this.state = 107;
+			this.expr();
+			this.state = 108;
+			this.match(vikingParser.T__9);
 			}
 		}
 		catch (re) {
@@ -278,15 +513,15 @@ export class vikingParser extends Parser {
 	// @RuleVersion(0)
 	public expr(): ExprContext {
 		let _localctx: ExprContext = new ExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 6, vikingParser.RULE_expr);
+		this.enterRule(_localctx, 18, vikingParser.RULE_expr);
 		try {
-			this.state = 65;
+			this.state = 112;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 3, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 7, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 63;
+				this.state = 110;
 				this.assignExpr();
 				}
 				break;
@@ -294,7 +529,7 @@ export class vikingParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 64;
+				this.state = 111;
 				this.parenExpr();
 				}
 				break;
@@ -317,15 +552,15 @@ export class vikingParser extends Parser {
 	// @RuleVersion(0)
 	public assignExpr(): AssignExprContext {
 		let _localctx: AssignExprContext = new AssignExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 8, vikingParser.RULE_assignExpr);
+		this.enterRule(_localctx, 20, vikingParser.RULE_assignExpr);
 		try {
-			this.state = 71;
+			this.state = 118;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 4, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 8, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 67;
+				this.state = 114;
 				this.relExpr(0);
 				}
 				break;
@@ -333,11 +568,11 @@ export class vikingParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 68;
+				this.state = 115;
 				this.match(vikingParser.ID);
-				this.state = 69;
-				this.match(vikingParser.T__8);
-				this.state = 70;
+				this.state = 116;
+				this.match(vikingParser.T__6);
+				this.state = 117;
 				this.expr();
 				}
 				break;
@@ -370,21 +605,21 @@ export class vikingParser extends Parser {
 		let _parentState: number = this.state;
 		let _localctx: RelExprContext = new RelExprContext(this._ctx, _parentState);
 		let _prevctx: RelExprContext = _localctx;
-		let _startState: number = 10;
-		this.enterRecursionRule(_localctx, 10, vikingParser.RULE_relExpr, _p);
+		let _startState: number = 22;
+		this.enterRecursionRule(_localctx, 22, vikingParser.RULE_relExpr, _p);
 		let _la: number;
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 74;
+			this.state = 121;
 			this.addExpr(0);
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 81;
+			this.state = 128;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 5, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 9, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -395,13 +630,13 @@ export class vikingParser extends Parser {
 					{
 					_localctx = new RelExprContext(_parentctx, _parentState);
 					this.pushNewRecursionContext(_localctx, _startState, vikingParser.RULE_relExpr);
-					this.state = 76;
+					this.state = 123;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
-					this.state = 77;
+					this.state = 124;
 					_la = this._input.LA(1);
-					if (!(_la === vikingParser.T__9 || _la === vikingParser.T__10)) {
+					if (!(_la === vikingParser.T__10 || _la === vikingParser.T__11)) {
 					this._errHandler.recoverInline(this);
 					} else {
 						if (this._input.LA(1) === Token.EOF) {
@@ -411,14 +646,14 @@ export class vikingParser extends Parser {
 						this._errHandler.reportMatch(this);
 						this.consume();
 					}
-					this.state = 78;
+					this.state = 125;
 					this.addExpr(0);
 					}
 					}
 				}
-				this.state = 83;
+				this.state = 130;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 5, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 9, this._ctx);
 			}
 			}
 		}
@@ -449,21 +684,21 @@ export class vikingParser extends Parser {
 		let _parentState: number = this.state;
 		let _localctx: AddExprContext = new AddExprContext(this._ctx, _parentState);
 		let _prevctx: AddExprContext = _localctx;
-		let _startState: number = 12;
-		this.enterRecursionRule(_localctx, 12, vikingParser.RULE_addExpr, _p);
+		let _startState: number = 24;
+		this.enterRecursionRule(_localctx, 24, vikingParser.RULE_addExpr, _p);
 		let _la: number;
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
 			{
 			{
-			this.state = 85;
+			this.state = 132;
 			this.negExpr();
 			}
 			this._ctx._stop = this._input.tryLT(-1);
-			this.state = 92;
+			this.state = 139;
 			this._errHandler.sync(this);
-			_alt = this.interpreter.adaptivePredict(this._input, 6, this._ctx);
+			_alt = this.interpreter.adaptivePredict(this._input, 10, this._ctx);
 			while (_alt !== 2 && _alt !== ATN.INVALID_ALT_NUMBER) {
 				if (_alt === 1) {
 					if (this._parseListeners != null) {
@@ -474,13 +709,13 @@ export class vikingParser extends Parser {
 					{
 					_localctx = new AddExprContext(_parentctx, _parentState);
 					this.pushNewRecursionContext(_localctx, _startState, vikingParser.RULE_addExpr);
-					this.state = 87;
+					this.state = 134;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
-					this.state = 88;
+					this.state = 135;
 					_la = this._input.LA(1);
-					if (!(_la === vikingParser.T__11 || _la === vikingParser.T__12)) {
+					if (!(_la === vikingParser.T__12 || _la === vikingParser.T__13)) {
 					this._errHandler.recoverInline(this);
 					} else {
 						if (this._input.LA(1) === Token.EOF) {
@@ -490,14 +725,14 @@ export class vikingParser extends Parser {
 						this._errHandler.reportMatch(this);
 						this.consume();
 					}
-					this.state = 89;
+					this.state = 136;
 					this.negExpr();
 					}
 					}
 				}
-				this.state = 94;
+				this.state = 141;
 				this._errHandler.sync(this);
-				_alt = this.interpreter.adaptivePredict(this._input, 6, this._ctx);
+				_alt = this.interpreter.adaptivePredict(this._input, 10, this._ctx);
 			}
 			}
 		}
@@ -518,28 +753,28 @@ export class vikingParser extends Parser {
 	// @RuleVersion(0)
 	public negExpr(): NegExprContext {
 		let _localctx: NegExprContext = new NegExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 14, vikingParser.RULE_negExpr);
+		this.enterRule(_localctx, 26, vikingParser.RULE_negExpr);
 		try {
-			this.state = 98;
+			this.state = 145;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case vikingParser.T__6:
+			case vikingParser.T__7:
 			case vikingParser.T__14:
 			case vikingParser.STRING:
 			case vikingParser.ID:
 			case vikingParser.DIGITS:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 95;
+				this.state = 142;
 				this.callExpr();
 				}
 				break;
-			case vikingParser.T__12:
+			case vikingParser.T__13:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 96;
-				this.match(vikingParser.T__12);
-				this.state = 97;
+				this.state = 143;
+				this.match(vikingParser.T__13);
+				this.state = 144;
 				this.callExpr();
 				}
 				break;
@@ -564,16 +799,16 @@ export class vikingParser extends Parser {
 	// @RuleVersion(0)
 	public callExpr(): CallExprContext {
 		let _localctx: CallExprContext = new CallExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 16, vikingParser.RULE_callExpr);
+		this.enterRule(_localctx, 28, vikingParser.RULE_callExpr);
 		let _la: number;
 		try {
-			this.state = 113;
+			this.state = 160;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 9, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 13, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 100;
+				this.state = 147;
 				this.stringExpr();
 				}
 				break;
@@ -581,30 +816,30 @@ export class vikingParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 101;
+				this.state = 148;
 				this.match(vikingParser.ID);
-				this.state = 102;
-				this.match(vikingParser.T__6);
-				this.state = 103;
+				this.state = 149;
+				this.match(vikingParser.T__7);
+				this.state = 150;
 				this.expr();
-				this.state = 108;
+				this.state = 155;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === vikingParser.T__13) {
+				while (_la === vikingParser.T__8) {
 					{
 					{
-					this.state = 104;
-					this.match(vikingParser.T__13);
-					this.state = 105;
+					this.state = 151;
+					this.match(vikingParser.T__8);
+					this.state = 152;
 					this.expr();
 					}
 					}
-					this.state = 110;
+					this.state = 157;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 111;
-				this.match(vikingParser.T__7);
+				this.state = 158;
+				this.match(vikingParser.T__9);
 				}
 				break;
 			}
@@ -626,25 +861,25 @@ export class vikingParser extends Parser {
 	// @RuleVersion(0)
 	public stringExpr(): StringExprContext {
 		let _localctx: StringExprContext = new StringExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 18, vikingParser.RULE_stringExpr);
+		this.enterRule(_localctx, 30, vikingParser.RULE_stringExpr);
 		try {
-			this.state = 117;
+			this.state = 164;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case vikingParser.STRING:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 115;
+				this.state = 162;
 				this.match(vikingParser.STRING);
 				}
 				break;
-			case vikingParser.T__6:
+			case vikingParser.T__7:
 			case vikingParser.T__14:
 			case vikingParser.ID:
 			case vikingParser.DIGITS:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 116;
+				this.state = 163;
 				this.arrayExpr();
 				}
 				break;
@@ -669,45 +904,45 @@ export class vikingParser extends Parser {
 	// @RuleVersion(0)
 	public arrayExpr(): ArrayExprContext {
 		let _localctx: ArrayExprContext = new ArrayExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 20, vikingParser.RULE_arrayExpr);
+		this.enterRule(_localctx, 32, vikingParser.RULE_arrayExpr);
 		let _la: number;
 		try {
-			this.state = 131;
+			this.state = 178;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case vikingParser.T__14:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 119;
+				this.state = 166;
 				this.match(vikingParser.T__14);
-				this.state = 120;
+				this.state = 167;
 				this.expr();
-				this.state = 125;
+				this.state = 172;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === vikingParser.T__13) {
+				while (_la === vikingParser.T__8) {
 					{
 					{
-					this.state = 121;
-					this.match(vikingParser.T__13);
-					this.state = 122;
+					this.state = 168;
+					this.match(vikingParser.T__8);
+					this.state = 169;
 					this.expr();
 					}
 					}
-					this.state = 127;
+					this.state = 174;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
 				}
-				this.state = 128;
+				this.state = 175;
 				this.match(vikingParser.T__15);
 				}
 				break;
-			case vikingParser.T__6:
+			case vikingParser.T__7:
 			case vikingParser.ID:
 			case vikingParser.DIGITS:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 130;
+				this.state = 177;
 				this.arrayAccessExpr();
 				}
 				break;
@@ -732,21 +967,21 @@ export class vikingParser extends Parser {
 	// @RuleVersion(0)
 	public arrayAccessExpr(): ArrayAccessExprContext {
 		let _localctx: ArrayAccessExprContext = new ArrayAccessExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 22, vikingParser.RULE_arrayAccessExpr);
+		this.enterRule(_localctx, 34, vikingParser.RULE_arrayAccessExpr);
 		try {
-			this.state = 139;
+			this.state = 186;
 			this._errHandler.sync(this);
-			switch ( this.interpreter.adaptivePredict(this._input, 13, this._ctx) ) {
+			switch ( this.interpreter.adaptivePredict(this._input, 17, this._ctx) ) {
 			case 1:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 133;
+				this.state = 180;
 				this.termExpr();
-				this.state = 134;
+				this.state = 181;
 				this.match(vikingParser.T__14);
-				this.state = 135;
+				this.state = 182;
 				this.expr();
-				this.state = 136;
+				this.state = 183;
 				this.match(vikingParser.T__15);
 				}
 				break;
@@ -754,7 +989,7 @@ export class vikingParser extends Parser {
 			case 2:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 138;
+				this.state = 185;
 				this.termExpr();
 				}
 				break;
@@ -777,29 +1012,29 @@ export class vikingParser extends Parser {
 	// @RuleVersion(0)
 	public termExpr(): TermExprContext {
 		let _localctx: TermExprContext = new TermExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 24, vikingParser.RULE_termExpr);
+		this.enterRule(_localctx, 36, vikingParser.RULE_termExpr);
 		try {
-			this.state = 144;
+			this.state = 191;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case vikingParser.ID:
 				this.enterOuterAlt(_localctx, 1);
 				{
-				this.state = 141;
+				this.state = 188;
 				this.match(vikingParser.ID);
 				}
 				break;
 			case vikingParser.DIGITS:
 				this.enterOuterAlt(_localctx, 2);
 				{
-				this.state = 142;
+				this.state = 189;
 				this.match(vikingParser.DIGITS);
 				}
 				break;
-			case vikingParser.T__6:
+			case vikingParser.T__7:
 				this.enterOuterAlt(_localctx, 3);
 				{
-				this.state = 143;
+				this.state = 190;
 				this.parenExpr();
 				}
 				break;
@@ -824,10 +1059,10 @@ export class vikingParser extends Parser {
 
 	public sempred(_localctx: RuleContext, ruleIndex: number, predIndex: number): boolean {
 		switch (ruleIndex) {
-		case 5:
+		case 11:
 			return this.relExpr_sempred(_localctx as RelExprContext, predIndex);
 
-		case 6:
+		case 12:
 			return this.addExpr_sempred(_localctx as AddExprContext, predIndex);
 		}
 		return true;
@@ -848,66 +1083,88 @@ export class vikingParser extends Parser {
 	}
 
 	public static readonly _serializedATN: string =
-		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03\x16\x95\x04\x02" +
+		"\x03\uC91D\uCABA\u058D\uAFBA\u4F53\u0607\uEA8B\uC241\x03\x17\xC4\x04\x02" +
 		"\t\x02\x04\x03\t\x03\x04\x04\t\x04\x04\x05\t\x05\x04\x06\t\x06\x04\x07" +
 		"\t\x07\x04\b\t\b\x04\t\t\t\x04\n\t\n\x04\v\t\v\x04\f\t\f\x04\r\t\r\x04" +
-		"\x0E\t\x0E\x03\x02\x06\x02\x1E\n\x02\r\x02\x0E\x02\x1F\x03\x03\x03\x03" +
-		"\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03" +
-		"\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x07\x032\n\x03\f\x03\x0E\x03" +
-		"5\v\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x03\x05\x03<\n\x03\x03\x04" +
-		"\x03\x04\x03\x04\x03\x04\x03\x05\x03\x05\x05\x05D\n\x05\x03\x06\x03\x06" +
-		"\x03\x06\x03\x06\x05\x06J\n\x06\x03\x07\x03\x07\x03\x07\x03\x07\x03\x07" +
-		"\x03\x07\x07\x07R\n\x07\f\x07\x0E\x07U\v\x07\x03\b\x03\b\x03\b\x03\b\x03" +
-		"\b\x03\b\x07\b]\n\b\f\b\x0E\b`\v\b\x03\t\x03\t\x03\t\x05\te\n\t\x03\n" +
-		"\x03\n\x03\n\x03\n\x03\n\x03\n\x07\nm\n\n\f\n\x0E\np\v\n\x03\n\x03\n\x05" +
-		"\nt\n\n\x03\v\x03\v\x05\vx\n\v\x03\f\x03\f\x03\f\x03\f\x07\f~\n\f\f\f" +
-		"\x0E\f\x81\v\f\x03\f\x03\f\x03\f\x05\f\x86\n\f\x03\r\x03\r\x03\r\x03\r" +
-		"\x03\r\x03\r\x05\r\x8E\n\r\x03\x0E\x03\x0E\x03\x0E\x05\x0E\x93\n\x0E\x03" +
-		"\x0E\x02\x02\x04\f\x0E\x0F\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E" +
-		"\x02\x10\x02\x12\x02\x14\x02\x16\x02\x18\x02\x1A\x02\x02\x04\x03\x02\f" +
-		"\r\x03\x02\x0E\x0F\x02\x9B\x02\x1D\x03\x02\x02\x02\x04;\x03\x02\x02\x02" +
-		"\x06=\x03\x02\x02\x02\bC\x03\x02\x02\x02\nI\x03\x02\x02\x02\fK\x03\x02" +
-		"\x02\x02\x0EV\x03\x02\x02\x02\x10d\x03\x02\x02\x02\x12s\x03\x02\x02\x02" +
-		"\x14w\x03\x02\x02\x02\x16\x85\x03\x02\x02\x02\x18\x8D\x03\x02\x02\x02" +
-		"\x1A\x92\x03\x02\x02\x02\x1C\x1E\x05\x04\x03\x02\x1D\x1C\x03\x02\x02\x02" +
-		"\x1E\x1F\x03\x02\x02\x02\x1F\x1D\x03\x02\x02\x02\x1F \x03\x02\x02\x02" +
-		" \x03\x03\x02\x02\x02!\"\x07\x03\x02\x02\"#\x05\x06\x04\x02#$\x05\x04" +
-		"\x03\x02$<\x03\x02\x02\x02%&\x07\x03\x02\x02&\'\x05\x06\x04\x02\'(\x05" +
-		"\x04\x03\x02()\x07\x04\x02\x02)*\x05\x04\x03\x02*<\x03\x02\x02\x02+,\x07" +
-		"\x05\x02\x02,-\x05\x06\x04\x02-.\x05\x04\x03\x02.<\x03\x02\x02\x02/3\x07" +
-		"\x06\x02\x0202\x05\x04\x03\x0210\x03\x02\x02\x0225\x03\x02\x02\x0231\x03" +
-		"\x02\x02\x0234\x03\x02\x02\x0246\x03\x02\x02\x0253\x03\x02\x02\x026<\x07" +
-		"\x07\x02\x0278\x05\b\x05\x0289\x07\b\x02\x029<\x03\x02\x02\x02:<\x07\b" +
-		"\x02\x02;!\x03\x02\x02\x02;%\x03\x02\x02\x02;+\x03\x02\x02\x02;/\x03\x02" +
-		"\x02\x02;7\x03\x02\x02\x02;:\x03\x02\x02\x02<\x05\x03\x02\x02\x02=>\x07" +
-		"\t\x02\x02>?\x05\b\x05\x02?@\x07\n\x02\x02@\x07\x03\x02\x02\x02AD\x05" +
-		"\n\x06\x02BD\x05\x06\x04\x02CA\x03\x02\x02\x02CB\x03\x02\x02\x02D\t\x03" +
-		"\x02\x02\x02EJ\x05\f\x07\x02FG\x07\x14\x02\x02GH\x07\v\x02\x02HJ\x05\b" +
-		"\x05\x02IE\x03\x02\x02\x02IF\x03\x02\x02\x02J\v\x03\x02\x02\x02KL\b\x07" +
-		"\x01\x02LM\x05\x0E\b\x02MS\x03\x02\x02\x02NO\f\x03\x02\x02OP\t\x02\x02" +
-		"\x02PR\x05\x0E\b\x02QN\x03\x02\x02\x02RU\x03\x02\x02\x02SQ\x03\x02\x02" +
-		"\x02ST\x03\x02\x02\x02T\r\x03\x02\x02\x02US\x03\x02\x02\x02VW\b\b\x01" +
-		"\x02WX\x05\x10\t\x02X^\x03\x02\x02\x02YZ\f\x03\x02\x02Z[\t\x03\x02\x02" +
-		"[]\x05\x10\t\x02\\Y\x03\x02\x02\x02]`\x03\x02\x02\x02^\\\x03\x02\x02\x02" +
-		"^_\x03\x02\x02\x02_\x0F\x03\x02\x02\x02`^\x03\x02\x02\x02ae\x05\x12\n" +
-		"\x02bc\x07\x0F\x02\x02ce\x05\x12\n\x02da\x03\x02\x02\x02db\x03\x02\x02" +
-		"\x02e\x11\x03\x02\x02\x02ft\x05\x14\v\x02gh\x07\x14\x02\x02hi\x07\t\x02" +
-		"\x02in\x05\b\x05\x02jk\x07\x10\x02\x02km\x05\b\x05\x02lj\x03\x02\x02\x02" +
-		"mp\x03\x02\x02\x02nl\x03\x02\x02\x02no\x03\x02\x02\x02oq\x03\x02\x02\x02" +
-		"pn\x03\x02\x02\x02qr\x07\n\x02\x02rt\x03\x02\x02\x02sf\x03\x02\x02\x02" +
-		"sg\x03\x02\x02\x02t\x13\x03\x02\x02\x02ux\x07\x13\x02\x02vx\x05\x16\f" +
-		"\x02wu\x03\x02\x02\x02wv\x03\x02\x02\x02x\x15\x03\x02\x02\x02yz\x07\x11" +
-		"\x02\x02z\x7F\x05\b\x05\x02{|\x07\x10\x02\x02|~\x05\b\x05\x02}{\x03\x02" +
-		"\x02\x02~\x81\x03\x02\x02\x02\x7F}\x03\x02\x02\x02\x7F\x80\x03\x02\x02" +
-		"\x02\x80\x82\x03\x02\x02\x02\x81\x7F\x03\x02\x02\x02\x82\x83\x07\x12\x02" +
-		"\x02\x83\x86\x03\x02\x02\x02\x84\x86\x05\x18\r\x02\x85y\x03\x02\x02\x02" +
-		"\x85\x84\x03\x02\x02\x02\x86\x17\x03\x02\x02\x02\x87\x88\x05\x1A\x0E\x02" +
-		"\x88\x89\x07\x11\x02\x02\x89\x8A\x05\b\x05\x02\x8A\x8B\x07\x12\x02\x02" +
-		"\x8B\x8E\x03\x02\x02\x02\x8C\x8E\x05\x1A\x0E\x02\x8D\x87\x03\x02\x02\x02" +
-		"\x8D\x8C\x03\x02\x02\x02\x8E\x19\x03\x02\x02\x02\x8F\x93\x07\x14\x02\x02" +
-		"\x90\x93\x07\x15\x02\x02\x91\x93\x05\x06\x04\x02\x92\x8F\x03\x02\x02\x02" +
-		"\x92\x90\x03\x02\x02\x02\x92\x91\x03\x02\x02\x02\x93\x1B\x03\x02\x02\x02" +
-		"\x11\x1F3;CIS^dnsw\x7F\x85\x8D\x92";
+		"\x0E\t\x0E\x04\x0F\t\x0F\x04\x10\t\x10\x04\x11\t\x11\x04\x12\t\x12\x04" +
+		"\x13\t\x13\x04\x14\t\x14\x03\x02\x06\x02*\n\x02\r\x02\x0E\x02+\x03\x03" +
+		"\x03\x03\x05\x030\n\x03\x03\x04\x03\x04\x03\x04\x03\x04\x03\x04\x03\x04" +
+		"\x03\x04\x03\x04\x05\x04:\n\x04\x03\x05\x03\x05\x07\x05>\n\x05\f\x05\x0E" +
+		"\x05A\v\x05\x03\x05\x03\x05\x03\x06\x03\x06\x03\x06\x03\x06\x03\x06\x03" +
+		"\x06\x03\x06\x03\x06\x03\x06\x03\x06\x05\x06O\n\x06\x03\x07\x03\x07\x03" +
+		"\x07\x03\x07\x03\b\x03\b\x03\b\x03\b\x03\b\x03\b\x03\t\x03\t\x03\t\x03" +
+		"\t\x03\t\x03\t\x03\t\x03\t\x07\tc\n\t\f\t\x0E\tf\v\t\x05\th\n\t\x03\t" +
+		"\x03\t\x03\t\x03\n\x03\n\x03\n\x03\n\x03\v\x03\v\x05\vs\n\v\x03\f\x03" +
+		"\f\x03\f\x03\f\x05\fy\n\f\x03\r\x03\r\x03\r\x03\r\x03\r\x03\r\x07\r\x81" +
+		"\n\r\f\r\x0E\r\x84\v\r\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E\x03\x0E" +
+		"\x07\x0E\x8C\n\x0E\f\x0E\x0E\x0E\x8F\v\x0E\x03\x0F\x03\x0F\x03\x0F\x05" +
+		"\x0F\x94\n\x0F\x03\x10\x03\x10\x03\x10\x03\x10\x03\x10\x03\x10\x07\x10" +
+		"\x9C\n\x10\f\x10\x0E\x10\x9F\v\x10\x03\x10\x03\x10\x05\x10\xA3\n\x10\x03" +
+		"\x11\x03\x11\x05\x11\xA7\n\x11\x03\x12\x03\x12\x03\x12\x03\x12\x07\x12" +
+		"\xAD\n\x12\f\x12\x0E\x12\xB0\v\x12\x03\x12\x03\x12\x03\x12\x05\x12\xB5" +
+		"\n\x12\x03\x13\x03\x13\x03\x13\x03\x13\x03\x13\x03\x13\x05\x13\xBD\n\x13" +
+		"\x03\x14\x03\x14\x03\x14\x05\x14\xC2\n\x14\x03\x14\x02\x02\x04\x18\x1A" +
+		"\x15\x02\x02\x04\x02\x06\x02\b\x02\n\x02\f\x02\x0E\x02\x10\x02\x12\x02" +
+		"\x14\x02\x16\x02\x18\x02\x1A\x02\x1C\x02\x1E\x02 \x02\"\x02$\x02&\x02" +
+		"\x02\x04\x03\x02\r\x0E\x03\x02\x0F\x10\x02\xC8\x02)\x03\x02\x02\x02\x04" +
+		"/\x03\x02\x02\x02\x069\x03\x02\x02\x02\b;\x03\x02\x02\x02\nN\x03\x02\x02" +
+		"\x02\fP\x03\x02\x02\x02\x0ET\x03\x02\x02\x02\x10Z\x03\x02\x02\x02\x12" +
+		"l\x03\x02\x02\x02\x14r\x03\x02\x02\x02\x16x\x03\x02\x02\x02\x18z\x03\x02" +
+		"\x02\x02\x1A\x85\x03\x02\x02\x02\x1C\x93\x03\x02\x02\x02\x1E\xA2\x03\x02" +
+		"\x02\x02 \xA6\x03\x02\x02\x02\"\xB4\x03\x02\x02\x02$\xBC\x03\x02\x02\x02" +
+		"&\xC1\x03\x02\x02\x02(*\x05\x04\x03\x02)(\x03\x02\x02\x02*+\x03\x02\x02" +
+		"\x02+)\x03\x02\x02\x02+,\x03\x02\x02\x02,\x03\x03\x02\x02\x02-0\x05\x0E" +
+		"\b\x02.0\x05\x10\t\x02/-\x03\x02\x02\x02/.\x03\x02\x02\x020\x05\x03\x02" +
+		"\x02\x021:\x05\n\x06\x022:\x05\f\x07\x023:\x05\b\x05\x024:\x05\x0E\b\x02" +
+		"56\x05\x14\v\x0267\x07\x03\x02\x027:\x03\x02\x02\x028:\x07\x03\x02\x02" +
+		"91\x03\x02\x02\x0292\x03\x02\x02\x0293\x03\x02\x02\x0294\x03\x02\x02\x02" +
+		"95\x03\x02\x02\x0298\x03\x02\x02\x02:\x07\x03\x02\x02\x02;?\x07\x04\x02" +
+		"\x02<>\x05\x06\x04\x02=<\x03\x02\x02\x02>A\x03\x02\x02\x02?=\x03\x02\x02" +
+		"\x02?@\x03\x02\x02\x02@B\x03\x02\x02\x02A?\x03\x02\x02\x02BC\x07\x05\x02" +
+		"\x02C\t\x03\x02\x02\x02DE\x07\x06\x02\x02EF\x05\x12\n\x02FG\x05\x06\x04" +
+		"\x02GO\x03\x02\x02\x02HI\x07\x06\x02\x02IJ\x05\x12\n\x02JK\x05\x06\x04" +
+		"\x02KL\x07\x07\x02\x02LM\x05\x06\x04\x02MO\x03\x02\x02\x02ND\x03\x02\x02" +
+		"\x02NH\x03\x02\x02\x02O\v\x03\x02\x02\x02PQ\x07\b\x02\x02QR\x05\x12\n" +
+		"\x02RS\x05\x06\x04\x02S\r\x03\x02\x02\x02TU\x07\x13\x02\x02UV\x07\x15" +
+		"\x02\x02VW\x07\t\x02\x02WX\x05\x14\v\x02XY\x07\x03\x02\x02Y\x0F\x03\x02" +
+		"\x02\x02Z[\x07\x13\x02\x02[\\\x07\x15\x02\x02\\g\x07\n\x02\x02]^\x07\x13" +
+		"\x02\x02^d\x07\x15\x02\x02_`\x07\v\x02\x02`a\x07\x13\x02\x02ac\x07\x15" +
+		"\x02\x02b_\x03\x02\x02\x02cf\x03\x02\x02\x02db\x03\x02\x02\x02de\x03\x02" +
+		"\x02\x02eh\x03\x02\x02\x02fd\x03\x02\x02\x02g]\x03\x02\x02\x02gh\x03\x02" +
+		"\x02\x02hi\x03\x02\x02\x02ij\x07\f\x02\x02jk\x05\x06\x04\x02k\x11\x03" +
+		"\x02\x02\x02lm\x07\n\x02\x02mn\x05\x14\v\x02no\x07\f\x02\x02o\x13\x03" +
+		"\x02\x02\x02ps\x05\x16\f\x02qs\x05\x12\n\x02rp\x03\x02\x02\x02rq\x03\x02" +
+		"\x02\x02s\x15\x03\x02\x02\x02ty\x05\x18\r\x02uv\x07\x15\x02\x02vw\x07" +
+		"\t\x02\x02wy\x05\x14\v\x02xt\x03\x02\x02\x02xu\x03\x02\x02\x02y\x17\x03" +
+		"\x02\x02\x02z{\b\r\x01\x02{|\x05\x1A\x0E\x02|\x82\x03\x02\x02\x02}~\f" +
+		"\x03\x02\x02~\x7F\t\x02\x02\x02\x7F\x81\x05\x1A\x0E\x02\x80}\x03\x02\x02" +
+		"\x02\x81\x84\x03\x02\x02\x02\x82\x80\x03\x02\x02\x02\x82\x83\x03\x02\x02" +
+		"\x02\x83\x19\x03\x02\x02\x02\x84\x82\x03\x02\x02\x02\x85\x86\b\x0E\x01" +
+		"\x02\x86\x87\x05\x1C\x0F\x02\x87\x8D\x03\x02\x02\x02\x88\x89\f\x03\x02" +
+		"\x02\x89\x8A\t\x03\x02\x02\x8A\x8C\x05\x1C\x0F\x02\x8B\x88\x03\x02\x02" +
+		"\x02\x8C\x8F\x03\x02\x02\x02\x8D\x8B\x03\x02\x02\x02\x8D\x8E\x03\x02\x02" +
+		"\x02\x8E\x1B\x03\x02\x02\x02\x8F\x8D\x03\x02\x02\x02\x90\x94\x05\x1E\x10" +
+		"\x02\x91\x92\x07\x10\x02\x02\x92\x94\x05\x1E\x10\x02\x93\x90\x03\x02\x02" +
+		"\x02\x93\x91\x03\x02\x02\x02\x94\x1D\x03\x02\x02\x02\x95\xA3\x05 \x11" +
+		"\x02\x96\x97\x07\x15\x02\x02\x97\x98\x07\n\x02\x02\x98\x9D\x05\x14\v\x02" +
+		"\x99\x9A\x07\v\x02\x02\x9A\x9C\x05\x14\v\x02\x9B\x99\x03\x02\x02\x02\x9C" +
+		"\x9F\x03\x02\x02\x02\x9D\x9B\x03\x02\x02\x02\x9D\x9E\x03\x02\x02\x02\x9E" +
+		"\xA0\x03\x02\x02\x02\x9F\x9D\x03\x02\x02\x02\xA0\xA1\x07\f\x02\x02\xA1" +
+		"\xA3\x03\x02\x02\x02\xA2\x95\x03\x02\x02\x02\xA2\x96\x03\x02\x02\x02\xA3" +
+		"\x1F\x03\x02\x02\x02\xA4\xA7\x07\x14\x02\x02\xA5\xA7\x05\"\x12\x02\xA6" +
+		"\xA4\x03\x02\x02\x02\xA6\xA5\x03\x02\x02\x02\xA7!\x03\x02\x02\x02\xA8" +
+		"\xA9\x07\x11\x02\x02\xA9\xAE\x05\x14\v\x02\xAA\xAB\x07\v\x02\x02\xAB\xAD" +
+		"\x05\x14\v\x02\xAC\xAA\x03\x02\x02\x02\xAD\xB0\x03\x02\x02\x02\xAE\xAC" +
+		"\x03\x02\x02\x02\xAE\xAF\x03\x02\x02\x02\xAF\xB1\x03\x02\x02\x02\xB0\xAE" +
+		"\x03\x02\x02\x02\xB1\xB2\x07\x12\x02\x02\xB2\xB5\x03\x02\x02\x02\xB3\xB5" +
+		"\x05$\x13\x02\xB4\xA8\x03\x02\x02\x02\xB4\xB3\x03\x02\x02\x02\xB5#\x03" +
+		"\x02\x02\x02\xB6\xB7\x05&\x14\x02\xB7\xB8\x07\x11\x02\x02\xB8\xB9\x05" +
+		"\x14\v\x02\xB9\xBA\x07\x12\x02\x02\xBA\xBD\x03\x02\x02\x02\xBB\xBD\x05" +
+		"&\x14\x02\xBC\xB6\x03\x02\x02\x02\xBC\xBB\x03\x02\x02\x02\xBD%\x03\x02" +
+		"\x02\x02\xBE\xC2\x07\x15\x02\x02\xBF\xC2\x07\x16\x02\x02\xC0\xC2\x05\x12" +
+		"\n\x02\xC1\xBE\x03\x02\x02\x02\xC1\xBF\x03\x02\x02\x02\xC1\xC0\x03\x02" +
+		"\x02\x02\xC2\'\x03\x02\x02\x02\x15+/9?Ndgrx\x82\x8D\x93\x9D\xA2\xA6\xAE" +
+		"\xB4\xBC\xC1";
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
 		if (!vikingParser.__ATN) {
@@ -920,13 +1177,13 @@ export class vikingParser extends Parser {
 }
 
 export class EntryContext extends ParserRuleContext {
-	public stat(): StatContext[];
-	public stat(i: number): StatContext;
-	public stat(i?: number): StatContext | StatContext[] {
+	public externalStmt(): ExternalStmtContext[];
+	public externalStmt(i: number): ExternalStmtContext;
+	public externalStmt(i?: number): ExternalStmtContext | ExternalStmtContext[] {
 		if (i === undefined) {
-			return this.getRuleContexts(StatContext);
+			return this.getRuleContexts(ExternalStmtContext);
 		} else {
-			return this.getRuleContext(i, StatContext);
+			return this.getRuleContext(i, ExternalStmtContext);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
@@ -957,18 +1214,53 @@ export class EntryContext extends ParserRuleContext {
 }
 
 
-export class StatContext extends ParserRuleContext {
-	public parenExpr(): ParenExprContext | undefined {
-		return this.tryGetRuleContext(0, ParenExprContext);
+export class ExternalStmtContext extends ParserRuleContext {
+	public varDeclStmt(): VarDeclStmtContext | undefined {
+		return this.tryGetRuleContext(0, VarDeclStmtContext);
 	}
-	public stat(): StatContext[];
-	public stat(i: number): StatContext;
-	public stat(i?: number): StatContext | StatContext[] {
-		if (i === undefined) {
-			return this.getRuleContexts(StatContext);
-		} else {
-			return this.getRuleContext(i, StatContext);
+	public fnDeclStmt(): FnDeclStmtContext | undefined {
+		return this.tryGetRuleContext(0, FnDeclStmtContext);
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return vikingParser.RULE_externalStmt; }
+	// @Override
+	public enterRule(listener: vikingListener): void {
+		if (listener.enterExternalStmt) {
+			listener.enterExternalStmt(this);
 		}
+	}
+	// @Override
+	public exitRule(listener: vikingListener): void {
+		if (listener.exitExternalStmt) {
+			listener.exitExternalStmt(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: vikingVisitor<Result>): Result {
+		if (visitor.visitExternalStmt) {
+			return visitor.visitExternalStmt(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+
+
+export class StmtContext extends ParserRuleContext {
+	public ifStmt(): IfStmtContext | undefined {
+		return this.tryGetRuleContext(0, IfStmtContext);
+	}
+	public whileStmt(): WhileStmtContext | undefined {
+		return this.tryGetRuleContext(0, WhileStmtContext);
+	}
+	public stmtBlock(): StmtBlockContext | undefined {
+		return this.tryGetRuleContext(0, StmtBlockContext);
+	}
+	public varDeclStmt(): VarDeclStmtContext | undefined {
+		return this.tryGetRuleContext(0, VarDeclStmtContext);
 	}
 	public expr(): ExprContext | undefined {
 		return this.tryGetRuleContext(0, ExprContext);
@@ -977,23 +1269,221 @@ export class StatContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return vikingParser.RULE_stat; }
+	public get ruleIndex(): number { return vikingParser.RULE_stmt; }
 	// @Override
 	public enterRule(listener: vikingListener): void {
-		if (listener.enterStat) {
-			listener.enterStat(this);
+		if (listener.enterStmt) {
+			listener.enterStmt(this);
 		}
 	}
 	// @Override
 	public exitRule(listener: vikingListener): void {
-		if (listener.exitStat) {
-			listener.exitStat(this);
+		if (listener.exitStmt) {
+			listener.exitStmt(this);
 		}
 	}
 	// @Override
 	public accept<Result>(visitor: vikingVisitor<Result>): Result {
-		if (visitor.visitStat) {
-			return visitor.visitStat(this);
+		if (visitor.visitStmt) {
+			return visitor.visitStmt(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+
+
+export class StmtBlockContext extends ParserRuleContext {
+	public stmt(): StmtContext[];
+	public stmt(i: number): StmtContext;
+	public stmt(i?: number): StmtContext | StmtContext[] {
+		if (i === undefined) {
+			return this.getRuleContexts(StmtContext);
+		} else {
+			return this.getRuleContext(i, StmtContext);
+		}
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return vikingParser.RULE_stmtBlock; }
+	// @Override
+	public enterRule(listener: vikingListener): void {
+		if (listener.enterStmtBlock) {
+			listener.enterStmtBlock(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: vikingListener): void {
+		if (listener.exitStmtBlock) {
+			listener.exitStmtBlock(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: vikingVisitor<Result>): Result {
+		if (visitor.visitStmtBlock) {
+			return visitor.visitStmtBlock(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+
+
+export class IfStmtContext extends ParserRuleContext {
+	public parenExpr(): ParenExprContext {
+		return this.getRuleContext(0, ParenExprContext);
+	}
+	public stmt(): StmtContext[];
+	public stmt(i: number): StmtContext;
+	public stmt(i?: number): StmtContext | StmtContext[] {
+		if (i === undefined) {
+			return this.getRuleContexts(StmtContext);
+		} else {
+			return this.getRuleContext(i, StmtContext);
+		}
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return vikingParser.RULE_ifStmt; }
+	// @Override
+	public enterRule(listener: vikingListener): void {
+		if (listener.enterIfStmt) {
+			listener.enterIfStmt(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: vikingListener): void {
+		if (listener.exitIfStmt) {
+			listener.exitIfStmt(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: vikingVisitor<Result>): Result {
+		if (visitor.visitIfStmt) {
+			return visitor.visitIfStmt(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+
+
+export class WhileStmtContext extends ParserRuleContext {
+	public parenExpr(): ParenExprContext {
+		return this.getRuleContext(0, ParenExprContext);
+	}
+	public stmt(): StmtContext {
+		return this.getRuleContext(0, StmtContext);
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return vikingParser.RULE_whileStmt; }
+	// @Override
+	public enterRule(listener: vikingListener): void {
+		if (listener.enterWhileStmt) {
+			listener.enterWhileStmt(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: vikingListener): void {
+		if (listener.exitWhileStmt) {
+			listener.exitWhileStmt(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: vikingVisitor<Result>): Result {
+		if (visitor.visitWhileStmt) {
+			return visitor.visitWhileStmt(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+
+
+export class VarDeclStmtContext extends ParserRuleContext {
+	public TYPE(): TerminalNode { return this.getToken(vikingParser.TYPE, 0); }
+	public ID(): TerminalNode { return this.getToken(vikingParser.ID, 0); }
+	public expr(): ExprContext {
+		return this.getRuleContext(0, ExprContext);
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return vikingParser.RULE_varDeclStmt; }
+	// @Override
+	public enterRule(listener: vikingListener): void {
+		if (listener.enterVarDeclStmt) {
+			listener.enterVarDeclStmt(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: vikingListener): void {
+		if (listener.exitVarDeclStmt) {
+			listener.exitVarDeclStmt(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: vikingVisitor<Result>): Result {
+		if (visitor.visitVarDeclStmt) {
+			return visitor.visitVarDeclStmt(this);
+		} else {
+			return visitor.visitChildren(this);
+		}
+	}
+}
+
+
+export class FnDeclStmtContext extends ParserRuleContext {
+	public TYPE(): TerminalNode[];
+	public TYPE(i: number): TerminalNode;
+	public TYPE(i?: number): TerminalNode | TerminalNode[] {
+		if (i === undefined) {
+			return this.getTokens(vikingParser.TYPE);
+		} else {
+			return this.getToken(vikingParser.TYPE, i);
+		}
+	}
+	public ID(): TerminalNode[];
+	public ID(i: number): TerminalNode;
+	public ID(i?: number): TerminalNode | TerminalNode[] {
+		if (i === undefined) {
+			return this.getTokens(vikingParser.ID);
+		} else {
+			return this.getToken(vikingParser.ID, i);
+		}
+	}
+	public stmt(): StmtContext {
+		return this.getRuleContext(0, StmtContext);
+	}
+	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
+		super(parent, invokingState);
+	}
+	// @Override
+	public get ruleIndex(): number { return vikingParser.RULE_fnDeclStmt; }
+	// @Override
+	public enterRule(listener: vikingListener): void {
+		if (listener.enterFnDeclStmt) {
+			listener.enterFnDeclStmt(this);
+		}
+	}
+	// @Override
+	public exitRule(listener: vikingListener): void {
+		if (listener.exitFnDeclStmt) {
+			listener.exitFnDeclStmt(this);
+		}
+	}
+	// @Override
+	public accept<Result>(visitor: vikingVisitor<Result>): Result {
+		if (visitor.visitFnDeclStmt) {
+			return visitor.visitFnDeclStmt(this);
 		} else {
 			return visitor.visitChildren(this);
 		}

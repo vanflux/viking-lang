@@ -4,7 +4,13 @@
 import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 
 import { EntryContext } from "./vikingParser";
-import { StatContext } from "./vikingParser";
+import { ExternalStmtContext } from "./vikingParser";
+import { StmtContext } from "./vikingParser";
+import { StmtBlockContext } from "./vikingParser";
+import { IfStmtContext } from "./vikingParser";
+import { WhileStmtContext } from "./vikingParser";
+import { VarDeclStmtContext } from "./vikingParser";
+import { FnDeclStmtContext } from "./vikingParser";
 import { ParenExprContext } from "./vikingParser";
 import { ExprContext } from "./vikingParser";
 import { AssignExprContext } from "./vikingParser";
@@ -34,11 +40,53 @@ export interface vikingVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitEntry?: (ctx: EntryContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `vikingParser.stat`.
+	 * Visit a parse tree produced by `vikingParser.externalStmt`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitStat?: (ctx: StatContext) => Result;
+	visitExternalStmt?: (ctx: ExternalStmtContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.stmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStmt?: (ctx: StmtContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.stmtBlock`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStmtBlock?: (ctx: StmtBlockContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.ifStmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitIfStmt?: (ctx: IfStmtContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.whileStmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitWhileStmt?: (ctx: WhileStmtContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.varDeclStmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitVarDeclStmt?: (ctx: VarDeclStmtContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.fnDeclStmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFnDeclStmt?: (ctx: FnDeclStmtContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `vikingParser.parenExpr`.

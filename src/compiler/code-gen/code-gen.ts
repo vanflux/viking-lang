@@ -17,7 +17,7 @@ import {
   WhileStatement,
   ArrayLiteralExpression,
   ArrayAccessExpression,
-} from '../ast';
+} from '../ast-ir';
 import { Generator } from './generator';
 import { ValueAllocator } from './value-allocator';
 

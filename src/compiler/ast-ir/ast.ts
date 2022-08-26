@@ -1,5 +1,6 @@
-import { ArrayAccessExprContext, ArrayExprContext } from './antlr/vikingParser';
 import {
+  ArrayAccessExprContext,
+  ArrayExprContext,
   AddExprContext,
   AssignExprContext,
   CallExprContext,
@@ -8,10 +9,11 @@ import {
   NegExprContext,
   ParenExprContext,
   RelExprContext,
-  StatContext,
+  StmtContext,
   StringExprContext,
   TermExprContext,
-} from './antlr/vikingParser';
+  ExternalStmtContext,
+} from '../lex-parser';
 
 type ProcessFunc<T = void> = (node: Node, ctx?: T) => T;
 
@@ -21,6 +23,11 @@ export interface Node {
 }
 export interface Expression extends Node {}
 export interface Statement extends Node {}
+
+export interface FunctionArgument {
+  type: string;
+  id: string;
+}
 
 // Expressions
 
@@ -130,6 +137,30 @@ export class ExpressionStatement implements Statement {
   }
 }
 
+export class VarDeclarationStatement implements Statement {
+  constructor(public text: string, public type: string, public id: string, public expression: Expression) {}
+  process<T>(func: ProcessFunc<T>, ctx?: T) {
+    ctx = func(this, ctx);
+    this.expression.process(func, ctx);
+  }
+}
+
+export class FunctionDeclarationStatement implements Statement {
+  constructor(public text: string, public type: string, public id: string, public args: FunctionArgument[], public stmts: Statement[]) {}
+  process<T>(func: ProcessFunc<T>, ctx?: T) {
+    ctx = func(this, ctx);
+    this.stmts.forEach(x => x.process(func, ctx));
+  }
+}
+
+export class ExternalStatement implements Statement {
+  constructor(public text: string, public expression: Expression) {}
+  process<T>(func: ProcessFunc<T>, ctx?: T) {
+    ctx = func(this, ctx);
+    this.expression.process(func, ctx);
+  }
+}
+
 // Ast
 
 export class Ast {
@@ -137,30 +168,46 @@ export class Ast {
 
   constructor(entryContext: EntryContext) {
     function programToAst(ctx: EntryContext) {
-      return ctx.stat().flatMap(statementToAst);
+      return ctx.externalStmt().flatMap(externalStmtToAst);
     }
 
-    function statementToAst(ctx: StatContext): Statement[] {
-      const statements: Statement[] = [];
-      if (!ctx.children) return statements;
-      const [child1, , , child4] = ctx.children;
-      if (child1.text === 'if') {
-        const conditionExpression = expressionToAst(ctx.parenExpr()!);
-        const ifStatements = statementToAst(ctx.stat()[0]);
-        const elseStatements = child4?.text === 'else' ? statementToAst(ctx.stat()[1]) : [];
-        statements.push(new IfStatement(ctx.text, conditionExpression, ifStatements, elseStatements));
-      } else if (child1.text === 'while') {
-        const conditionExpression = expressionToAst(ctx.parenExpr()!);
-        const bodyStatements = statementToAst(ctx.stat()[0]);
-        statements.push(new WhileStatement(ctx.text, conditionExpression, bodyStatements));
-      } else if (child1.text === '{') {
-        statements.push(...ctx.stat().flatMap(statementToAst));
-      } else if (child1 instanceof ExprContext) {
-        statements.push(new ExpressionStatement(ctx.text, expressionToAst(child1)));
-      } else {
-        throw new Error('Unhandled statement on ast generation');
+    function externalStmtToAst(ctx: ExternalStmtContext): Statement[] {
+      if (ctx.fnDeclStmt()) {
+        const types = ctx.fnDeclStmt()!.TYPE().map(x => x.text);
+        const ids = ctx.fnDeclStmt()!.ID().map(x => x.text);
+        const args = types.slice(1).map<FunctionArgument>((type, i) => ({ type, id: ids[i+1] }));
+        const stmts = statementToAst(ctx.fnDeclStmt()!.stmt());
+        return [new FunctionDeclarationStatement(ctx.text, types[0], ids[0], args, stmts)];
+      } else if (ctx.varDeclStmt()) {
+        const type = ctx.varDeclStmt()!.TYPE().text;
+        const id = ctx.varDeclStmt()!.ID().text;
+        const expr = expressionToAst(ctx.varDeclStmt()!.expr());
+        return [new VarDeclarationStatement(ctx.text, type, id, expr)];
       }
-      return statements;
+      throw new Error('Could not transform external statement to ast');
+    }
+
+    function statementToAst(ctx: StmtContext): Statement[] {
+      if (ctx.ifStmt()) {
+        const conditionExpression = expressionToAst(ctx.ifStmt()!.parenExpr());
+        const ifStatements = statementToAst(ctx.ifStmt()!.stmt()[0]);
+        const elseStatements = ctx.ifStmt()!.stmt()[1] ? statementToAst(ctx.ifStmt()!.stmt()[1]) : [];
+        return [new IfStatement(ctx.text, conditionExpression, ifStatements, elseStatements)];
+      } else if (ctx.whileStmt()) {
+        const conditionExpression = expressionToAst(ctx.whileStmt()!.parenExpr());
+        const bodyStatements = statementToAst(ctx.whileStmt()!.stmt());
+        return [new WhileStatement(ctx.text, conditionExpression, bodyStatements)];
+      } else if (ctx.stmtBlock()) {
+        return ctx.stmtBlock()!.stmt().flatMap(statementToAst);
+      } else if (ctx.expr()) {
+        return [new ExpressionStatement(ctx.text, expressionToAst(ctx.expr()!))];
+      } else if (ctx.varDeclStmt()) {
+        const type = ctx.varDeclStmt()!.TYPE().text;
+        const id = ctx.varDeclStmt()!.ID().text;
+        const expr = expressionToAst(ctx.varDeclStmt()!.expr());
+        return [new VarDeclarationStatement(ctx.text, type, id, expr)];
+      }
+      throw new Error('Unhandled statement on ast generation');
     }
 
     function expressionToAst(
