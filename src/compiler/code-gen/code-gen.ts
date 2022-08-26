@@ -1,22 +1,22 @@
 import { Architecture } from '../../common';
 import {
-  AddExpression,
-  AssignExpression,
+  ASTAddExpression,
+  ASTAssignExpression,
   Ast,
-  BinaryExpression,
-  CallExpression,
-  Expression,
-  ExpressionStatement,
-  IfStatement,
-  NumberLiteralExpression,
-  StringLiteralExpression,
-  NegateExpression,
-  RelationalExpression,
-  Statement,
-  VarReference,
-  WhileStatement,
-  ArrayLiteralExpression,
-  ArrayAccessExpression,
+  ASTBinaryExpression,
+  ASTCallExpression,
+  ASTExpression,
+  ASTExpressionStatement,
+  ASTIfStatement,
+  ASTNumberLiteralExpression,
+  ASTStringLiteralExpression,
+  ASTNegateExpression,
+  ASTRelationalExpression,
+  ASTStatement,
+  ASTVarReference,
+  ASTWhileStatement,
+  ASTArrayLiteralExpression,
+  ASTArrayAccessExpression,
 } from '../ast-ir';
 import { Generator } from './generator';
 import { ValueAllocator } from './value-allocator';
@@ -37,7 +37,7 @@ export class CodeGen {
     const generalPurposeRegisters = registers.filter(r => r.aliases.length === 0).map(r => r.name);
     const valueAllocator = new ValueAllocator(generalPurposeRegisters, this.gen);
     this.gen.genInit();
-    this.genStatements(this.ast.statements, valueAllocator);
+    this.genStatements(this.ast.externalStatements, valueAllocator);
     this.gen.genEnd();
     this.genStringLiteralData();
     this.genArrayLiteralData();
@@ -60,21 +60,21 @@ export class CodeGen {
     return symbol;
   }
 
-  private genExpression(expr: Expression, valueAllocator: ValueAllocator): number {
+  private genExpression(expr: ASTExpression, valueAllocator: ValueAllocator): number {
     // TODO: remove duplicated code
     const newTmpId = () => valueAllocator.allocateId();
     const getVarId = (varName: string) => {
       if (this.varIdMap.get(varName) === undefined) this.varIdMap.set(varName, valueAllocator.allocateId());
       return this.varIdMap.get(varName)!;
     };
-    if (expr instanceof BinaryExpression) {
-      if (!(expr.leftExpression instanceof NumberLiteralExpression) && expr.rightExpression instanceof NumberLiteralExpression) {
+    if (expr instanceof ASTBinaryExpression) {
+      if (!(expr.leftExpression instanceof ASTNumberLiteralExpression) && expr.rightExpression instanceof ASTNumberLiteralExpression) {
         const id = this.genExpression(expr.leftExpression, valueAllocator);
         const reg = valueAllocator.ensureOnRegister(id);
         this.gen.genRegLitComputation(expr.operation, expr.rightExpression.value, reg);
         valueAllocator.informChanged(id);
         return id;
-      } else if (expr.leftExpression instanceof NumberLiteralExpression && !(expr.rightExpression instanceof NumberLiteralExpression)) {
+      } else if (expr.leftExpression instanceof ASTNumberLiteralExpression && !(expr.rightExpression instanceof ASTNumberLiteralExpression)) {
         if (expr.operation === '-' || expr.operation === '<' || expr.operation === '>') {
           const id1 = this.genExpression(expr.leftExpression, valueAllocator);
           const id2 = this.genExpression(expr.rightExpression, valueAllocator);
@@ -91,7 +91,7 @@ export class CodeGen {
           valueAllocator.informChanged(id2);
           return id2;
         }
-      } else if (expr.leftExpression instanceof NumberLiteralExpression && expr.rightExpression instanceof NumberLiteralExpression) {
+      } else if (expr.leftExpression instanceof ASTNumberLiteralExpression && expr.rightExpression instanceof ASTNumberLiteralExpression) {
         const id = newTmpId();
         switch (expr.operation) {
           case '+':
@@ -120,14 +120,14 @@ export class CodeGen {
         valueAllocator.informChanged(id2);
         return id2;
       }
-    } else if (expr instanceof AssignExpression) {
+    } else if (expr instanceof ASTAssignExpression) {
       const dstVar = expr.varRef.varName;
       const dstId = getVarId(dstVar);
       const srcId = this.genExpression(expr.expression, valueAllocator);
       valueAllocator.moveValue(srcId, dstId);
       valueAllocator.ensureOnRegister(dstId);
       return dstId;
-    } else if (expr instanceof CallExpression) {
+    } else if (expr instanceof ASTCallExpression) {
       if (expr.paramExpressions.length !== 1) throw new Error('At this point, code gen doesnt support multiple params on call expression');
       const id = this.genExpression(expr.paramExpressions[0], valueAllocator);
       const reg = valueAllocator.ensureOnRegister(id);
@@ -143,8 +143,8 @@ export class CodeGen {
           throw new Error('Function not found: ' + expr.funcName);
       }
       return id;
-    } else if (expr instanceof NegateExpression) {
-      if (expr.expression instanceof NumberLiteralExpression) {
+    } else if (expr instanceof ASTNegateExpression) {
+      if (expr.expression instanceof ASTNumberLiteralExpression) {
         const id = newTmpId();
         valueAllocator.setLiteral(id, -expr.expression.value);
         return id;
@@ -155,30 +155,30 @@ export class CodeGen {
         valueAllocator.informChanged(id);
         return id;
       }
-    } else if (expr instanceof VarReference) {
+    } else if (expr instanceof ASTVarReference) {
       const id = newTmpId();
       valueAllocator.setValue(getVarId(expr.varName), id);
       return id;
-    } else if (expr instanceof NumberLiteralExpression) {
+    } else if (expr instanceof ASTNumberLiteralExpression) {
       const id = newTmpId();
       valueAllocator.setLiteral(id, expr.value);
       return id;
-    } else if (expr instanceof StringLiteralExpression) {
+    } else if (expr instanceof ASTStringLiteralExpression) {
       const id = newTmpId();
       valueAllocator.setLiteral(id, this.addStringLiteralData(expr.value));
       return id;
-    } else if (expr instanceof ArrayLiteralExpression) {
+    } else if (expr instanceof ASTArrayLiteralExpression) {
       const id = newTmpId();
-      if (expr.expressions.some(x => !(x instanceof NumberLiteralExpression))) throw new Error('Only number literals are allowed on global array declarations');
-      const numberLiteralExpressions = expr.expressions as NumberLiteralExpression[];
+      if (expr.expressions.some(x => !(x instanceof ASTNumberLiteralExpression))) throw new Error('Only number literals are allowed on global array declarations');
+      const numberLiteralExpressions = expr.expressions as ASTNumberLiteralExpression[];
       const values = numberLiteralExpressions.map(x => x.value);
       valueAllocator.setLiteral(id, this.addArrayLiteralData(values));
       return id;
-    } else if (expr instanceof ArrayAccessExpression) {
+    } else if (expr instanceof ASTArrayAccessExpression) {
       const id = newTmpId();
       let arrayId, array, offsetId, offset, arrayIsReg = false, offsetIsReg = false;
       let blacklist: string[] = [];
-      if (expr.array instanceof NumberLiteralExpression) {
+      if (expr.array instanceof ASTNumberLiteralExpression) {
         array = expr.array.value;
       } else {
         arrayId = this.genExpression(expr.array, valueAllocator);
@@ -186,7 +186,7 @@ export class CodeGen {
         arrayIsReg = true;
         blacklist.push(array);
       }
-      if (expr.offset instanceof NumberLiteralExpression) {
+      if (expr.offset instanceof ASTNumberLiteralExpression) {
         offset = expr.offset.value;
       } else {
         offsetId = this.genExpression(expr.offset, valueAllocator);
@@ -203,7 +203,7 @@ export class CodeGen {
     throw new Error('Unsupported expression');
   }
 
-  private genStatements(statements: Statement[], valueAllocator: ValueAllocator) {
+  private genStatements(statements: ASTStatement[], valueAllocator: ValueAllocator) {
     const getVarId = (varName: string) => {
       if (this.varIdMap.get(varName) === undefined) this.varIdMap.set(varName, valueAllocator.allocateId());
       return this.varIdMap.get(varName)!;
@@ -211,16 +211,16 @@ export class CodeGen {
 
     statements.forEach(statement => {
       statement.process(node => {
-        if (!(node instanceof VarReference)) return;
+        if (!(node instanceof ASTVarReference)) return;
         const id = getVarId(node.varName);
         valueAllocator.allocStackPos(id);
       });
     });
 
     for (const statement of statements) {
-      if (statement instanceof ExpressionStatement) {
+      if (statement instanceof ASTExpressionStatement) {
         this.genExpression(statement.expression, valueAllocator);
-      } else if (statement instanceof IfStatement) {
+      } else if (statement instanceof ASTIfStatement) {
         const ifNum = this.nextIfNum++;
         const id = this.genExpression(statement.conditionExpression, valueAllocator);
         const reg = valueAllocator.ensureOnRegister(id);
@@ -240,7 +240,7 @@ export class CodeGen {
           ifValueAllocator.converge(valueAllocator);
         }
         this.gen.genSymbol(`if_end_${ifNum}`);
-      } else if (statement instanceof WhileStatement) {
+      } else if (statement instanceof ASTWhileStatement) {
         const whileNum = this.nextWhileNum++;
         this.gen.genSymbol(`while_start_${whileNum}`);
         const initialValueAllocator = valueAllocator.fork();
