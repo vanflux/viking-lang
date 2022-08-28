@@ -24,7 +24,7 @@ export class Compiler {
     const parseTree = parser.entry();
     const astIr = new Ast(parseTree);
     const ssaIr = new SSA(astIr);
-    console.log(inspect(ssaIr, false, null));
+    ssaIr.blocks.forEach((block, i) => console.log(block.toString(), '\n'))
 
     return {code: ''};
     /*const inputStream = CharStreams.fromString(code);

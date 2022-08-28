@@ -38,7 +38,7 @@ export async function main() {
   console.log('[ASM]');
   console.log(asmCode);
 
-  const pseudoConverter = new PseudoConverter(getAllPseudos());
+  /*const pseudoConverter = new PseudoConverter(getAllPseudos());
   const assembler = new Assembler(architecture, pseudoConverter);
   const { rawObjectCode } = assembler.assemble(asmCode);
 
@@ -61,7 +61,7 @@ export async function main() {
     console.log('Time:', end - start, 'ms');
   });
   simulation.setRawObjCode(rawObjectCode!);
-  simulation.run();
+  simulation.run();*/
 }
 
 main();

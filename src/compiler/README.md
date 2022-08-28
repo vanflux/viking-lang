@@ -63,7 +63,7 @@ TEST_L0():
 TEST_L1():
 7. C1 = C0 + E0 // c = c + e;
 8. T0 = E0 < 5 // if (e < 5) {
-9. BR.NZ  T0 TEST_L2() TEST_L3()
+9. BR.NZ T0 TEST_L2() TEST_L3()
 
 TEST_L2():
 10. E1 = E0 + 1; // e = e + 1;
@@ -105,7 +105,7 @@ TEST_L0(D0, C0, E0):
 TEST_L1(C0, E0, D0):
 7. C1 = C0 + E0 // c = c + e;
 8. T0 = E0 < 5 // if (e < 5) {
-9. BR.NZ  T0 TEST_L2(E0, D0, C1) TEST_L3(E0, C1, D0)
+9. BR.NZ T0 TEST_L2(E0, D0, C1) TEST_L3(E0, C1, D0)
 
 TEST_L2(E0, D0, C0):
 10. E1 = E0 + 1; // e = e + 1;

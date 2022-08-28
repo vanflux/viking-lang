@@ -12,15 +12,13 @@ externalStmt
    ;
 
 stmt
-   : ifStmt
+   : varDeclStmt
+   | ifStmt
    | whileStmt
+   | retStmt
    | stmtBlock
    | expr ';'
    | ';'
-   ;
-
-stmtBlock
-   : '{' stmt* '}'
    ;
 
 ifStmt
@@ -30,6 +28,14 @@ ifStmt
 
 whileStmt
    : 'while' parenExpr stmt
+   ;
+
+retStmt
+   : 'return' expr ';'
+   ;
+
+stmtBlock
+   : '{' stmt* '}'
    ;
 
 varDeclStmt

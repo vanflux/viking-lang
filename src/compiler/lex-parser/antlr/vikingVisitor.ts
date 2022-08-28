@@ -6,9 +6,10 @@ import { ParseTreeVisitor } from "antlr4ts/tree/ParseTreeVisitor";
 import { EntryContext } from "./vikingParser";
 import { ExternalStmtContext } from "./vikingParser";
 import { StmtContext } from "./vikingParser";
-import { StmtBlockContext } from "./vikingParser";
 import { IfStmtContext } from "./vikingParser";
 import { WhileStmtContext } from "./vikingParser";
+import { RetStmtContext } from "./vikingParser";
+import { StmtBlockContext } from "./vikingParser";
 import { VarDeclStmtContext } from "./vikingParser";
 import { FnDeclStmtContext } from "./vikingParser";
 import { ParenExprContext } from "./vikingParser";
@@ -54,13 +55,6 @@ export interface vikingVisitor<Result> extends ParseTreeVisitor<Result> {
 	visitStmt?: (ctx: StmtContext) => Result;
 
 	/**
-	 * Visit a parse tree produced by `vikingParser.stmtBlock`.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	visitStmtBlock?: (ctx: StmtBlockContext) => Result;
-
-	/**
 	 * Visit a parse tree produced by `vikingParser.ifStmt`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -73,6 +67,20 @@ export interface vikingVisitor<Result> extends ParseTreeVisitor<Result> {
 	 * @return the visitor result
 	 */
 	visitWhileStmt?: (ctx: WhileStmtContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.retStmt`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitRetStmt?: (ctx: RetStmtContext) => Result;
+
+	/**
+	 * Visit a parse tree produced by `vikingParser.stmtBlock`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitStmtBlock?: (ctx: StmtBlockContext) => Result;
 
 	/**
 	 * Visit a parse tree produced by `vikingParser.varDeclStmt`.

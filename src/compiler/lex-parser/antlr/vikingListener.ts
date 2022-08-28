@@ -6,9 +6,10 @@ import { ParseTreeListener } from "antlr4ts/tree/ParseTreeListener";
 import { EntryContext } from "./vikingParser";
 import { ExternalStmtContext } from "./vikingParser";
 import { StmtContext } from "./vikingParser";
-import { StmtBlockContext } from "./vikingParser";
 import { IfStmtContext } from "./vikingParser";
 import { WhileStmtContext } from "./vikingParser";
+import { RetStmtContext } from "./vikingParser";
+import { StmtBlockContext } from "./vikingParser";
 import { VarDeclStmtContext } from "./vikingParser";
 import { FnDeclStmtContext } from "./vikingParser";
 import { ParenExprContext } from "./vikingParser";
@@ -63,17 +64,6 @@ export interface vikingListener extends ParseTreeListener {
 	exitStmt?: (ctx: StmtContext) => void;
 
 	/**
-	 * Enter a parse tree produced by `vikingParser.stmtBlock`.
-	 * @param ctx the parse tree
-	 */
-	enterStmtBlock?: (ctx: StmtBlockContext) => void;
-	/**
-	 * Exit a parse tree produced by `vikingParser.stmtBlock`.
-	 * @param ctx the parse tree
-	 */
-	exitStmtBlock?: (ctx: StmtBlockContext) => void;
-
-	/**
 	 * Enter a parse tree produced by `vikingParser.ifStmt`.
 	 * @param ctx the parse tree
 	 */
@@ -94,6 +84,28 @@ export interface vikingListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitWhileStmt?: (ctx: WhileStmtContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `vikingParser.retStmt`.
+	 * @param ctx the parse tree
+	 */
+	enterRetStmt?: (ctx: RetStmtContext) => void;
+	/**
+	 * Exit a parse tree produced by `vikingParser.retStmt`.
+	 * @param ctx the parse tree
+	 */
+	exitRetStmt?: (ctx: RetStmtContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `vikingParser.stmtBlock`.
+	 * @param ctx the parse tree
+	 */
+	enterStmtBlock?: (ctx: StmtBlockContext) => void;
+	/**
+	 * Exit a parse tree produced by `vikingParser.stmtBlock`.
+	 * @param ctx the parse tree
+	 */
+	exitStmtBlock?: (ctx: StmtBlockContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `vikingParser.varDeclStmt`.

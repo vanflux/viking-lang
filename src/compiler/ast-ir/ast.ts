@@ -145,6 +145,14 @@ export class ASTVarDeclarationStatement implements ASTStatement {
   }
 }
 
+export class ASTReturnStatement implements ASTStatement {
+  constructor(public text: string, public expression: ASTExpression) {}
+  process<T>(func: ASTProcessFunc<T>, ctx?: T) {
+    ctx = func(this, ctx);
+    this.expression.process(func, ctx);
+  }
+}
+
 export class ASTFunctionDeclarationStatement implements ASTStatement {
   constructor(public text: string, public type: string, public id: string, public args: ASTFunctionArgument[], public stmts: ASTStatement[]) {}
   process<T>(func: ASTProcessFunc<T>, ctx?: T) {
@@ -206,6 +214,9 @@ export class Ast {
         const id = ctx.varDeclStmt()!.ID().text;
         const expr = expressionToAst(ctx.varDeclStmt()!.expr());
         return [new ASTVarDeclarationStatement(ctx.text, type, id, expr)];
+      } else if (ctx.retStmt()) {
+        const expr = expressionToAst(ctx.retStmt()!.expr());
+        return [new ASTReturnStatement(ctx.text, expr)];
       }
       throw new Error('Unhandled statement on ast generation');
     }
