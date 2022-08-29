@@ -1,4 +1,4 @@
-import { SSAInstruction } from "./instructions";
+import { SSABranchInstruction, SSAInstruction } from "./instructions";
 import { SSAVariable } from "./values";
 
 export class SSABlockArgument {
@@ -12,40 +12,41 @@ export class SSABlockArgument {
 export class SSABlock {
   public instructions: SSAInstruction[] = [];
   public args: SSABlockArgument[] = [];
-  constructor(public id: string) {}
+  public variables: SSAVariable[] = [];
+  public argsChangeHandlers: ((addedArg: SSABlockArgument)=>any)[] = [];
+
+  constructor(public id: string, public prev: SSABlock | undefined) {}
   
   public setArgs(args: SSABlockArgument[]) {
-    this.args = args;
+    args.forEach(arg => this.addArg(arg));
     return this;
+  }
+
+  public addArg(arg: SSABlockArgument) {
+    if (this.args.find(x => x.baseVarName === arg.baseVarName)) return;
+    this.args.push(arg);
+    this.argsChangeHandlers.forEach(x => x(arg));
+    return this;
+  }
+
+  public registerArgsChangeHandler(handler: (addedArg: SSABlockArgument) => any) {
+    this.argsChangeHandlers.push(handler);
   }
 
   public addInstruction(instruction: SSAInstruction) {
     this.instructions.push(instruction);
+    if (instruction instanceof SSABranchInstruction) instruction.setBlock(this);
     return this;
   }
 
-  public toString() {
-    return `${this.id}(${this.args.map(x => x.toString()).join(', ')}):\n${this.instructions.map(x => x.toString()).join('\n')}`;
-  }
-}
-
-export class SSABlockGenerationContext {
-  public blocks: SSABlock[] = [];
-  public variables: SSAVariable[] = [];
-  
-  constructor(public id: string) {}
-
-  public curBlock() {
-    return this.blocks[this.blocks.length - 1];
+  public hasVar(id: string) {
+    if (this.variables.find(x => x.base === id)) return true;
+    if (this.args.find(x => x.baseVarName === id)) return true;
+    if (this.prev?.hasVar(id)) return true;
+    return false;
   }
 
-  public addBlock() {
-    const block = new SSABlock(`${this.id}_${this.blocks.length}`);
-    this.blocks.push(block);
-    return block;
-  }
-
-  public getVar(id: string, isNew: boolean) {
+  public getVar(id: string, isNew: boolean, isTemp=false): SSAVariable {
     const variable = this.variables.find(x => x.base === id);
     if (variable) {
       if (isNew) {
@@ -55,6 +56,14 @@ export class SSABlockGenerationContext {
       }
       return variable;
     } else {
+      // Search variables on previous blocks
+      if (!isTemp && this.prev?.hasVar(id)) {
+        const variable = this.prev.getVar(id, isNew, isTemp);
+        if (variable) {
+          this.addArg(new SSABlockArgument(variable.base, 'int'));
+          return variable;
+        }
+      }
       const newVariable = new SSAVariable(id, 0);
       this.variables.unshift(newVariable);
       return newVariable;
@@ -63,6 +72,26 @@ export class SSABlockGenerationContext {
   }
 
   public getTmp(isNew: boolean) {
-    return this.getVar('_T', isNew);
+    return this.getVar('_T', isNew, true);
+  }
+
+  public toString() {
+    return `${this.id}(${this.args.map(x => x.toString()).join(', ')}):\n${this.instructions.map(x => x.toString()).join('\n')}`;
+  }
+}
+
+export class SSABlockGenerationContext {
+  public blocks: SSABlock[] = [];
+  
+  constructor(public id: string) {}
+
+  public curBlock() {
+    return this.blocks[this.blocks.length - 1];
+  }
+
+  public addBlock() {
+    const block = new SSABlock(`${this.id}_${this.blocks.length}`, this.curBlock());
+    this.blocks.push(block);
+    return block;
   }
 }

@@ -20,14 +20,14 @@ export class SSA {
     function genStatementsBlocks(ctx: SSABlockGenerationContext, statements: ASTStatement[]) {
       for (const statement of statements) {
         if (statement instanceof ASTVarDeclarationStatement) {
-          evalExpressionTo(ctx, statement.expression, ctx.getVar(statement.id, true));
+          evalExpressionTo(ctx, statement.expression, ctx.curBlock().getVar(statement.id, true));
         } else if (statement instanceof ASTExpressionStatement) {
           evalExpression(ctx, statement.expression);
         } else if (statement instanceof ASTWhileStatement) {
           const beforeBlock = ctx.curBlock();
           const initialBlock = ctx.addBlock();
           beforeBlock.addInstruction(new SSABranchGoInstruction(initialBlock, []));
-          const condVar = ctx.getTmp(true);
+          const condVar = ctx.curBlock().getTmp(true);
           evalExpressionTo(ctx, statement.conditionExpression, condVar);
           const condBlock = ctx.curBlock();
           const bodyBlock = ctx.addBlock();
@@ -36,7 +36,7 @@ export class SSA {
           const outBlock = ctx.addBlock();
           condBlock.addInstruction(new SSABranchNZInstruction(condVar, bodyBlock, [], outBlock, []));
         } else if (statement instanceof ASTIfStatement) {
-          const condVar = ctx.getTmp(true);
+          const condVar = ctx.curBlock().getTmp(true);
           evalExpressionTo(ctx, statement.conditionExpression, condVar);
           const condBlock = ctx.curBlock();
           const ifBlock = ctx.addBlock();
@@ -48,7 +48,7 @@ export class SSA {
           elseBlock.addInstruction(new SSABranchGoInstruction(endBlock, []));
           condBlock.addInstruction(new SSABranchNZInstruction(condVar, ifBlock, [], elseBlock, []));
         } else if (statement instanceof ASTReturnStatement) {
-          const dest = ctx.getTmp(true);
+          const dest = ctx.curBlock().getTmp(true);
           ctx.curBlock()
           .addInstruction(new SSAMoveInstruction(dest, evalExpression(ctx, statement.expression)))
           .addInstruction(new SSARetInstruction(dest));
@@ -65,19 +65,21 @@ export class SSA {
     // Convert expression to blocks and return the output expression
     function evalExpression(ctx: SSABlockGenerationContext, expression: ASTExpression): SSAValue {
       if (expression instanceof ASTVarReference) {
-        return ctx.getVar(expression.varName, false);
+        return ctx.curBlock().getVar(expression.varName, false);
       } else if (expression instanceof ASTNumberLiteralExpression) {
         return new SSALiteralNumberValue(expression.value);
       } else if (expression instanceof ASTStringLiteralExpression) {
         return new SSALiteralStringValue(expression.value);
       } else if (expression instanceof ASTAssignExpression) {
-        return new SSAMoveInstruction(ctx.getVar(expression.varRef.varName, true), evalExpression(ctx, expression.expression));
+        const dest = ctx.curBlock().getVar(expression.varRef.varName, true);
+        ctx.curBlock().addInstruction(new SSAMoveInstruction(dest, evalExpression(ctx, expression.expression)));
+        return dest;
       } else if (expression instanceof ASTBinaryExpression) {
-        const result = ctx.getTmp(true);
+        const result = ctx.curBlock().getTmp(true);
         ctx.curBlock().addInstruction(new SSABinaryInstruction(result, evalExpression(ctx, expression.leftExpression), evalExpression(ctx, expression.rightExpression), expression.operation));
         return result;
       } else if (expression instanceof ASTUnaryExpression) {
-        const result = ctx.getTmp(true);
+        const result = ctx.curBlock().getTmp(true);
         ctx.curBlock().addInstruction(new SSAUnaryInstruction(result, evalExpression(ctx, expression.expression), expression.operation));
         return result;
       } else if (expression instanceof ASTCallExpression) {
