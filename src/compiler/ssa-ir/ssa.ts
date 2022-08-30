@@ -71,16 +71,20 @@ export class SSA {
       } else if (expression instanceof ASTStringLiteralExpression) {
         return new SSALiteralStringValue(expression.value);
       } else if (expression instanceof ASTAssignExpression) {
+        const value = evalExpression(ctx, expression.expression);
         const dest = ctx.curBlock().getVar(expression.varRef.varName, true);
-        ctx.curBlock().addInstruction(new SSAMoveInstruction(dest, evalExpression(ctx, expression.expression)));
+        ctx.curBlock().addInstruction(new SSAMoveInstruction(dest, value));
         return dest;
       } else if (expression instanceof ASTBinaryExpression) {
+        const leftValue = evalExpression(ctx, expression.leftExpression);
+        const rightValue = evalExpression(ctx, expression.rightExpression);
         const result = ctx.curBlock().getTmp(true);
-        ctx.curBlock().addInstruction(new SSABinaryInstruction(result, evalExpression(ctx, expression.leftExpression), evalExpression(ctx, expression.rightExpression), expression.operation));
+        ctx.curBlock().addInstruction(new SSABinaryInstruction(result, leftValue, rightValue, expression.operation));
         return result;
       } else if (expression instanceof ASTUnaryExpression) {
+        const value = evalExpression(ctx, expression.expression);
         const result = ctx.curBlock().getTmp(true);
-        ctx.curBlock().addInstruction(new SSAUnaryInstruction(result, evalExpression(ctx, expression.expression), expression.operation));
+        ctx.curBlock().addInstruction(new SSAUnaryInstruction(result, value, expression.operation));
         return result;
       } else if (expression instanceof ASTCallExpression) {
         throw new Error('Call expression not supported yet on SSA');
@@ -96,5 +100,9 @@ export class SSA {
         console.error('Not implemented!');
       }
     });
+  }
+
+  toString() {
+    return this.blocks.map(block => block.toString()).join('\n\n');
   }
 }

@@ -16,6 +16,14 @@ export class SSAVariable extends SSAValue {
   }
 }
 
+export class SSARegister extends SSAValue {
+  constructor(public register: number) {super()}
+
+  public toString(): string {
+    return `r${this.register}`;
+  }
+}
+
 export class SSALiteralNumberValue extends SSAValue {
   constructor(public value: number) {super()}
 

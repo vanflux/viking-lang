@@ -4,6 +4,7 @@ import { Architecture } from '../common';
 import { Ast } from './ast-ir';
 import { CodeGen } from './code-gen';
 import { Lexer, Parser } from './lex-parser';
+import { LinearScan } from './register-allocator';
 import { SSA } from './ssa-ir';
 
 // Making compiler
@@ -24,8 +25,13 @@ export class Compiler {
     const parseTree = parser.entry();
     const astIr = new Ast(parseTree);
     const ssaIr = new SSA(astIr);
-    ssaIr.blocks.forEach((block, i) => console.log(block.toString(), '\n'))
+    //console.log(ssaIr.toString())
 
+    const registerAllocator = new LinearScan();
+    registerAllocator.process(ssaIr, {
+      registerCount: 4,
+    });
+    
     return {code: ''};
     /*const inputStream = CharStreams.fromString(code);
     const lexer = new Lexer(inputStream);
