@@ -1,6 +1,6 @@
 import { Assembler, getAllPseudos, PseudoConverter } from "../../src/assembler";
 import { ArchitectureManager } from "../../src/common";
-import { Compiler } from "../../src/compiler";
+import { Compiler, DumbCodeGen } from "../../src/compiler";
 import { ConsoleDevice, Memory, RegisterBank, Simulation } from "../../src/simulator";
 
 export interface SimulationResult {
@@ -10,7 +10,7 @@ export interface SimulationResult {
 
 export function compile(code: string) {
   const architecture = ArchitectureManager.getViking16Arch();
-  const compiler = new Compiler(architecture);
+  const compiler = new Compiler(architecture, new DumbCodeGen());
   return compiler.compile(code);
 }
 

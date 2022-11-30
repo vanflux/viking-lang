@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node-dev --respawn --transpile-only --exit-child src/entry.ts",
     "build": "tsc",
-    "test": "mocha --slow -1 -r ts-node/register 'tests/**/*.ts'",
+    "test": "mocha --slow -1 --exclude tests/integration/compiler/**/*.ts -r ts-node/register 'tests/**/*.ts'",
     "test:watch": "npm t -- --watch --watch-files src,tests",
     "gen-parser": "cd src/compiler/lex-parser && antlr4ts -visitor viking.g4 -o ./antlr",
     "coverage": "nyc --reporter=lcov --reporter=text-summary npm t",
