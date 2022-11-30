@@ -1,9 +1,9 @@
 {
   "name": "viking-lang",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Viking language assembler, compiler and simulator/debugger",
   "main": "dist/index.js",
-  "types": "./index.d.ts",
+  "types": "dist/index.d.ts",
   "scripts": {
     "start": "ts-node-dev --respawn --exit-child src/entry.ts",
     "build": "tsc",
