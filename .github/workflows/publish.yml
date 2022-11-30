@@ -28,7 +28,7 @@ jobs:
       - name: Show release version
         run: echo Release version ${{ steps.tagName.outputs.tag }}
       - name: Change package.json version
-        run: npm version ${{ steps.tagName.outputs.tag }}
+        run: npm version --no-git-tag-version ${{ steps.tagName.outputs.tag }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
