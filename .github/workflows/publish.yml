@@ -21,10 +21,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set env
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/:1}" >> $GITHUB_ENV
+      - uses: olegtarasov/get-tag@v2.1.2
+        id: tagName
+        with:
+          tagRegex: "v(.*)"
       - name: Show release version
-        run: echo Release version ${{ env.RELEASE_VERSION }}
+        run: echo Release version ${{ steps.tagName.outputs.tag }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -33,6 +35,6 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-      - run: npm publish --tag ${{ env.RELEASE_VERSION }}
+      - run: npm publish --tag ${{ steps.tagName.outputs.tag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
