@@ -6,7 +6,7 @@ import { Memory } from './simulator';
 import { RegisterBank } from './simulator';
 import { Simulation } from './simulator';
 import { getAllPseudos } from './assembler';
-import { Compiler } from './compiler';
+import { Compiler, GoodCodeGen, DumbCodeGen } from './compiler';
 
 export async function main() {
   const start = Date.now();
@@ -33,15 +33,13 @@ export async function main() {
 
   const architecture = ArchitectureManager.getViking16Arch();
 
-  const compiler = new Compiler(architecture);
+  const compiler = new Compiler(architecture, new DumbCodeGen());
   const { code: asmCode } = compiler.compile(langCode);
   console.log('[ASM]');
   console.log(asmCode);
 
-  /*const pseudoConverter = new PseudoConverter(getAllPseudos());
+  const pseudoConverter = new PseudoConverter(getAllPseudos());
   const assembler = new Assembler(architecture, pseudoConverter);
-  const { rawObjectCode } = assembler.assemble(asmCode);
-
   const memory = Memory.createFromArchitecture(architecture);
   const registerBank = RegisterBank.createFromArchitecture(architecture);
   const simulation = new Simulation(architecture, memory, registerBank);
@@ -50,18 +48,19 @@ export async function main() {
   consoleDevice.on('write char', console.log);
   consoleDevice.on('input buffer', buffer => console.log('console device input buffer:', buffer));
   consoleDevice.on('waiting', waiting => console.log('console device waiting:', waiting));
-
   simulation.registerPorts(consoleDevice.getPorts());
   simulation.setStepInterval(0);
-
   simulation.on('run ended', () => {
     console.log('[Simulation] Run ended!');
 
     const end = Date.now();
     console.log('Time:', end - start, 'ms');
   });
+  
+  assembler.addExtraSymbolTable(simulation.getPortsSymbolTable());
+  const { rawObjectCode } = assembler.assemble(asmCode);
   simulation.setRawObjCode(rawObjectCode!);
-  simulation.run();*/
+  simulation.run();
 }
 
 main();

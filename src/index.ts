@@ -7,6 +7,4 @@ export * from './simulator/memory';
 export * from './simulator/registerBank';
 export * from './simulator/simulation';
 export * from './assembler/pseudos';
-export * from './compiler/compiler';
-export * from './compiler/code-gen/value-allocator';
-export * from './compiler/code-gen/generator';
+export * from './compiler';

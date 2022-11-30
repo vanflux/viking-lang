@@ -43,7 +43,8 @@ export class LinearScan implements IRegisterAllocator {
     const liveRanges = this.buildLiveRanges(block);
     console.log(liveRanges.toString());
     const allocations = this.allocate(liveRanges, options.registerCount);
-    console.log(allocations);
+    console.log('ssa.blocks', ssa.blocks.map(x => x.toString()).join('\n\n'));
+    console.log('allocations', allocations);
   }
 
   private buildLiveRanges(block: SSABlock) {

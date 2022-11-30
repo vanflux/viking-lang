@@ -1,3 +1,8 @@
-export * from './code-gen';
-export * from './generator';
-export * from './value-allocator';
+import { Ast } from '../ast-ir';
+
+export * from './dumb-code-gen';
+export * from './good-code-gen';
+
+export interface ICodeGen {
+  generate(astIr: Ast): string;
+}
