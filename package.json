@@ -1,10 +1,11 @@
 {
   "name": "viking-lang",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Viking language assembler, compiler and simulator/debugger",
   "main": "dist/index.js",
+  "types": "./index.d.ts",
   "scripts": {
-    "start": "ts-node-dev --respawn --transpile-only --exit-child src/entry.ts",
+    "start": "ts-node-dev --respawn --exit-child src/entry.ts",
     "build": "tsc",
     "test": "mocha --slow -1 --exclude tests/integration/compiler/**/*.ts -r ts-node/register 'tests/**/*.ts'",
     "test:watch": "npm t -- --watch --watch-files src,tests",
@@ -39,5 +40,9 @@
   "dependencies": {
     "antlr4ts": "^0.5.0-alpha.4",
     "unraw": "^2.0.1"
-  }
+  },
+  "files": [
+    "dist/",
+    "package.json"
+  ]
 }
