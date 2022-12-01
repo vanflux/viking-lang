@@ -27,24 +27,24 @@ jobs:
           tagRegex: "v(.*)"
       - name: Show release version
         run: echo Release version ${{ steps.tagName.outputs.tag }}
-      - name: Change package.json version
-        run: npm version --no-git-tag-version ${{ steps.tagName.outputs.tag }}
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          registry-url: 'https://registry.npmjs.org'
-      - name: Install dependencies
-        run: npm ci
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: v${{ steps.tagName.outputs.tag }}
+          release_name: Release v${{ steps.tagName.outputs.tag }}
           draft: true
-          prerelease: true
+          prerelease: false
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install dependencies
+        run: npm ci
+      - name: Change package.json version
+        run: npm version --no-git-tag-version ${{ steps.tagName.outputs.tag }}
       - name: Build
         run: npm run build
       - name: Publish
