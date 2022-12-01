@@ -35,6 +35,7 @@ jobs:
         with:
           tag_name: v${{ steps.tagName.outputs.tag }}
           release_name: Release v${{ steps.tagName.outputs.tag }}
+          body: Just another release
           draft: true
           prerelease: false
       - uses: actions/setup-node@v3
