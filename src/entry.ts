@@ -11,7 +11,7 @@ import { Compiler, GoodCodeGen, DumbCodeGen } from './compiler';
 export async function main() {
   const start = Date.now();
 
-  const langCode = `
+  /*const langCode = `
   int test(int a, int b) {
     int c = a + b;
     int d = 0;
@@ -29,11 +29,18 @@ export async function main() {
     int f = ((-(1 - c)) + 55 + 3 - (c + c));
     return 5 - f;
   }
+  `;*/
+  const langCode = `
+  int test(int a, int b) {
+    int c = 5;
+    int d = c;
+    return d;
+  }
   `;
 
   const architecture = ArchitectureManager.getViking16Arch();
 
-  const compiler = new Compiler(architecture, new DumbCodeGen());
+  const compiler = new Compiler(architecture, new GoodCodeGen());
   const { code: asmCode } = compiler.compile(langCode);
   console.log('[ASM]');
   console.log(asmCode);

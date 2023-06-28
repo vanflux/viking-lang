@@ -147,12 +147,123 @@ TBD
 
 ### Register allocation
 
-TBD
+```c
+test_0(int a?, int b?):                                   // Params: a0 = r1, b0 = r2
+_T0 = a0 + b0                                             // r1 = r1 + r2
+c0 = _T0                                                  // r1 = r1
+d0 = 0                                                    // r2 = 0
+e0 = 1                                                    // r3 = 1
+BR.GO test_1(d0, c0, e0)                                  // jmp test_1
+
+test_1(int d?, int c?, int e?):                           // Params: d0 = r2, c0 = r1, e0 = r3
+_T1 = d0 < 10                                             // r4 = r2 < 10
+_T0 = _T1                                                 // r4 = r4
+BR.NZ _T0 test_2(c0, e0, d0) test_6(c0)                   // jnz r4 test_2
+                                                          // jmp test_6
+
+test_2(int c?, int e?, int d?):                           // Params: c0 = r1, e0 = r3, d0 = r2
+_T0 = c0 + e0                                             // r1 = r1 + r3
+c1 = _T0                                                  // r1 = r1
+_T2 = e0 < 5                                              // r4 = r3 < 5
+_T1 = _T2                                                 // r4 = r4
+BR.NZ _T1 test_3(e0, c1, d0) test_4(e0, c1, d0)           // jnz r4 test_3
+                                                          // jmp test_4
+
+test_3(int e?, int c?, int d?):                           // Params: e0 = r3, c0 = r1, d0 = r2
+_T0 = e0 + 1                                              // r3 = r3 + 1
+e1 = _T0                                                  // r3 = r3
+BR.GO test_5(d0, c0, e1)                                  // jmp test_5
+
+test_4(int e?, int c?, int d?):                           // Params: e0 = r3, c0 = r1, d0 = r2
+_T0 = e0 + 2                                              // r3 = r3 + 2
+e1 = _T0                                                  // r3 = r3
+_T1 = c0 + 1                                              // r1 = r1 + 1
+c1 = _T1                                                  // r1 = r1
+                                                          // [SPILL] (perfect)
+BR.GO test_5(d0, c1, e1)                                  // jmp test_5
+
+test_5(int d?, int c?, int e?):                           // Params: d0 = r2, c0 = r1, e0 = r3
+_T0 = d0 + 1                                              // r2 = r2 + 1
+d1 = _T0                                                  // r2 = r2
+                                                          // [SPILL] (perfect)
+BR.GO test_1(d1, c0, e0)                                  // jmp test_1
+
+test_6(int c?):                                           // Params: c0 = r1
+_T0 = 1 - c0                                              // r2 = 1 - r1
+_T1 = - _T0                                               // r2 = - r2
+_T2 = _T1 + 55                                            // r2 = r2 + 55
+_T3 = _T2 + 3                                             // r2 = r2 + 3
+_T4 = c0 + c0                                             // r1 = r1 + r1
+_T5 = _T3 - _T4                                           // r1 = r2 - r1
+f0 = _T5                                                  // r1 = r1
+_T7 = 5 - f0                                              // r1 = 5 - r1
+_T6 = _T7                                                 // r1 = r1
+RET _T6                                                   // ret r1
+```
 
 ## Stack allocation
 
 TBD
 
 ## Code gen
+
+```c
+test_0
+	add r1, r1, r2
+	mov r1, r1
+	ldi r2, 0
+	ldi r3, 1
+	bnz r7, test_1
+
+test_1
+	ldi r5, 10
+	slt r4, r2, r5
+	mov r4, r4
+	bnz r4, test_2
+	bnz r7, test_6
+
+test_2
+	add r1, r1, r3
+	mov r1, r1
+	ldi r5, 5
+	slt r4, r3, r5
+	mov r4, r4
+	bnz r4, test_3
+	bnz r7, test_4
+
+test_3
+	add r3, 1
+	mov r3, r3
+	bnz r7, test_5
+
+test_4
+	add r3, 2
+	mov r3, r3
+	add r1, 1
+	mov r1, r1
+	bnz r7, test_5
+
+test_5
+	add r2, 1
+	mov r2, r2
+	bnz r7, test_1
+
+test_6
+	ldi r5, 1
+	sub r2, r5, r1
+	neg r2
+	add r2, 55
+	add r2, 3
+	add r1, r1, r1
+	sub r1, r2, r1
+	mov r1, r1
+	ldi r5, 5
+	sub r1, r5, r1
+	mov r1, r1
+
+stw r1, console_writei
+hcf
+
+```
 
 TBD
