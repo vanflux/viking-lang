@@ -1,6 +1,6 @@
 {
   "name": "viking-lang",
-  "version": "0.0.5",
+  "version": "0.0.0",
   "description": "Viking language assembler, compiler and simulator/debugger",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
