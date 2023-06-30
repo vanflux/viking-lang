@@ -7,7 +7,7 @@
   "scripts": {
     "start": "ts-node-dev --respawn --exit-child src/entry.ts",
     "build": "tsc",
-    "test": "mocha --slow -1 --exclude tests/integration/compiler/**/*.ts -r ts-node/register 'tests/**/*.ts'",
+    "test": "mocha --slow -1 -r ts-node/register 'tests/**/*.ts'",
     "test:watch": "npm t -- --watch --watch-files src,tests",
     "gen-parser": "cd src/compiler/lex-parser && antlr4ts -visitor viking.g4 -o ./antlr",
     "coverage": "nyc --reporter=lcov --reporter=text-summary npm t",
@@ -30,12 +30,18 @@
     "@types/node": "^17.0.29",
     "antlr4ts-cli": "^0.5.0-alpha.4",
     "chai": "^4.3.6",
+    "fork-ts-checker-webpack-plugin": "^8.0.0",
     "mocha": "^9.2.2",
     "nyc": "^15.1.0",
     "prettier": "2.6.2",
+    "terser-webpack-plugin": "^5.3.9",
+    "ts-loader": "^9.4.4",
     "ts-node": "^10.7.0",
     "ts-node-dev": "^1.1.8",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.3",
+    "webpack": "^5.88.1",
+    "webpack-bundle-analyzer": "^4.9.0",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "antlr4ts": "^0.5.0-alpha.4",

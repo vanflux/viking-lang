@@ -9,7 +9,7 @@ export class SSA {
   constructor(ast: Ast) {
     // Convert function to blocks
     function genFunctionDeclBlocks(functionDecl: ASTFunctionDeclarationStatement): SSABlock[] {
-      const args = functionDecl.args.map(x => new SSABlockArgument(x.id, x.type));
+      const args = functionDecl.args.map(x => new SSABlockArgument(new SSAVariable(x.id, 0, x.type)));
       const ctx = new SSABlockGenerationContext(functionDecl.id);
       ctx.addBlock().setArgs(args);
       genStatementsBlocks(ctx, functionDecl.stmts);
@@ -67,7 +67,7 @@ export class SSA {
       if (expression instanceof ASTVarReference) {
         return ctx.curBlock().getVar(expression.varName, false);
       } else if (expression instanceof ASTNumberLiteralExpression) {
-        return new SSALiteralNumberValue(expression.value);
+        return new SSALiteralNumberValue(expression.value, 'int');
       } else if (expression instanceof ASTStringLiteralExpression) {
         return new SSALiteralStringValue(expression.value);
       } else if (expression instanceof ASTAssignExpression) {

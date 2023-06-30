@@ -2,10 +2,10 @@ import { SSABranchInstruction, SSAInstruction } from "./instructions";
 import { SSAVariable } from "./values";
 
 export class SSABlockArgument {
-  constructor(public baseVarName: string, public type: string) {};
+  constructor(public variable: SSAVariable) {};
 
   public toString() {
-    return `${this.type} ${this.baseVarName}?`;
+    return `${this.variable.type} ${this.variable.base}?`;
   }
 }
 
@@ -23,8 +23,9 @@ export class SSABlock {
   }
 
   public addArg(arg: SSABlockArgument) {
-    if (this.args.find(x => x.baseVarName === arg.baseVarName)) return;
+    if (this.args.find(x => x.variable.base === arg.variable.base)) return;
     this.args.push(arg);
+    this.variables.unshift(arg.variable);
     this.argsChangeHandlers.forEach(x => x(arg));
     return this;
   }
@@ -41,28 +42,34 @@ export class SSABlock {
 
   public hasVar(id: string) {
     if (this.variables.find(x => x.base === id)) return true;
-    if (this.args.find(x => x.baseVarName === id)) return true;
     if (this.prev?.hasVar(id)) return true;
     return false;
   }
 
   public getVar(id: string, isNew: boolean, isTemp=false): SSAVariable {
-    let newVariable = new SSAVariable(id, 0);
     const variable = this.variables.find(x => x.base === id);
     if (!variable) {
       // Search variables on previous blocks
       if (!isTemp && this.prev?.hasVar(id)) {
         const variable = this.prev.getVar(id, false, isTemp);
         if (variable) {
-          this.addArg(new SSABlockArgument(id, 'int'));
-          if (isNew) newVariable = newVariable.next();
+          const newVariable = new SSAVariable(id, 0, 'int');
+          this.addArg(new SSABlockArgument(newVariable));
+          return newVariable;
         }
       }
+      const newVariable = new SSAVariable(id, 0, 'int');
+      this.variables.unshift(newVariable);
+      return newVariable;
     } else {
-      newVariable = isNew ? variable.next() : variable;
+      if (isNew) {
+        const newVariable = variable.next();
+        this.variables.unshift(newVariable);
+        return newVariable;
+      } else {
+        return variable;
+      }
     }
-    this.variables.unshift(newVariable);
-    return newVariable;
   }
 
   public getTmp(isNew: boolean) {

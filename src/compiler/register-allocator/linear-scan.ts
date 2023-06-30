@@ -79,14 +79,16 @@ export class LinearScan implements IRegisterAllocator {
     for (let i = 0; i < block.args.length; i++) {
       const arg = block.args[i];
       const argAllocation = argAllocations?.[i];
-      if (argAllocation && argAllocation.type === 'register') {
-        availableRegisters.splice(availableRegisters.indexOf(argAllocation.register), 1);
-      }
       const allocation =  argAllocation ?? alloc();
-      const variable = `${arg.baseVarName}0`;
-      liveRanges.informUsage(0, variable);
-      allocations.set(variable, allocation);
-    };
+      if (allocation?.type === 'register') {
+        if (argAllocation) availableRegisters.splice(availableRegisters.indexOf(allocation.register), 1);
+        arg.variable.register = allocation.register;
+      } else if (allocation?.type === 'stack') {
+        arg.variable.stackPos = allocation.stackPos;
+      }
+      liveRanges.informUsage(0, arg.variable.toString());
+      allocations.set(arg.variable.toString(), allocation);
+    }
     for (let i = 0; i < block.instructions.length; i++) {
       const instruction = block.instructions[i];
       for (const variable of instruction.variables()) {
@@ -120,11 +122,16 @@ export class LinearScan implements IRegisterAllocator {
           if (!liveRanges.isEnd(variable, i)) {
             if (!allocations.get(variable)) {
               const allocation = alloc();
+              const v = block.variables.find(v => v.toString() === variable);
+              if (v) {
+                v.register = allocation.type === 'register' ? allocation.register : undefined;
+                v.stackPos = allocation.type === 'stack' ? allocation.stackPos : undefined;
+              }
               allocations.set(variable, allocation);
             }
           }
         }
       }
-    };
+    }
   }
 }

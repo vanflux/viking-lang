@@ -1,7 +1,6 @@
 {
   "ts-node": {
-    "files": true,
-    "transpileOnly": true
+    "files": true
   },
   "include": ["src/**/*"],
   "exclude": ["src/entry.ts"],

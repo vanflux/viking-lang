@@ -1,11 +1,35 @@
+import { CharStreams, CommonTokenStream } from "antlr4ts";
 import { Assembler, getAllPseudos, PseudoConverter } from "../../src/assembler";
 import { ArchitectureManager } from "../../src/common";
-import { Compiler, DumbCodeGen } from "../../src/compiler";
+import { Ast, Compiler, DumbCodeGen, Lexer, LinearScan, Parser, SSA } from "../../src/compiler";
 import { ConsoleDevice, Memory, RegisterBank, Simulation } from "../../src/simulator";
 
 export interface SimulationResult {
   numbers: number[];
   chars: string[];
+}
+
+export function genAst(code: string) {
+  const inputStream = CharStreams.fromString(code);
+  const lexer = new Lexer(inputStream);
+  const tokenStream = new CommonTokenStream(lexer);
+  const parser = new Parser(tokenStream);
+  const parseTree = parser.entry();
+  const astIr = new Ast(parseTree);
+  return astIr
+}
+
+export function genSSA(astIr: Ast) {
+  const ssaIr = new SSA(astIr);
+  return ssaIr;
+}
+
+export function processRegisterAllocations(ssaIr: SSA) {
+  const registerAllocator = new LinearScan();
+  registerAllocator.process(ssaIr, {
+    registerCount: 4,
+  });
+  return registerAllocator;
 }
 
 export function compile(code: string) {

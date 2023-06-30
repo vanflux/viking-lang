@@ -16,9 +16,9 @@ export class SSABranchGoInstruction extends SSABranchInstruction {
   constructor(public dest: SSABlock, public params: SSAVariable[]) {super()}
 
   setBlock(block: SSABlock) {
-    this.dest.args.forEach(arg => this.params.push(block.getVar(arg.baseVarName, false)));
+    this.dest.args.forEach(arg => this.params.push(block.getVar(arg.variable.base, false)));
     this.dest.registerArgsChangeHandler(arg => {
-      this.params.push(block.getVar(arg.baseVarName, false));
+      this.params.push(block.getVar(arg.variable.base, false));
     });
     return this;
   }
@@ -36,10 +36,10 @@ export class SSABranchNZInstruction extends SSABranchInstruction {
   constructor(public input: SSAVariable, public destTrue: SSABlock, public paramsTrue: SSAVariable[], public destFalse: SSABlock, public paramsFalse: SSAVariable[]) {super()}
 
   setBlock(block: SSABlock) {
-    this.destTrue.args.forEach(arg => this.paramsTrue.push(block.getVar(arg.baseVarName, false)));
-    this.destFalse.args.forEach(arg => this.paramsFalse.push(block.getVar(arg.baseVarName, false)));
-    this.destTrue.registerArgsChangeHandler(arg => this.paramsTrue.push(block.getVar(arg.baseVarName, false)));
-    this.destFalse.registerArgsChangeHandler(arg => this.paramsFalse.push(block.getVar(arg.baseVarName, false)));
+    this.destTrue.args.forEach(arg => this.paramsTrue.push(block.getVar(arg.variable.base, false)));
+    this.destFalse.args.forEach(arg => this.paramsFalse.push(block.getVar(arg.variable.base, false)));
+    this.destTrue.registerArgsChangeHandler(arg => this.paramsTrue.push(block.getVar(arg.variable.base, false)));
+    this.destFalse.registerArgsChangeHandler(arg => this.paramsFalse.push(block.getVar(arg.variable.base, false)));
     return this;
   }
 

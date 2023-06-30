@@ -32,7 +32,7 @@ export async function main() {
   `;*/
   const langCode = `
   int test(int a, int b) {
-    int c = 5;
+    int c = a;
     int d = c;
     return d;
   }

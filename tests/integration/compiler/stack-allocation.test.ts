@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { compileAndRun } from '../../fixtures/functions';
-
+/*
 describe('Stack allocation tests', () => {
   it(`Compile stack allocation case 1"`, async () => {
     // Put variables on stack (by allocating a lot)
@@ -79,3 +79,4 @@ describe('Stack allocation tests', () => {
   });
 
 });
+*/

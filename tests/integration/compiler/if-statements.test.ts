@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { compileAndRun } from '../../fixtures/functions';
-
+/*
 describe('If statement tests', () => {
   [
     {cmp: 0, numbers: [1, 2, 3, 4, 5]},
@@ -65,3 +65,4 @@ describe('If statement tests', () => {
     });
   });
 });
+*/

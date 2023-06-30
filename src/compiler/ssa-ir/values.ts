@@ -2,13 +2,18 @@
 export abstract class SSAValue {
   public __base = 'ssa_value';
   public abstract toString(): string;
+  
+  constructor(public type: string) {}
 }
 
 export class SSAVariable extends SSAValue {
-  constructor(public base: string, public version: number) {super()}
+  public register?: string;
+  public stackPos?: number;
+
+  constructor(public base: string, public version: number, type: string) {super(type)}
 
   public next() {
-    return new SSAVariable(this.base, this.version + 1)
+    return new SSAVariable(this.base, this.version + 1, this.type)
   }
 
   public toString(): string {
@@ -16,16 +21,8 @@ export class SSAVariable extends SSAValue {
   }
 }
 
-export class SSARegister extends SSAValue {
-  constructor(public register: number) {super()}
-
-  public toString(): string {
-    return `r${this.register}`;
-  }
-}
-
 export class SSALiteralNumberValue extends SSAValue {
-  constructor(public value: number) {super()}
+  constructor(public value: number, type: string) {super(type)}
 
   public toString(): string {
     return `${this.value}`;
@@ -33,7 +30,7 @@ export class SSALiteralNumberValue extends SSAValue {
 }
 
 export class SSALiteralStringValue extends SSAValue {
-  constructor(public value: string) {super()}
+  constructor(public value: string, ) {super('string')}
   
   public toString(): string {
     return `"${this.value}"`;

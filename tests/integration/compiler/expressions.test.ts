@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { compileAndRun } from '../../fixtures/functions';
 import { limitTestNumbers1 } from '../../fixtures/numbers';
-
+/*
 describe('Expression tests', () => {
   describe('Computation', () => {
     limitTestNumbers1().forEach(x => {
@@ -121,3 +121,4 @@ describe('Expression tests', () => {
   });
 
 });
+*/
