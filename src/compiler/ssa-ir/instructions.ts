@@ -48,8 +48,8 @@ export class SSABranchNZInstruction extends SSABranchInstruction {
   }
 
   public toString(): string {
-    const strTrue =  `${this.destTrue.id}(${this.paramsTrue.map(x => x.toString()).join(', ')})`;
-    const strFalse = `${this.destFalse.id}(${this.paramsFalse.map(x => x.toString()).join(', ')})`;
+    const strTrue =  `${this.destTrue.name}(${this.paramsTrue.map(x => x.toString()).join(', ')})`;
+    const strFalse = `${this.destFalse.name}(${this.paramsFalse.map(x => x.toString()).join(', ')})`;
     return `BR.NZ ${this.input.toString()} ${strTrue} ${strFalse}`;
   }
 }
@@ -99,5 +99,17 @@ export class SSARetInstruction extends SSAInstruction {
 
   public toString(): string {
     return `RET ${this.retVar.toString()}`;
+  }
+}
+
+export class SSACallInstruction extends SSAInstruction {
+  constructor(public name: string, public dest: SSAVariable, public args: SSAValue[]) {super()}
+  
+  variables() {
+    return [this.dest, ...this.args.filter(arg => arg instanceof SSAVariable) as SSAVariable[]];
+  }
+
+  public toString(): string {
+    return `${this.dest.toString()} = CALL ${this.name}(${this.args.map(arg => arg.toString()).join(', ')})`;
   }
 }

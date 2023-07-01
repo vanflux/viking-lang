@@ -2,19 +2,20 @@ import { Allocation, IRegisterAllocator, RegisterAllocatorOptions } from ".";
 import { SSA } from "../ssa-ir";
 import { SSABlock } from "../ssa-ir/blocks";
 import { SSABranchGoInstruction, SSABranchInstruction, SSABranchNZInstruction } from "../ssa-ir/instructions";
+import { SSAVariable } from "../ssa-ir/values";
 
 export class LiveRanges {
-  private starts = new Map<string, number>();
-  private ends = new Map<string, number>();
+  private starts = new Map<SSAVariable, number>();
+  private ends = new Map<SSAVariable, number>();
   private size = 0;
   
   public getSize() {
     return this.size;
   }
 
-  public informUsage(index: number, varName: string) {
-    if (!this.starts.has(varName)) this.starts.set(varName, index);
-    this.ends.set(varName, index);
+  public informUsage(index: number, variable: SSAVariable) {
+    if (!this.starts.has(variable)) this.starts.set(variable, index);
+    this.ends.set(variable, index);
     this.size = Math.max(this.size, index + 1);
   }
 
@@ -22,12 +23,12 @@ export class LiveRanges {
     return this.starts.keys();
   }
 
-  public isStart(varBaseName: string, index: number) {
-    return this.starts.get(varBaseName)! === index;
+  public isStart(variable: SSAVariable, index: number) {
+    return this.starts.get(variable)! === index;
   }
 
-  public isEnd(varBaseName: string, index: number) {
-    return this.ends.get(varBaseName)! === index;
+  public isEnd(variable: SSAVariable, index: number) {
+    return this.ends.get(variable)! === index;
   }
 
   public toString() {
@@ -36,7 +37,7 @@ export class LiveRanges {
 }
 
 export class LinearScan implements IRegisterAllocator {
-  public ssaBlockAllocations = new Map<SSABlock, Map<string, Allocation>>();
+  public processedSsaBlocks = new Set<SSABlock>();
   private busyStackPositions = new Set<number>();
   private registerCount = 0;
 
@@ -47,7 +48,8 @@ export class LinearScan implements IRegisterAllocator {
   }
 
   private allocate(block: SSABlock, argAllocations?: Allocation[]) {
-    if (this.ssaBlockAllocations.has(block)) return;
+    if (this.processedSsaBlocks.has(block)) return;
+    this.processedSsaBlocks.add(block);
 
     const availableRegisters: string[] = [];
     for (let i = 0; i < this.registerCount; i++) availableRegisters.push(`r${i + 1}`);
@@ -72,9 +74,7 @@ export class LinearScan implements IRegisterAllocator {
       }
     }
 
-    const allocations = new Map<string, Allocation>();
-    this.ssaBlockAllocations.set(block, allocations);
-    
+    const allocations = new Map<SSAVariable, Allocation>();
     const liveRanges = new LiveRanges();
     for (let i = 0; i < block.args.length; i++) {
       const arg = block.args[i];
@@ -86,13 +86,13 @@ export class LinearScan implements IRegisterAllocator {
       } else if (allocation?.type === 'stack') {
         arg.variable.stackPos = allocation.stackPos;
       }
-      liveRanges.informUsage(0, arg.variable.toString());
-      allocations.set(arg.variable.toString(), allocation);
+      liveRanges.informUsage(0, arg.variable);
+      allocations.set(arg.variable, allocation);
     }
     for (let i = 0; i < block.instructions.length; i++) {
       const instruction = block.instructions[i];
       for (const variable of instruction.variables()) {
-        liveRanges.informUsage(i, variable.toString());
+        liveRanges.informUsage(i, variable);
       }
     }
 
@@ -100,12 +100,12 @@ export class LinearScan implements IRegisterAllocator {
       const instruction = block.instructions[i];
       if (instruction instanceof SSABranchInstruction) {
         if (instruction instanceof SSABranchGoInstruction) {
-          const argAllocations = instruction.params.map(param => allocations.get(param.toString())!);
+          const argAllocations = instruction.params.map(param => allocations.get(param)!);
           this.allocate(instruction.dest, argAllocations);
         } else if (instruction instanceof SSABranchNZInstruction) {
-          const trueArgAllocations = instruction.paramsTrue.map(param => allocations.get(param.toString())!);
+          const trueArgAllocations = instruction.paramsTrue.map(param => allocations.get(param)!);
           this.allocate(instruction.destTrue, trueArgAllocations);
-          const falseArgAllocations = instruction.paramsFalse.map(param => allocations.get(param.toString())!);
+          const falseArgAllocations = instruction.paramsFalse.map(param => allocations.get(param)!);
           this.allocate(instruction.destFalse, falseArgAllocations);
         }
       }
@@ -122,7 +122,7 @@ export class LinearScan implements IRegisterAllocator {
           if (!liveRanges.isEnd(variable, i)) {
             if (!allocations.get(variable)) {
               const allocation = alloc();
-              const v = block.variables.find(v => v.toString() === variable);
+              const v = block.variables.find(v => v === variable);
               if (v) {
                 v.register = allocation.type === 'register' ? allocation.register : undefined;
                 v.stackPos = allocation.type === 'stack' ? allocation.stackPos : undefined;

@@ -1,6 +1,6 @@
 import { Ast, ASTAssignExpression, ASTBinaryExpression, ASTCallExpression, ASTExpression, ASTExpressionStatement, ASTFunctionDeclarationStatement, ASTIfStatement, ASTNumberLiteralExpression, ASTReturnStatement, ASTStatement, ASTStringLiteralExpression, ASTUnaryExpression, ASTVarDeclarationStatement, ASTVarReference, ASTWhileStatement } from "../ast-ir";
 import { SSABlock, SSABlockArgument, SSABlockGenerationContext } from "./blocks";
-import { SSABinaryInstruction, SSABranchGoInstruction, SSABranchNZInstruction, SSAMoveInstruction, SSARetInstruction, SSAUnaryInstruction } from "./instructions";
+import { SSABinaryInstruction, SSABranchGoInstruction, SSABranchNZInstruction, SSACallInstruction, SSAMoveInstruction, SSARetInstruction, SSAUnaryInstruction } from "./instructions";
 import { SSALiteralNumberValue, SSALiteralStringValue, SSAValue, SSAVariable } from "./values";
 
 export class SSA {
@@ -87,7 +87,10 @@ export class SSA {
         ctx.curBlock().addInstruction(new SSAUnaryInstruction(result, value, expression.operation));
         return result;
       } else if (expression instanceof ASTCallExpression) {
-        throw new Error('Call expression not supported yet on SSA');
+        const dest = ctx.curBlock().getTmp(true);
+        const args = expression.paramExpressions.map(param => evalExpression(ctx, param));
+        ctx.curBlock().addInstruction(new SSACallInstruction(expression.funcName, dest, args));
+        return dest;
       } else {
         throw new Error('Unsupported SSA expression generation!');
       }

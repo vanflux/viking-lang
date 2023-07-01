@@ -17,7 +17,9 @@ export class SSAVariable extends SSAValue {
   }
 
   public toString(): string {
-    return `${this.base}${this.version}`;
+    const baseStr = `${this.base}${this.version}`;
+    const allocationStr = this.register !== undefined ? `(${this.register})` : (this.stackPos !== undefined ? `(s${this.stackPos})` : '');
+    return `${baseStr}${allocationStr}`;
   }
 }
 

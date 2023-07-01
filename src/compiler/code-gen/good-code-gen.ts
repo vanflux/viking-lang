@@ -8,11 +8,16 @@ import { SSALiteralNumberValue, SSALiteralStringValue, SSAVariable } from "../ss
 export class GoodCodeGen implements ICodeGen {
   generate(astIr: Ast) {
     const ssaIr = new SSA(astIr);
+    console.log('[SSA]');
+    console.log(ssaIr.toString());
     const registerAllocator = new LinearScan();
     registerAllocator.process(ssaIr, {
       registerCount: 4,
     });
-
+    console.log();
+    console.log('[SSA Post Allocations]');
+    console.log(ssaIr.toString());
+    console.log();
     let code = '';
     for (const block of ssaIr.blocks) {
       code += `${block.id}\n`;
@@ -32,6 +37,10 @@ export class GoodCodeGen implements ICodeGen {
             } else {
               throw new Error('Not implemented ' + instruction.toString());
             }
+          } else if (instruction.dest.stackPos !== undefined) {
+            throw new Error('Not implemented ' + instruction.toString());
+          } else {
+            // Unused variable, the linear scan doesn't allocated anything to this
           }
         } else if (instruction instanceof SSABinaryInstruction) {
           switch(instruction.operation) {

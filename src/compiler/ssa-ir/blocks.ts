@@ -5,7 +5,7 @@ export class SSABlockArgument {
   constructor(public variable: SSAVariable) {};
 
   public toString() {
-    return `${this.variable.type} ${this.variable.base}?`;
+    return `${this.variable.type} ${this.variable.toString()}`;
   }
 }
 
@@ -14,8 +14,11 @@ export class SSABlock {
   public args: SSABlockArgument[] = [];
   public variables: SSAVariable[] = [];
   public argsChangeHandlers: ((addedArg: SSABlockArgument)=>any)[] = [];
+  public id: string;
 
-  constructor(public id: string, public prev: SSABlock | undefined) {}
+  constructor(public name: string, public seq: number, public prev: SSABlock | undefined) {
+    this.id = `${name}_${seq}`;
+  }
   
   public setArgs(args: SSABlockArgument[]) {
     args.forEach(arg => this.addArg(arg));
@@ -84,14 +87,14 @@ export class SSABlock {
 export class SSABlockGenerationContext {
   public blocks: SSABlock[] = [];
   
-  constructor(public id: string) {}
+  constructor(public name: string) {}
 
   public curBlock() {
     return this.blocks[this.blocks.length - 1];
   }
 
   public addBlock() {
-    const block = new SSABlock(`${this.id}_${this.blocks.length}`, this.curBlock());
+    const block = new SSABlock(this.name, this.blocks.length, this.curBlock());
     this.blocks.push(block);
     return block;
   }
