@@ -48,8 +48,8 @@ export class SSABranchNZInstruction extends SSABranchInstruction {
   }
 
   public toString(): string {
-    const strTrue =  `${this.destTrue.name}(${this.paramsTrue.map(x => x.toString()).join(', ')})`;
-    const strFalse = `${this.destFalse.name}(${this.paramsFalse.map(x => x.toString()).join(', ')})`;
+    const strTrue =  `${this.destTrue.id}(${this.paramsTrue.map(x => x.toString()).join(', ')})`;
+    const strFalse = `${this.destFalse.id}(${this.paramsFalse.map(x => x.toString()).join(', ')})`;
     return `BR.NZ ${this.input.toString()} ${strTrue} ${strFalse}`;
   }
 }
