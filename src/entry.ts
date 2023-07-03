@@ -54,11 +54,16 @@ export async function main() {
   `;*/
 
   const langCode = `
-  int test(int a, int b) {
+  int main(int a, int b) {
     int a = 1;
-    int b = a;
+    int b = 1 + 4;
     int c = b;
-    return a;
+    if (c < 5) {
+      c = 40;
+    } else {
+      c = c + 1;
+    }
+    return c;
   }
   `;
 
