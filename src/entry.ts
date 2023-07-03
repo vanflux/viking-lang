@@ -55,11 +55,15 @@ export async function main() {
 
   const langCode = `
   int main(int a, int b) {
-    int a = 1;
-    int b = 1 + 4;
-    int c = b;
+    int c = 4;
     if (c < 5) {
-      c = 40;
+      while(c < 60) {
+        int i = 0;
+        while(i < 2) {
+          c = c + i;
+          i = i + 1;
+        }
+      }
     } else {
       c = c + 1;
     }

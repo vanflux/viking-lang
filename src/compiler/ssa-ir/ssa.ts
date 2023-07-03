@@ -39,14 +39,20 @@ export class SSA {
           const condVar = ctx.curBlock().getTmp(true);
           evalExpressionTo(ctx, statement.conditionExpression, condVar);
           const condBlock = ctx.curBlock();
-          const ifBlock = ctx.addBlock();
+
+          const ifBlockStart = ctx.addBlock();
           genStatementsBlocks(ctx, statement.ifStatements);
-          const elseBlock = ctx.addBlock();
+          const ifBlockEnd = ctx.curBlock();
+
+          const elseBlockStart = ctx.addBlock();
           genStatementsBlocks(ctx, statement.elseStatements);
+          const elseBlockEnd = ctx.curBlock();
+
           const endBlock = ctx.addBlock();
-          ifBlock.addInstruction(new SSABranchGoInstruction(endBlock, []));
-          elseBlock.addInstruction(new SSABranchGoInstruction(endBlock, []));
-          condBlock.addInstruction(new SSABranchNZInstruction(condVar, ifBlock, [], elseBlock, []));
+          
+          ifBlockEnd.addInstruction(new SSABranchGoInstruction(endBlock, []));
+          elseBlockEnd.addInstruction(new SSABranchGoInstruction(endBlock, []));
+          condBlock.addInstruction(new SSABranchNZInstruction(condVar, ifBlockStart, [], elseBlockStart, []));
         } else if (statement instanceof ASTReturnStatement) {
           const dest = ctx.curBlock().getTmp(true);
           ctx.curBlock()
