@@ -103,13 +103,13 @@ export class SSARetInstruction extends SSAInstruction {
 }
 
 export class SSACallInstruction extends SSAInstruction {
-  constructor(public name: string, public dest: SSAVariable, public args: SSAValue[]) {super()}
+  constructor(public func: SSABlock, public dest: SSAVariable, public args: SSAValue[]) {super()}
   
   variables() {
     return [this.dest, ...this.args.filter(arg => arg instanceof SSAVariable) as SSAVariable[]];
   }
 
   public toString(): string {
-    return `${this.dest.toString()} = CALL ${this.name}(${this.args.map(arg => arg.toString()).join(', ')})`;
+    return `${this.dest.toString()} = CALL ${this.func.name}(${this.args.map(arg => arg.toString()).join(', ')})`;
   }
 }

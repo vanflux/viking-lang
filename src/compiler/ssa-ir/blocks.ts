@@ -85,9 +85,7 @@ export class SSABlock {
 }
 
 export class SSABlockGenerationContext {
-  public blocks: SSABlock[] = [];
-  
-  constructor(public name: string) {}
+  constructor(public name: string, public blocks: SSABlock[] = []) {}
 
   public curBlock() {
     return this.blocks[this.blocks.length - 1];

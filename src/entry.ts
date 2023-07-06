@@ -35,25 +35,17 @@ export async function main() {
   }
   `;*/
   
-  /*const langCode = `
-  int test(int a, int b) {
-    int a1 = a;
-    int a2 = a;
-    int a3 = a;
-    int a4 = a;
-    int b1 = a1;
-    int b2 = a2;
-    int b3 = a3;
-    int b4 = a4;
-    int c1 = b1;
-    int c2 = b2;
-    int c3 = b3;
-    int c4 = b4;
-    return b4;
-  }
-  `;*/
-
   const langCode = `
+  int main() {
+    return test(1);
+  }
+
+  int test(int a) {
+    return a;
+  }
+  `;
+
+  /*const langCode = `
   int main(int a, int b) {
     int c = 4;
     if (c < 5) {
@@ -69,7 +61,7 @@ export async function main() {
     }
     return c;
   }
-  `;
+  `;*/
 
   const architecture = ArchitectureManager.getViking16Arch();
 

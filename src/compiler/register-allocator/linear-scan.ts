@@ -43,8 +43,10 @@ export class LinearScan implements IRegisterAllocator {
 
   public process(ssa: SSA, options: RegisterAllocatorOptions): void {
     this.registerCount = options.registerCount;
-    const entryBlock = ssa.blocks[0];
-    this.allocate(entryBlock);
+    for (const block of ssa.allBlocks) {
+      if (this.processedSsaBlocks.has(block)) continue;
+      this.allocate(block);
+    }
   }
 
   private allocate(block: SSABlock, argAllocations?: Allocation[]) {

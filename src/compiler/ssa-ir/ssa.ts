@@ -4,20 +4,26 @@ import { SSABinaryInstruction, SSABranchGoInstruction, SSABranchNZInstruction, S
 import { SSALiteralNumberValue, SSALiteralStringValue, SSAValue, SSAVariable } from "./values";
 
 export class SSA {
-  public blocks: SSABlock[] = [];
+  public allBlocks: SSABlock[] = [];
+  public blocksPerFunction = new Map<string, SSABlock[]>();
   
   constructor(ast: Ast) {
     // Convert function to blocks
-    function genFunctionDeclBlocks(functionDecl: ASTFunctionDeclarationStatement): SSABlock[] {
+    const genFunctionDeclBlocks = (functionDecl: ASTFunctionDeclarationStatement) => {
       const args = functionDecl.args.map(x => new SSABlockArgument(new SSAVariable(x.id, 0, x.type)));
-      const ctx = new SSABlockGenerationContext(functionDecl.id);
-      ctx.addBlock().setArgs(args);
+      const existentBlocks = this.blocksPerFunction.get(functionDecl.id);
+      const ctx = new SSABlockGenerationContext(functionDecl.id, existentBlocks);
+      if (!existentBlocks?.length) {
+        ctx.addBlock();
+      }
+      ctx.curBlock().setArgs(args);
       genStatementsBlocks(ctx, functionDecl.stmts);
-      return ctx.blocks;
+      this.allBlocks.push(...ctx.blocks);
+      this.blocksPerFunction.set(functionDecl.id, ctx.blocks);
     }
 
     // Convert statement list to blocks
-    function genStatementsBlocks(ctx: SSABlockGenerationContext, statements: ASTStatement[]) {
+    const genStatementsBlocks = (ctx: SSABlockGenerationContext, statements: ASTStatement[]) => {
       for (const statement of statements) {
         if (statement instanceof ASTVarDeclarationStatement) {
           evalExpressionTo(ctx, statement.expression, ctx.curBlock().getVar(statement.id, true));
@@ -64,12 +70,12 @@ export class SSA {
       }
     }
 
-    function evalExpressionTo(ctx: SSABlockGenerationContext, expression: ASTExpression, dest: SSAVariable) {
+    const evalExpressionTo = (ctx: SSABlockGenerationContext, expression: ASTExpression, dest: SSAVariable) => {
       ctx.curBlock().addInstruction(new SSAMoveInstruction(dest, evalExpression(ctx, expression)));
     }
 
     // Convert expression to blocks and return the output expression
-    function evalExpression(ctx: SSABlockGenerationContext, expression: ASTExpression): SSAValue {
+    const evalExpression = (ctx: SSABlockGenerationContext, expression: ASTExpression): SSAValue => {
       if (expression instanceof ASTVarReference) {
         return ctx.curBlock().getVar(expression.varName, false);
       } else if (expression instanceof ASTNumberLiteralExpression) {
@@ -95,7 +101,12 @@ export class SSA {
       } else if (expression instanceof ASTCallExpression) {
         const dest = ctx.curBlock().getTmp(true);
         const args = expression.paramExpressions.map(param => evalExpression(ctx, param));
-        ctx.curBlock().addInstruction(new SSACallInstruction(expression.funcName, dest, args));
+        let func = this.blocksPerFunction.get(expression.funcName)?.[0];
+        if (!func) {
+          func = new SSABlock(expression.funcName, 0, undefined);
+          this.blocksPerFunction.set(expression.funcName, [func]);
+        }
+        ctx.curBlock().addInstruction(new SSACallInstruction(func, dest, args));
         return dest;
       } else {
         throw new Error('Unsupported SSA expression generation!');
@@ -104,7 +115,7 @@ export class SSA {
 
     ast.externalStatements.forEach(externalStatement => {
       if (externalStatement instanceof ASTFunctionDeclarationStatement) {
-        this.blocks.push(...genFunctionDeclBlocks(externalStatement));
+        genFunctionDeclBlocks(externalStatement);
       } else if (externalStatement instanceof ASTVarDeclarationStatement) {
         console.error('Not implemented!');
       }
@@ -112,6 +123,6 @@ export class SSA {
   }
 
   toString() {
-    return this.blocks.map(block => block.toString()).join('\n\n');
+    return this.allBlocks.map(block => block.toString()).join('\n\n');
   }
 }
