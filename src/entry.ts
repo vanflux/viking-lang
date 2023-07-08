@@ -37,11 +37,31 @@ export async function main() {
   
   const langCode = `
   int main() {
-    return test(1);
+    int b = 0;
+    return double(quad(1));
   }
 
-  int test(int a) {
-    return a;
+  int double(int a) {
+    return a + a;
+  }
+
+  int quad(int a) {
+    int i = 0;
+    int b = 0;
+    while (i < 4) {
+      b = b + a;
+      i = i + 1;
+    }
+    return b;
+  }
+
+  int mul(int a, int b) {
+    int result = 0;
+    while (b > 0) {
+      result = result + a;
+      b = b - 1;
+    }
+    return result;
   }
   `;
 

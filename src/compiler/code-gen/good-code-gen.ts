@@ -7,6 +7,7 @@ import { SSALiteralNumberValue, SSALiteralStringValue, SSAVariable } from "../ss
 
 export class GoodCodeGen implements ICodeGen {
   private code = '';
+  private registerCount = 4;
 
   generate(astIr: Ast) {
     const ssaIr = new SSA(astIr);
@@ -14,7 +15,7 @@ export class GoodCodeGen implements ICodeGen {
     console.log(ssaIr.toString());
     const registerAllocator = new LinearScan();
     registerAllocator.process(ssaIr, {
-      registerCount: 4,
+      registerCount: this.registerCount,
     });
     console.log();
     console.log('[SSA Post Allocations]');
@@ -31,6 +32,9 @@ export class GoodCodeGen implements ICodeGen {
         this.code += `  mov sr, sp\n`;
       }
       for (const block of blocks) {
+        if (block.seq > 0) {
+          this.code += `${block.id}\n`;
+        }
         for (const instruction of block.instructions) {
           if (instruction instanceof SSAMoveInstruction) {
             if (instruction.dest.register !== undefined) {
@@ -78,11 +82,29 @@ export class GoodCodeGen implements ICodeGen {
                   throw new Error('Not implemented ' + instruction.toString());
                 }
                 break;
+              case '>':
+                if (instruction.dest instanceof SSAVariable && instruction.left instanceof SSAVariable && instruction.right instanceof SSALiteralNumberValue) {
+                  if (instruction.dest.register !== undefined && instruction.left.register !== undefined) {
+                    this.code += `  ldi r0, ${instruction.right.value}\n`;
+                    this.code += `  slt ${instruction.dest.register}, r0, ${instruction.left.register}\n`;
+                  } else {
+                    throw new Error('Not implemented ' + instruction.toString());
+                  }
+                } else {
+                  throw new Error('Not implemented ' + instruction.toString());
+                }
+                break;
               case '<':
                 if (instruction.dest instanceof SSAVariable && instruction.left instanceof SSAVariable && instruction.right instanceof SSALiteralNumberValue) {
                   if (instruction.dest.register !== undefined && instruction.left.register !== undefined) {
                     this.code += `  ldi r0, ${instruction.right.value}\n`;
                     this.code += `  slt ${instruction.dest.register}, ${instruction.left.register}, r0\n`;
+                  } else {
+                    throw new Error('Not implemented ' + instruction.toString());
+                  }
+                } else if (instruction.dest instanceof SSAVariable && instruction.left instanceof SSAVariable && instruction.right instanceof SSAVariable) {
+                  if (instruction.dest.register !== undefined && instruction.left.register !== undefined && instruction.right.register !== undefined) {
+                    this.code += `  slt ${instruction.dest.register}, ${instruction.left.register}, ${instruction.right.register}\n`;
                   } else {
                     throw new Error('Not implemented ' + instruction.toString());
                   }
@@ -121,13 +143,64 @@ export class GoodCodeGen implements ICodeGen {
               throw new Error('Not implemented ' + instruction.toString());
             }
           } else if (instruction instanceof SSACallInstruction) {
-            if (instruction.args.length) {
-              console.log(instruction.args);
+            if (instruction.func.args.length !== instruction.args.length) throw new Error('Wrong args count ' + instruction.toString());
+            if (instruction.dest.register !== undefined) {
+              for (let i = 0; i < this.registerCount; i++) {
+                const register = `r${i + 1}`;
+                if (instruction.dest.register !== register) {
+                  this.code += `  push ${register}\n`;
+                }
+              }
             }
+
+
+            // ARG RECONCILIATION START
+            for (let i = 0; i < instruction.args.length; i++) {
+              const inputArg = instruction.args[i];
+              const destArg = instruction.func.args[i].variable;
+              if (inputArg instanceof SSALiteralNumberValue) {
+                if (destArg.register !== undefined) {
+                  this.code += `  ldi ${destArg.register}, ${inputArg.value}\n`;
+                } else {
+                  throw new Error('Not implemented ' + instruction.toString());
+                }
+              } else if (inputArg instanceof SSALiteralStringValue) {
+                throw new Error('Not implemented ' + instruction.toString());
+              }
+            }
+            const registerMapping = new Map<string, string>();
+            for (let i = 0; i < instruction.args.length; i++) {
+              const inputArg = instruction.args[i];
+              const destArg = instruction.func.args[i].variable;
+              if (inputArg instanceof SSAVariable && inputArg.register !== undefined) {
+                if (destArg instanceof SSAVariable && destArg.register !== undefined) {
+                  if (inputArg.register !== destArg.register) {
+                    registerMapping.set(inputArg.register, destArg.register);
+                  }
+                }
+              }
+            }
+            if (registerMapping.size > 0) {
+              console.log('registerMapping', registerMapping);
+              throw new Error('Not implemented ' + instruction.toString());
+            }
+            // ARG RECONCILIATION END
+
             const postCallBlockName = `${block.name}_post_call_${postCallBlockSeq++}`;
             this.code += `  ldi lr, ${postCallBlockName}\n`;
             this.code += `  bnz r7, ${instruction.func.id}\n`;
             this.code += `${postCallBlockName}\n`;
+            if (instruction.dest.register !== undefined) {
+              this.code += `  mov ${instruction.dest.register}, r1\n`;
+              for (let i = this.registerCount - 1; i >= 0; i--) {
+                const register = `r${i + 1}`;
+                if (instruction.dest.register !== register) {
+                  this.code += `  pop ${register}\n`;
+                }
+              }
+            } else {
+              throw new Error('Not implemented ' + instruction.toString());
+            }
           } else {
             throw new Error('Not implemented ' + instruction.toString());
           }
