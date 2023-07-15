@@ -17,9 +17,9 @@ export class SSA {
         ctx.addBlock();
       }
       ctx.curBlock().setArgs(args);
+      this.blocksPerFunction.set(functionDecl.id, ctx.blocks);
       genStatementsBlocks(ctx, functionDecl.stmts);
       this.allBlocks.push(...ctx.blocks);
-      this.blocksPerFunction.set(functionDecl.id, ctx.blocks);
     }
 
     // Convert statement list to blocks

@@ -131,7 +131,7 @@ export function expressionToAst(
       return expressionToAst(ctx.parenExpr()!);
     } else {
       const text = ctx.text;
-      if (text[0] >= '0' && text[0] <= '9') {
+      if (text[0] === '-' || (text[0] >= '0' && text[0] <= '9')) {
         return new ASTNumberLiteralExpression(text, Number(text));
       } else {
         return new ASTVarReference(text, text);

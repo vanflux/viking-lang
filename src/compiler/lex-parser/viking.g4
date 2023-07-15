@@ -79,7 +79,7 @@ negExpr
 
 callExpr
    : stringExpr
-   | ID '(' expr (',' expr)* ')'
+   | ID '(' (expr (',' expr)*)? ')'
    ;
 
 stringExpr
@@ -100,6 +100,7 @@ arrayAccessExpr
 termExpr
    : ID
    | DIGITS
+   | '-' DIGITS
    | parenExpr
    ;
 

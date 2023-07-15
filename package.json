@@ -7,7 +7,7 @@
   "scripts": {
     "start": "ts-node-dev --respawn --exit-child src/entry.ts",
     "build": "tsc",
-    "test": "mocha --slow -1 -r ts-node/register 'tests/**/*.ts'",
+    "test": "mocha --slow -1 -r mocha-suppress-logs -r ts-node/register 'tests/**/*.ts'",
     "test:watch": "npm t -- --watch --watch-files src,tests",
     "gen-parser": "cd src/compiler/lex-parser && antlr4ts -visitor viking.g4 -o ./antlr",
     "coverage": "nyc --reporter=lcov --reporter=text-summary npm t",
@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "antlr4ts": "^0.5.0-alpha.4",
+    "mocha-suppress-logs": "^0.3.1",
     "unraw": "^2.0.1"
   },
   "files": [
