@@ -67,46 +67,59 @@ export class CodeGen implements ICodeGen {
     };
 
     const reconciliate = (inputArgs: SSAValue[], destArgs: SSABlockArgument[], instruction: SSAInstruction) => {
-      // discover what registers need to be mapped to another
-      const registerMapping = new Map<string, string>();
+      const allocMapping = new Map<string | number, string | number>();
       for (let i = 0; i < inputArgs.length; i++) {
         const inputArg = inputArgs[i];
         const destArg = destArgs[i].variable;
-        if (inputArg instanceof SSAVariable && inputArg.register !== undefined) {
-          if (destArg instanceof SSAVariable && destArg.register !== undefined) {
-            if (inputArg.register !== destArg.register) {
-              registerMapping.set(inputArg.register, destArg.register);
-            }
+        if (inputArg instanceof SSAVariable && destArg instanceof SSAVariable) {
+          const input = inputArg.register !== undefined ? inputArg.register : inputArg.stackPos!;
+          const dest = destArg.register !== undefined ? destArg.register : destArg.stackPos!;
+          if (input !== dest) allocMapping.set(input, dest);
+        }
+      }
+      while (allocMapping.size > 0) {
+        const allocs: (string | number)[] = [];
+        const start: string = allocMapping.keys().next().value;
+        allocs.push(start);
+        while (allocMapping.has(allocs[allocs.length - 1])) {
+          const curAlloc = allocs[allocs.length - 1];
+          const nextAlloc = allocMapping.get(curAlloc)!;
+          allocs.push(nextAlloc);
+          allocMapping.delete(curAlloc);
+        }
+        const isCycle = allocs[allocs.length - 1] === allocs[0];
+        const firstAlloc = allocs[0];
+        if (isCycle) {
+          if (typeof firstAlloc === 'number') {
+            this.code += `  ldi r0, ${-firstAlloc} // [arg-rec cycle-start] ${instruction.toString()}\n`;
+            this.code += `  add r0, r5, r0 // [arg-rec cycle-start] ${instruction.toString()}\n`;
+            this.code += `  ldw lr, r0 // [arg-rec cycle-start] ${instruction.toString()}\n`;
+          } else {
+            this.code += `  mov lr, ${firstAlloc} // [arg-rec cycle-start] ${instruction.toString()}\n`;
           }
         }
-      }
-      // map registers to registers
-      while (registerMapping.size > 0) {
-        const registers: string[] = [];
-        const startRegister: string = registerMapping.keys().next().value;
-        registers.push(startRegister);
-        while (registerMapping.has(registers[registers.length - 1])) {
-          const curRegister = registers[registers.length - 1];
-          const nextRegister = registerMapping.get(curRegister)!;
-          registers.push(nextRegister);
-          registerMapping.delete(curRegister);
-        }
-        const isCycle = registers[registers.length - 1] === registers[0];
-        if (isCycle) this.code += `  mov lr, ${registers[registers.length - 1]} // [arg-rec reg2reg] ${instruction.toString()}\n`;
-        for (let i = registers.length - 2; i >= 0; i--) {
-          this.code += `  mov ${registers[i + 1]}, ${registers[i]} // [arg-rec reg2reg] ${instruction.toString()}\n`;
-        }
-        if (isCycle) this.code += `  mov ${registers[0]}, lr // [arg-rec reg2reg] ${instruction.toString()}\n`;
-      }
-      // map stack to register
-      for (let i = 0; i < inputArgs.length; i++) {
-        const inputArg = inputArgs[i];
-        const destArg = destArgs[i].variable;
-        if (inputArg instanceof SSAVariable && inputArg.stackPos !== undefined) {
-          if (destArg instanceof SSAVariable && destArg.register !== undefined) {
-            this.code += `  ldi r0, ${-inputArg.stackPos} // [arg-rec stk2reg] ${instruction.toString()}\n`;
-            this.code += `  add r0, r5, r0 // [arg-rec stk2reg] ${instruction.toString()}\n`;
-            this.code += `  ldw ${destArg.register}, r0 // [arg-rec stk2reg] ${instruction.toString()}\n`;
+        for (let i = allocs.length - 2; i >= 0; i--) {
+          const inputAlloc = i === 0 && isCycle ? 'lr' : allocs[i];
+          const destAlloc = allocs[i + 1];
+          if (typeof inputAlloc === 'number') {
+            if (typeof destAlloc === 'number') {
+              throw 'number to number failed';
+              /*this.code += `  ldi r0, ${-inputAlloc} // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  add r0, r5, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  ldw r0, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;*/
+            } else {
+              this.code += `  ldi r0, ${-inputAlloc} // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  add r0, r5, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  ldw ${destAlloc}, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+            }
+          } else {
+            if (typeof destAlloc === 'number') {
+              this.code += `  ldi r0, ${-destAlloc} // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  add r0, r5, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  stw ${inputAlloc}, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+            } else {
+              this.code += `  mov ${destAlloc}, ${inputAlloc} // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+            }
           }
         }
       }
@@ -127,16 +140,106 @@ export class CodeGen implements ICodeGen {
       }
     };
 
+    // TODO: REFACTOR THIS!!!
+    const reconciliateForCall = (inputArgs: SSAValue[], destArgs: SSABlockArgument[], instruction: SSAInstruction) => {
+      const allocMapping = new Map<string | number, string | number>();
+      for (let i = 0; i < inputArgs.length; i++) {
+        const inputArg = inputArgs[i];
+        const destArg = destArgs[i].variable;
+        if (inputArg instanceof SSAVariable && destArg instanceof SSAVariable) {
+          const input = inputArg.register !== undefined ? inputArg.register : inputArg.stackPos!;
+          const dest = destArg.register !== undefined ? destArg.register : destArg.stackPos!;
+          if (typeof dest === 'number' || input !== dest) allocMapping.set(input, dest);
+        }
+      }
+      while (allocMapping.size > 0) {
+        const allocs: (string | number)[] = [];
+        const start: string = allocMapping.keys().next().value;
+        allocs.push(start);
+        while (allocMapping.has(allocs[allocs.length - 1])) {
+          const curAlloc = allocs[allocs.length - 1];
+          const nextAlloc = allocMapping.get(curAlloc)!;
+          allocs.push(nextAlloc);
+          allocMapping.delete(curAlloc);
+        }
+        const isCycle = allocs[allocs.length - 1] === allocs[0];
+        const firstAlloc = allocs[0];
+        if (isCycle) {
+          if (typeof firstAlloc === 'number') {
+            this.code += `  ldi r0, ${-firstAlloc} // [arg-rec cycle-start] ${instruction.toString()}\n`;
+            this.code += `  add r0, sr, r0 // [arg-rec cycle-start] ${instruction.toString()}\n`;
+            this.code += `  ldw lr, r0 // [arg-rec cycle-start] ${instruction.toString()}\n`;
+          } else {
+            this.code += `  mov lr, ${firstAlloc} // [arg-rec cycle-start] ${instruction.toString()}\n`;
+          }
+        }
+        for (let i = allocs.length - 2; i >= 0; i--) {
+          const inputAlloc = i === 0 && isCycle ? 'lr' : allocs[i];
+          const destAlloc = allocs[i + 1];
+          if (typeof inputAlloc === 'number') {
+            if (typeof destAlloc === 'number') {
+              throw 'number to number failed';
+              /*this.code += `  ldi r0, ${-inputAlloc} // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  add r0, ${reg}, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  ldw r0, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;*/
+            } else {
+              this.code += `  ldi r0, ${-inputAlloc} // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  add r0, sr, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  ldw ${destAlloc}, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+            }
+          } else {
+            if (typeof destAlloc === 'number') {
+              this.code += `  ldi r0, ${-(destAlloc + 6)} // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  add r0, sp, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+              this.code += `  stw ${inputAlloc}, r0 // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+            } else {
+              this.code += `  mov ${destAlloc}, ${inputAlloc} // [arg-rec cycle-middle] ${instruction.toString()}\n`;
+            }
+          }
+        }
+      }
+      
+      // load literals
+      for (let i = 0; i < inputArgs.length; i++) {
+        const inputArg = inputArgs[i];
+        const destArg = destArgs[i].variable;
+        if (inputArg instanceof SSALiteralNumberValue) {
+          const { regs: [destReg], dispose } = ensureReg([], 
+            { variable: destArg, load: false }
+          );
+          this.code += `  ldi ${destReg}, ${inputArg.value} // [arg-rec lit] ${instruction.toString()}\n`;
+          dispose();
+        } else if (inputArg instanceof SSALiteralStringValue) {
+          throw new Error('Not implemented ' + instruction.toString());
+        }
+      }
+    };
+
+    const calcStackSize = (functionId: string) => {
+      let stackSize = 0;
+      const blocks = ssaIr.blocksPerFunction.get(functionId)!;
+      for (const block of blocks) {
+        for (const variable of block.variables) {
+          if (variable.stackPos !== undefined) {
+            stackSize = Math.max(stackSize, variable.stackPos + 2);
+          }
+        }
+      }
+      return stackSize;
+    }
+
     this.code += `bnz r7, ${ssaIr.blocksPerFunction.get('main')![0].id}\n`;
     for (const [functionId, blocks] of ssaIr.blocksPerFunction) {
+      const stackSize = calcStackSize(functionId);
+
       this.code += `${blocks[0].id}\n`;
       const retBlockName = `${functionId}_ret`;
       let locationSeq = 0;
-      if (functionId !== 'main') {
-        this.code += `  push sr\n`;
-      }
+      this.code += `  push lr\n`;
+      this.code += `  push sr\n`;
       this.code += `  mov sr, sp\n`;
-      this.code += `  sub sp, 32\n`;
+      this.code += `  sub sp, ${stackSize}\n`;
+      this.code += `  sub sr, 2\n`;
 
       for (const block of blocks) {
         if (block.seq > 0) {
@@ -175,34 +278,42 @@ export class CodeGen implements ICodeGen {
                   '>': ['slt', (x: number, y: number) => x > y ? 1 : 0, instruction.dest, instruction.right, instruction.left],
                 } as const)[instruction.operation];
                 if (dest instanceof SSAVariable && left instanceof SSAVariable && right instanceof SSAVariable) {
-                  const { regs: [destReg, leftReg, rightReg], dispose } = ensureReg([], 
+                  const { regs: [destReg, leftReg, rightReg], dispose, unused } = ensureReg([], 
                     { variable: dest, load: false },
                     { variable: left },
                     { variable: right },
                   );
-                  this.code += `  ${opName} ${destReg}, ${leftReg}, ${rightReg} // ${instruction.toString()}\n`;
+                  if (!unused) {
+                    this.code += `  ${opName} ${destReg}, ${leftReg}, ${rightReg} // ${instruction.toString()}\n`;
+                  }
                   dispose();
                 } else if (dest instanceof SSAVariable && left instanceof SSAVariable && right instanceof SSALiteralNumberValue) {
-                  const { regs: [destReg, leftReg], dispose } = ensureReg([], 
+                  const { regs: [destReg, leftReg], dispose, unused } = ensureReg([], 
                     { variable: dest, load: false },
                     { variable: left }
                   );
-                  this.code += `  ldi r0, ${right.value} // ${instruction.toString()}\n`;
-                  this.code += `  ${opName} ${destReg}, ${leftReg}, r0 // ${instruction.toString()}\n`;
+                  if (!unused) {
+                    this.code += `  ldi r0, ${right.value} // ${instruction.toString()}\n`;
+                    this.code += `  ${opName} ${destReg}, ${leftReg}, r0 // ${instruction.toString()}\n`;
+                  }
                   dispose();
                 } else if (dest instanceof SSAVariable && right instanceof SSAVariable && left instanceof SSALiteralNumberValue) {
-                  const { regs: [destReg, rightReg], dispose } = ensureReg([], 
+                  const { regs: [destReg, rightReg], dispose, unused } = ensureReg([], 
                     { variable: dest, load: false },
                     { variable: right }
                   );
-                  this.code += `  ldi r0, ${left.value} // ${instruction.toString()}\n`;
-                  this.code += `  ${opName} ${destReg}, r0, ${rightReg} // ${instruction.toString()}\n`;
+                  if (!unused) {
+                    this.code += `  ldi r0, ${left.value} // ${instruction.toString()}\n`;
+                    this.code += `  ${opName} ${destReg}, r0, ${rightReg} // ${instruction.toString()}\n`;
+                  }
                   dispose();
                 } else if (dest instanceof SSAVariable && left instanceof SSALiteralNumberValue && right instanceof SSALiteralNumberValue) {
-                  const { regs: [destReg], dispose } = ensureReg([], 
+                  const { regs: [destReg], dispose, unused } = ensureReg([], 
                     { variable: dest, load: false }
                   );
-                  this.code += `  ldi ${destReg}, ${opFn(left.value, right.value)} // ${instruction.toString()}\n`;
+                  if (!unused) {
+                    this.code += `  ldi ${destReg}, ${opFn(left.value, right.value)} // ${instruction.toString()}\n`;
+                  }
                   dispose();
                 } else {
                   throw new Error('Not implemented ' + instruction.toString());
@@ -259,13 +370,10 @@ export class CodeGen implements ICodeGen {
             }
 
             const postCallBlockName = `${block.name}_post_call_${locationSeq++}`;
+
+            reconciliateForCall(instruction.args, instruction.func.args, instruction);
+
             this.code += `  ldi lr, ${postCallBlockName} // ${instruction.toString()}\n`;
-            this.code += `  push lr // ${instruction.toString()}\n`;
-
-            // ARG RECONCILIATION START
-
-            reconciliate(instruction.args, instruction.func.args, instruction);
-
             this.code += `  bnz r7, ${instruction.func.id} // ${instruction.toString()}\n`;
             this.code += `${postCallBlockName} // ${instruction.toString()}\n`;
 
@@ -297,7 +405,7 @@ export class CodeGen implements ICodeGen {
       }
       this.code += `${retBlockName}\n`;
       if (functionId !== 'main') {
-        this.code += `  mov sp, sr\n`;
+        this.code += `  add sp, ${stackSize}\n`;
         this.code += `  pop sr\n`;
         this.code += `  pop lr\n`;
         this.code += `  bnz r7, lr\n`;

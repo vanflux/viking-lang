@@ -11,7 +11,7 @@ import { Compiler, CodeGen } from './compiler';
 export async function main() {
   const start = Date.now();
 
-  const langCode = `
+  /*const langCode = `
   int main() {
     int a = 0;
     int b = 0;
@@ -44,6 +44,22 @@ export async function main() {
       return 1;
     }
     return fib(n - 1) + fib(n - 2);
+  }
+  `;*/
+  
+  
+  const langCode = `
+  int main() {
+    int a = 1;
+    int b = 2;
+    int c = 3;
+    int d = 4;
+    int e = 50;
+    return test(e, a, b, c, d);
+  }
+
+  int test(int a, int b, int c, int d, int e) {
+    return a + b + c + d + e;
   }
   `;
 
